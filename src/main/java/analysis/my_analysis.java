@@ -75,10 +75,11 @@ public class Main {
         System.out.println(method.getModifiers());
         StmtGraph<?> stmt_graph = method.getBody().getStmtGraph();
 
-       // /*
+        /*
         String urlToWebeditor = DotExporter.createUrlToWebeditor(stmt_graph);
         System.out.println(urlToWebeditor);
-//*/
+        */
+        /*
         CallGraphAlgorithm cha = new ClassHierarchyAnalysisAlgorithm(view);
         CallGraph cg = cha.initialize(Collections.singletonList(methodSignature));
 
@@ -86,11 +87,13 @@ public class Main {
         System.out.println("--");
         cg.callsFrom(methodSignature).stream()
                 .forEach(tgt -> System.out.println(methodSignature + " may call " + tgt));
+        */
 
         System.out.println("--");
         System.out.println("sootclass of " +sootClass);
         System.out.println("sootmethod of " +method);
-        System.out.println("method body : \n" +method.getBody());
+        method.getBody().getStmts().stream().forEach( x -> System.out.println(x));
+        //System.out.println("method body : \n" +method.getBody());
     }
 }
 //*/
