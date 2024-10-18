@@ -1,47 +1,41 @@
 package analysis;
 
 // /*
-import sootup.core.*;
 //import sootup.analysis.*;
-import sootup.callgraph.*;
+import sootup.core.graph.BasicBlock;
+import sootup.core.graph.DominanceFinder;
 import sootup.core.graph.StmtGraph;
 import sootup.core.inputlocation.AnalysisInputLocation;
-import sootup.core.util.DotExporter;
 import sootup.java.bytecode.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.core.*;
+import sootup.java.core.interceptors.LocalLivenessAnalyser;
 import sootup.java.core.types.JavaClassType;
 //import sootup.java.bytecode.*;
 import sootup.java.core.views.JavaView;
-import sootup.jimple.parser.*;
 
-import sootup.core.inputlocation.AnalysisInputLocation;
-import sootup.core.jimple.common.expr.JVirtualInvokeExpr;
-import sootup.core.jimple.common.stmt.JInvokeStmt;
-import sootup.core.model.SootClass;
 import sootup.core.model.SootMethod;
-import sootup.core.model.SourceType;
 import sootup.core.signatures.MethodSignature;
-import sootup.core.types.ClassType;
-import sootup.core.views.View;
 //import sootup.java.bytecode.frontend.inputlocation.PathBasedAnalysisInputLocation;
-import sootup.java.core.language.JavaJimple;
-import sootup.java.core.views.JavaView;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 //import sootup.qilin.*;
 
-public class Main {
-    private static AnalysisInputLocation inputLocation;
-    private static JavaView view;
-    private static JavaClassType classType;
-    private static JavaSootClass sootClass;
-    private static MethodSignature methodSignature;
-    private static Optional<JavaSootMethod> opt;
-    private static SootMethod method;
-
+public class my_analysis {  //unsure of what this class will do yet
+    private  AnalysisInputLocation inputLocation;
+    private  JavaView view;
+    private  JavaClassType classType;
+    private  JavaSootClass sootClass;
+    private  MethodSignature methodSignature;
+    private  Optional<JavaSootMethod> opt;
+    private  SootMethod method;
+    private LocalLivenessAnalyser live_analysis=null;
+    private DominanceFinder dominator_analysis=null;
     //instantiates the above fields
-    private static void init(){
+    private  void init(){
         //location->view->classType->SootClass->method->SootMethod->cfg
         inputLocation =
                 new JavaClassPathAnalysisInputLocation("subject_of_analysis/bytecode");
@@ -69,13 +63,54 @@ public class Main {
 
     }
 
+    String numbered_block_to_string(BasicBlock<?> block, Integer i){
+        return (block.toString().substring(0,6)+ i+'\n' + block.toString().substring(6).
+                replace(',','\n'));
+    }
+    private void live_variables(boolean print){
+
+        live_analysis = (live_analysis == null)?new LocalLivenessAnalyser(method.getBody().getStmtGraph()) : live_analysis;
+
+        if(print){
+            System.out.println("--\nLIVE VARIABLE ANALYSIS");
+            method.getBody().getStmts().stream().forEach(
+                    x -> System.out.println(x +" "+ live_analysis.getLiveLocalsAfterStmt(x)));
+        }
+
+    }
+
+    private void dominator_analysis(boolean print){
+
+        dominator_analysis = (dominator_analysis == null)?new DominanceFinder(method.getBody().getStmtGraph()) : dominator_analysis;
+
+
+        if(print){
+            System.out.println("--\nDOMINATOR ANALYSIS:");
+            Map<BasicBlock<?>, Integer>  blocks= dominator_analysis.getBlockToIdx();
+            Stream<Map.Entry<BasicBlock<?>,Integer>> sorted_blocks =        //idk if the sorting means much
+                        blocks.entrySet().stream()
+                            .sorted(Map.Entry.comparingByValue());
+
+
+             sorted_blocks.forEach( block->  System.out.println(
+                     numbered_block_to_string(block.getKey(), block.getValue()) +
+                             " is immediately dominated by " +
+                             blocks.get( dominator_analysis.getImmediateDominator(block.getKey()) ) )  );
+
+
+                }
+            }
+
+
+
+
     public static void main(String[] args) {
+        my_analysis analysis= new my_analysis();
+        analysis.init();
 
-        init();
-        System.out.println(method.getModifiers());
-        StmtGraph<?> stmt_graph = method.getBody().getStmtGraph();
-
+        System.out.println(analysis.method.getModifiers());
         /*
+        StmtGraph<?> stmt_graph = analysis.method.getBody().getStmtGraph();
         String urlToWebeditor = DotExporter.createUrlToWebeditor(stmt_graph);
         System.out.println(urlToWebeditor);
         */
@@ -90,10 +125,12 @@ public class Main {
         */
 
         System.out.println("--");
-        System.out.println("sootclass of " +sootClass);
-        System.out.println("sootmethod of " +method);
-        method.getBody().getStmts().stream().forEach( x -> System.out.println(x));
+        System.out.println("sootclass of " +analysis.sootClass);
+        System.out.println("sootmethod of " +analysis.method);
+        System.out.println("--");
         //System.out.println("method body : \n" +method.getBody());
+        analysis.live_variables(true);
+        analysis.dominator_analysis(true);
     }
 }
 //*/
