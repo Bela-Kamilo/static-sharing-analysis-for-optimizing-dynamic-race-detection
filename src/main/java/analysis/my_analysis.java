@@ -6,6 +6,7 @@ import sootup.core.graph.BasicBlock;
 import sootup.core.graph.DominanceFinder;
 import sootup.core.graph.StmtGraph;
 import sootup.core.inputlocation.AnalysisInputLocation;
+import sootup.core.jimple.basic.LValue;
 import sootup.java.bytecode.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.core.*;
 import sootup.java.core.interceptors.LocalLivenessAnalyser;
@@ -109,11 +110,7 @@ public class my_analysis {  //unsure of what this class will do yet
         analysis.init();
 
         System.out.println(analysis.method.getModifiers());
-        /*
-        StmtGraph<?> stmt_graph = analysis.method.getBody().getStmtGraph();
-        String urlToWebeditor = DotExporter.createUrlToWebeditor(stmt_graph);
-        System.out.println(urlToWebeditor);
-        */
+
         /*
         CallGraphAlgorithm cha = new ClassHierarchyAnalysisAlgorithm(view);
         CallGraph cg = cha.initialize(Collections.singletonList(methodSignature));
@@ -126,11 +123,13 @@ public class my_analysis {  //unsure of what this class will do yet
 
         System.out.println("--");
         System.out.println("sootclass of " +analysis.sootClass);
-        System.out.println("sootmethod of " +analysis.method);
+        System.out.println("sootmethod of " +analysis.method.getBody());
         System.out.println("--");
-        //System.out.println("method body : \n" +method.getBody());
-        analysis.live_variables(true);
-        analysis.dominator_analysis(true);
+        for(LValue def : analysis.method.getBody().getDefs())
+            System.out.println(def +"   "+ def.getType().getClass());
+
+       // analysis.live_variables(true);
+        //analysis.dominator_analysis(true);
     }
 }
 //*/
