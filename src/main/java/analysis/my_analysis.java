@@ -2,11 +2,13 @@ package analysis;
 
 // /*
 //import sootup.analysis.*;
+import AliasAnalysis.PointsToAnalysis;
 import sootup.core.graph.BasicBlock;
 import sootup.core.graph.DominanceFinder;
 import sootup.core.graph.StmtGraph;
 import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.jimple.basic.LValue;
+import sootup.core.jimple.common.stmt.Stmt;
 import sootup.java.bytecode.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.core.*;
 import sootup.java.core.interceptors.LocalLivenessAnalyser;
@@ -125,11 +127,24 @@ public class my_analysis {  //unsure of what this class will do yet
         System.out.println("sootclass of " +analysis.sootClass);
         System.out.println("sootmethod of " +analysis.method.getBody());
         System.out.println("--");
-        for(LValue def : analysis.method.getBody().getDefs())
-            System.out.println(def +"   "+ def.getType().getClass());
+        //for(LValue def : analysis.method.getBody().getDefs())
+          //  System.out.println(def +"   "+ def.getType().getClass());
 
+        PointsToAnalysis PTA = new PointsToAnalysis();
+        PTA.GenerateConstraints(analysis.method);
        // analysis.live_variables(true);
         //analysis.dominator_analysis(true);
+       // PrintMethodStmtLines(analysis);
+    }
+
+
+    static void PrintMethodStmtLines(my_analysis analysis) {
+        System.out.println("-----------");
+        for (Stmt stmt : analysis.method.getBody().getStmts()) {
+            System.out.println(stmt.getPositionInfo().getStmtPosition().getFirstLine());
+            //System.out.println(stmt.getClass());
+        }
     }
 }
 //*/
+
