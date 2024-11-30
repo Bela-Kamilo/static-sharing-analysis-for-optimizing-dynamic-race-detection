@@ -1,18 +1,17 @@
 package AliasAnalysis;
-import sootup.core.types.ReferenceType;
+import sootup.core.jimple.basic.Value;
+
 
 import java.util.HashSet;
 
+//a set of instances pointed ot by a variable
 public class PointsToSet extends HashSet<MemoryLocation>{
-    ReferenceType var;
-
-    PointsToSet(ReferenceType var){
-        super();
-        this.var=var;
+    private String var;
+    PointsToSet(String v){
+        this.var=v;
     }
 
-    @Override
-    public boolean add(MemoryLocation memoryLocation) {
-        return super.add(memoryLocation);
+    public String getVar() {
+        return var;
     }
 }

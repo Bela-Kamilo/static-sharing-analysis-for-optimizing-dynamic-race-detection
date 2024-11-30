@@ -1,7 +1,7 @@
 package analysis;
 
-// /*
-//import sootup.analysis.*;
+
+
 import AliasAnalysis.PointsToAnalysis;
 import sootup.core.graph.BasicBlock;
 import sootup.core.graph.DominanceFinder;
@@ -13,19 +13,16 @@ import sootup.java.bytecode.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.core.*;
 import sootup.java.core.interceptors.LocalLivenessAnalyser;
 import sootup.java.core.types.JavaClassType;
-//import sootup.java.bytecode.*;
 import sootup.java.core.views.JavaView;
 
 import sootup.core.model.SootMethod;
 import sootup.core.signatures.MethodSignature;
-//import sootup.java.bytecode.frontend.inputlocation.PathBasedAnalysisInputLocation;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-//import sootup.qilin.*;
 
 public class my_analysis {  //unsure of what this class will do yet
     private  AnalysisInputLocation inputLocation;
@@ -127,8 +124,8 @@ public class my_analysis {  //unsure of what this class will do yet
         System.out.println("sootclass of " +analysis.sootClass);
         System.out.println("sootmethod of " +analysis.method.getBody());
         System.out.println("--");
-        //for(LValue def : analysis.method.getBody().getDefs())
-          //  System.out.println(def +"   "+ def.getType().getClass());
+
+       // PrintClassesOfTypesOfDefinitions(analysis);
 
         PointsToAnalysis PTA = new PointsToAnalysis();
         PTA.GenerateConstraints(analysis.method);
@@ -137,7 +134,7 @@ public class my_analysis {  //unsure of what this class will do yet
        // PrintMethodStmtLines(analysis);
     }
 
-
+//debugging functions
     static void PrintMethodStmtLines(my_analysis analysis) {
         System.out.println("-----------");
         for (Stmt stmt : analysis.method.getBody().getStmts()) {
@@ -145,6 +142,11 @@ public class my_analysis {  //unsure of what this class will do yet
             //System.out.println(stmt.getClass());
         }
     }
+
+    static void PrintClassesOfTypesOfDefinitions(my_analysis analysis){
+        for(LValue def : analysis.method.getBody().getDefs())
+            System.out.println(def +"   "+ def.getType().getClass());
+    }
 }
-//*/
+
 

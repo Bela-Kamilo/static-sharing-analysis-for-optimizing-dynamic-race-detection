@@ -4,20 +4,20 @@ import sootup.core.jimple.basic.Value;
 import sootup.core.types.ReferenceType;
 
 public class SubsetOfConstraint implements  Constraint{
-    private final Value SuperSet;
-    private final Value SubSet;
-    SubsetOfConstraint(Value SubSet , Value SuperSet){
+    private final PointsToSet SuperSet;
+    private final PointsToSet SubSet;
+    SubsetOfConstraint(PointsToSet SubSet , PointsToSet SuperSet){
         this.SuperSet=SuperSet;
         this.SubSet=SubSet;
     }
 
-    public String toString(){ return SubSet +" is a subset of "+ SuperSet;}
+    public String toString(){ return SubSet.getVar() +" is a subset of "+ SuperSet.getVar();}
 
-    public Value getSubSet() {
+    public PointsToSet getSubSet() {
         return SubSet;
     }
 
-    public Value getSuperSet() {
+    public PointsToSet getSuperSet() {
         return SuperSet;
     }
 }
