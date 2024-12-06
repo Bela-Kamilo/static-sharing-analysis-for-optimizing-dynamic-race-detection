@@ -2,15 +2,15 @@ public class A {
 
 	A x, y,z,w;
 	int fld;
-	public int a(int c){
+	public int a(A d, int c){
 		A x= new A();
 		A y= new A();
 		A z= new A();
 		
 		w = ( c==1 )? x : y; 
 	
-		this.z= f (x,y);	
-		f2(c,c);		
+	//	this.z= f (x,y);	
+		f2(x,x);		
 
 		return c;
 	}

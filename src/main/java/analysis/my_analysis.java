@@ -18,10 +18,7 @@ import sootup.java.core.views.JavaView;
 import sootup.core.model.SootMethod;
 import sootup.core.signatures.MethodSignature;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class my_analysis {  //unsure of what this class will do yet
@@ -43,7 +40,7 @@ public class my_analysis {  //unsure of what this class will do yet
         classType =
                 view.getIdentifierFactory().getClassType("A");
         sootClass = view.getClass(classType).get();
-
+        
         methodSignature =
                 view
                         .getIdentifierFactory()
@@ -51,7 +48,7 @@ public class my_analysis {  //unsure of what this class will do yet
                                 classType,
                                 "a", // method name
                                 "int", // return type
-                                Collections.singletonList("int")); // args
+                                List.of("A","int")); // args
 
         opt = view.getMethod(methodSignature);
 

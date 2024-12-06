@@ -30,6 +30,7 @@ public class PointsToAnalysis {
             stmt.accept( ConstraintGenerator);
         }
         PrintConstraints();
+        ConstraintGenerator.printMethodsNoted();
     }
     public void PrintConstraints(){
         for (Constraint c : ConstraintGenerator.getConstraints() )

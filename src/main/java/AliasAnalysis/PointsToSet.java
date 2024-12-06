@@ -14,4 +14,9 @@ public class PointsToSet extends HashSet<MemoryLocation>{
     public String getVar() {
         return var;
     }
+
+    @Override
+    public String toString() {
+        return var;
+    }
 }
