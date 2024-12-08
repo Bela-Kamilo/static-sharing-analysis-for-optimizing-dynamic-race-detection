@@ -9,37 +9,33 @@ import java.util.*;
 public class MethodManager {
     //holds a vector of PointsToSets for each method
     //there has to be a better way tbh
-    private final Map<MethodSignature , Vector<Set<PointsToSet>>> methodParametersMap;
-    private final Map<MethodSignature, PointsToSet> methodReturnMap;
+    private final Map<MethodSignature , MethodNote> notedMethods;
 
-    MethodManager(){
-        methodParametersMap = new HashMap<>();
-        methodReturnMap = new HashMap<>();}
+
+    MethodManager(){this.notedMethods= new HashMap<>(); }
+
 
     //note  parameter=argument for method f
     public void argumentIsSubsetOf(MethodSignature f , int argumentAndParameterOrdinal, PointsToSet argumentsPTSet){
-        if(!methodParametersMap.containsKey(f)){
+        if(!notedMethods.containsKey(f)){
             System.out.println("!method "+ f+" hasn't been noted!");
             return;
         }
+        notedMethods.get(f).addArgument(argumentsPTSet,argumentAndParameterOrdinal);
+        /*
         Vector<Set<PointsToSet>> parameterVector= methodParametersMap.get(f);
         Set<PointsToSet> parameterPTSets= parameterVector.get(argumentAndParameterOrdinal);
         parameterPTSets.add(argumentsPTSet);
-
+*/
     }
 
-    public void noteMethod(MethodSignature methodSignature){
+    public void noteMethod(MethodSignature methodSignature) {
 
-        if(isNoted(methodSignature))return;
-
-        PointsToSet returnPTSet = new PointsToSet(methodSignature.toString());
-        methodReturnMap.put(methodSignature, returnPTSet);
-        Vector<Set<PointsToSet>> parameterVector= new Vector<>();
-        for(int i =0 ; i < methodSignature.getParameterTypes().size();i++){
-            parameterVector.add(new HashSet<>());
-        }
-        methodParametersMap.put(methodSignature, parameterVector);
+        if (notedMethods.containsKey(methodSignature)) return;    //method already noted
+        MethodNote methodNote = new MethodNote(methodSignature);
+        notedMethods.put(methodSignature, methodNote);
     }
+    /*
 
     private boolean isNoted(MethodSignature methodSignature){
         boolean res=false;
@@ -54,6 +50,6 @@ public class MethodManager {
         }
         return res;
     }
-
-    public void printParameterMappings(){System.out.println(methodParametersMap);}
+*/
+    public String toString(){return notedMethods.toString();}
 }

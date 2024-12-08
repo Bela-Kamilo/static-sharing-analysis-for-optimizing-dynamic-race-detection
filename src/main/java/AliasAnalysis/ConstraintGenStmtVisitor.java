@@ -113,7 +113,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     }
 
     public void printMethodsNoted(){
-        methodManager.printParameterMappings();
+        System.out.println(methodManager);
     }
 
     //generates constraints for a single value
