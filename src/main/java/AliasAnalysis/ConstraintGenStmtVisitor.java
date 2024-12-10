@@ -5,38 +5,37 @@ import sootup.core.jimple.basic.Local;
 import sootup.core.jimple.basic.StmtPositionInfo;
 import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.expr.*;
+import sootup.core.jimple.common.ref.JParameterRef;
 import sootup.core.jimple.common.stmt.JAssignStmt;
 import sootup.core.jimple.common.stmt.JIdentityStmt;
 import sootup.core.jimple.common.stmt.JInvokeStmt;
 import sootup.core.jimple.common.stmt.JReturnStmt;
+import sootup.core.jimple.javabytecode.stmt.JRetStmt;
 import sootup.core.jimple.visitor.AbstractStmtVisitor;
 import sootup.core.jimple.visitor.AbstractValueVisitor;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.ReferenceType;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 //visits a statement, generates constraints
 public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
     private Map<Value,PointsToSet> varsToLocationsMap;
     private Map<MethodSignature, PointsToSet> returnedLocationsMap;
+    private Map<MethodSignature, Vector<PointsToSet>> parametersLocationsMap;
     private Set<Constraint> constraints;
-    private Set<MemoryLocation> locations;
+
     private Set<MethodSignature> methodsInvoked; //method invocation will be visited after
-    private StmtPositionInfo visitingStmtPositionInfo;
-    private MethodManager methodManager;
+    private MethodSignature visitingMethod=null;
 
     ConstraintGenStmtVisitor(){
-        this.varsToLocationsMap = new HashMap<Value,PointsToSet>();
-        this.constraints= new HashSet<Constraint>();
-        this.locations= new HashSet<MemoryLocation>();
-        this.returnedLocationsMap = new HashMap<MethodSignature, PointsToSet>();
-        this.methodManager= new MethodManager();
+        this.varsToLocationsMap = new HashMap<>();
+        this.constraints= new HashSet<>();
+        this.parametersLocationsMap= new HashMap<>();
+        this.returnedLocationsMap = new HashMap<>();
+        this.methodsInvoked= new HashSet<>();
     }
 
     public Set<MethodSignature> getMethodsInvoked() {
@@ -50,21 +49,39 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     //<< f(a1,a2...an); >> treat as f.args = ai and add f in MethodsInvoked
     @Override
     public void caseInvokeStmt(@Nonnull JInvokeStmt stmt) {
-        visitingStmtPositionInfo =stmt.getPositionInfo();
-        methodManager.noteMethod(stmt.getInvokeExpr().getMethodSignature());
         stmt.getInvokeExpr().accept(new ConstraintGenInvokeVisitor() );
 
     }
     public void caseIdentityStmt(@Nonnull JIdentityStmt stmt) {
-        defaultCaseStmt(stmt);  //figure out what happens with 'this' and function arguments initialization
+        Value leftOp= stmt.getLeftOp();
+        Value rightOp= stmt.getRightOp();
+        PointsToSet subset;
+        PointsToSet superset;
+        if(!(rightOp.getType() instanceof ReferenceType)) return;
+
+        if(rightOp instanceof JParameterRef){
+            subset=getOrCreateMappingOf(visitingMethod,((JParameterRef) rightOp).getIndex());
+            superset=getOrCreateMappingOf(leftOp);
+            constraints.add(new SubsetOfConstraint( subset, superset ));
+            return;
+        }
+
+        //figure out what happens with 'this'
+        return;
     }
 
 
     // treat as f(...) = stmt.getOp()
     @Override
     public void caseReturnStmt(@Nonnull JReturnStmt stmt) {
-        defaultCaseStmt(stmt);
+        if( !(stmt.getOp().getType() instanceof ReferenceType) ) return;
+
+        PointsToSet superset =getOrCreateMappingOf(visitingMethod);
+        PointsToSet subset=getOrCreateMappingOf(stmt.getOp());
+        constraints.add(new SubsetOfConstraint( subset, superset ));
     }
+    @Override
+    public void caseRetStmt(@Nonnull JRetStmt stmt){System.out.println("VISITED A RET STATEMENT");}
     
 
     @Override
@@ -81,10 +98,15 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             return;
         }
 
-        visitingStmtPositionInfo =stmt.getPositionInfo();
 
-        if(rightOp instanceof AbstractInvokeExpr)
-            rightOp.accept(new ConstraintGenInvokeVisitor() );
+        if(rightOp instanceof AbstractInvokeExpr) {
+            rightOp.accept(new ConstraintGenInvokeVisitor());
+
+            PointsToSet superset =getOrCreateMappingOf(leftOp);
+            PointsToSet subset=getOrCreateMappingOf(((AbstractInvokeExpr) rightOp).getMethodSignature());
+            constraints.add(new SubsetOfConstraint( subset, superset ));
+            return;
+        }
 
         //copy rule
         PointsToSet superset =getOrCreateMappingOf(leftOp);
@@ -95,7 +117,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
 
 
-
+    // value -> PTSet
     private PointsToSet getOrCreateMappingOf(Value v){
         if(varsToLocationsMap.containsKey(v))
             return varsToLocationsMap.get(v);
@@ -103,7 +125,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         varsToLocationsMap.put(v, set);
         return set;
     }
-
+    //method-> PTSet    ,returned locations
     private PointsToSet getOrCreateMappingOf(MethodSignature method){
         if(returnedLocationsMap.containsKey(method))
             return returnedLocationsMap.get(method);
@@ -112,9 +134,24 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         return set;
     }
 
-    public void printMethodsNoted(){
-        System.out.println(methodManager);
+    //method -> parametersPTSet
+    private PointsToSet getOrCreateMappingOf(MethodSignature method,int paramOrdinal){
+
+        try {
+            if (parametersLocationsMap.containsKey(method))
+                return parametersLocationsMap.get(method).get(paramOrdinal);
+        } catch (Exception e) {
+            System.out.println("!failed to get "+method+" 's parameter"+paramOrdinal);
+        }
+
+        Vector<PointsToSet> paramVector= new Vector<>();
+        for(int i=0; i< method.getParameterTypes().size();i++)
+            paramVector.add(new PointsToSet(method+"."+i));
+        parametersLocationsMap.put(method, paramVector);
+        return paramVector.get(paramOrdinal);
     }
+    public void setVisitingMethod(MethodSignature method){visitingMethod=method;}
+
 
     //generates constraints for a single value
     //we only need this class for invocations
@@ -150,22 +187,15 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
         private  void defaultInvokeExpr(AbstractInvokeExpr invokeExpr ){
 
-            // MethodsInvoked.add(invokeExpr.getMethodSignature());
+             methodsInvoked.add(invokeExpr.getMethodSignature());
 
-
-
-            JAssignStmt newAssignStmt;
-
-            int i=0;                                //fix this, only for testing
-            for(Value arg : invokeExpr.getArgs()) { //i think we can assume that argumenti will be locali in functino body
-                LValue newLValue = new Local("argument" + i, invokeExpr.getMethodSignature().getParameterTypes().get(i));
-                newAssignStmt=new JAssignStmt(newLValue, arg, visitingStmtPositionInfo);
-                newAssignStmt.accept(ConstraintGenStmtVisitor.this);
-                methodManager.argumentIsSubsetOf(invokeExpr.getMethodSignature(),i,getOrCreateMappingOf(arg));
+            int i=0;
+            for(Value arg : invokeExpr.getArgs()) {
+                PointsToSet superset =getOrCreateMappingOf(invokeExpr.getMethodSignature(), i);
+                PointsToSet subset=getOrCreateMappingOf(arg);
+                constraints.add(new SubsetOfConstraint( subset, superset ));
                 i++;
             }
-
-            System.out.println("okokok");
         }
 
     }

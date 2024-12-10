@@ -47,7 +47,7 @@ public class my_analysis {  //unsure of what this class will do yet
                         .getMethodSignature(
                                 classType,
                                 "a", // method name
-                                "int", // return type
+                                "A", // return type
                                 List.of("A","int")); // args
 
         opt = view.getMethod(methodSignature);
@@ -138,6 +138,7 @@ public class my_analysis {  //unsure of what this class will do yet
             System.out.println(stmt.getPositionInfo().getStmtPosition().getFirstLine());
             //System.out.println(stmt.getClass());
         }
+        //analysis.method.get
     }
 
     static void PrintClassesOfTypesOfDefinitions(my_analysis analysis){

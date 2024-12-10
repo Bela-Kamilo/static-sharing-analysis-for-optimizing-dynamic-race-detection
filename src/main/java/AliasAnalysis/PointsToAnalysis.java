@@ -16,25 +16,28 @@ import java.util.Set;
 //we do not need to deal with dereferencing and such
 public class PointsToAnalysis {
 
-    //private Set<SootMethod>ToAnalizeNext;
+    //private Set<SootMethod>ToAnaliseNext;
     ConstraintGenStmtVisitor ConstraintGenerator;
 
     public PointsToAnalysis(){
         this.ConstraintGenerator = new ConstraintGenStmtVisitor();
-        //this.ToAnalizeNext = new HashSet<SootMethod>();
+        //this.ToAnaliseNext = new HashSet<SootMethod>();
     }
 
-    public void GenerateConstraints(SootMethod method){
-
-        for (Stmt stmt : method.getBody().getStmts()) {
+    public void GenerateConstraints(SootMethod entryMethod){
+        ConstraintGenerator.setVisitingMethod(entryMethod.getSignature());
+        for (Stmt stmt : entryMethod.getBody().getStmts()) {
             stmt.accept( ConstraintGenerator);
         }
         PrintConstraints();
-        ConstraintGenerator.printMethodsNoted();
+        System.out.println("------------\nMethods invoked:\n"+ConstraintGenerator.getMethodsInvoked());
+        System.out.println("------------");
     }
     public void PrintConstraints(){
+        System.out.println("---------\nConstraints:");
         for (Constraint c : ConstraintGenerator.getConstraints() )
             System.out.println( c);
+        System.out.println("---------");
     }
 
 }

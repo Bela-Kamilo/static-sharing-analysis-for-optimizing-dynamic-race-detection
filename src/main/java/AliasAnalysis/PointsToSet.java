@@ -19,4 +19,14 @@ public class PointsToSet extends HashSet<MemoryLocation>{
     public String toString() {
         return var;
     }
+
+    //a PointsToSet is equal only to itself
+    public boolean equals(Object o){return this==o;}
+
+    //let PointsToSet hash as a set though
+
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
 }

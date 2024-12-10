@@ -2,17 +2,18 @@ public class A {
 
 	A x, y,z,w;
 	int fld;
-	public int a(A d, int c){
+	public A a(A d, int c){
 		A x= new A();
 		A y= new A();
 		A z= new A();
 		
 		w = ( c==1 )? x : y; 
 	
-	//	this.z= f (x,y);	
+		z=f(x,y);	
 		f2(x,x);		
-
-		return c;
+		f2(y,y);
+		f2(x,x);		
+		return x;
 	}
 
 	public void f2(A p1, A p2){};

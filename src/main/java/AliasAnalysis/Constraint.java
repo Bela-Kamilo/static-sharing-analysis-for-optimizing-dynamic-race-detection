@@ -1,4 +1,3 @@
 package AliasAnalysis;
 
-public interface Constraint {
-}
+public interface Constraint {}
