@@ -66,7 +66,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             return;
         }
 
-        //figure out what happens with 'this'
+        //figure out what happens with 'this' identity
         return;
     }
 

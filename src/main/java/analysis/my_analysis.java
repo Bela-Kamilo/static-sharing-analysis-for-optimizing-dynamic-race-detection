@@ -124,9 +124,10 @@ public class my_analysis {  //unsure of what this class will do yet
 
        // PrintClassesOfTypesOfDefinitions(analysis);
 
-        PointsToAnalysis PTA = new PointsToAnalysis();
+        PointsToAnalysis PTA = new PointsToAnalysis(analysis.view);
         PTA.GenerateConstraints(analysis.method);
-       // analysis.live_variables(true);
+
+        // analysis.live_variables(true);
         //analysis.dominator_analysis(true);
        // PrintMethodStmtLines(analysis);
     }
