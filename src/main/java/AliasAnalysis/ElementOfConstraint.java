@@ -8,7 +8,7 @@ public class ElementOfConstraint implements Constraint{
         this.element=e;
     }
 
-    public String toString(){ return element +" is an element of "+ set.getVar();}
+    public String toString(){ return element +" is an element of "+ set.getVarName();}
 
     public MemoryLocation getElement() {
         return element;

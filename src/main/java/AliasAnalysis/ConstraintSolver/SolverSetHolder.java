@@ -1,5 +1,5 @@
 package AliasAnalysis.ConstraintSolver;
 
-public class SolverSet<T> {
+public class SolverSetHolder<T> {
     public T set;
 }

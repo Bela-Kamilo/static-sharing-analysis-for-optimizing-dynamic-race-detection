@@ -1,5 +1,6 @@
 package AliasAnalysis;
 
+import AliasAnalysis.ConstraintSolver.Solver;
 import analysis.my_analysis;
 import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.stmt.Stmt;
@@ -28,6 +29,14 @@ public class PointsToAnalysis {
         this.view=view;
     }
 
+    public Map<Value, PointsToSet> analise(SootMethod entryMethod){
+        GenerateConstraints(entryMethod);
+        Solver solver= new Solver(this.ConstraintGenerator.getConstraints());
+        solver.solve();
+        Map<Value, PointsToSet> debug = this.ConstraintGenerator.getVarsToLocationsMap();
+        return null;
+    }
+
     //generates constraints for all methods reachable from entryMethod
     //we'll go over each method only once
     public void GenerateConstraints(SootMethod entryMethod){
@@ -47,12 +56,10 @@ public class PointsToAnalysis {
                         filter(m -> !visitedMethods.contains(m)).
                         forEach(everyOtherMethod::add);
 
-
-
         }
     }
     //generates constraints, notes visited methods
-    private void generateConstraintsForSingleMethod(SootMethod method){
+    public void generateConstraintsForSingleMethod(SootMethod method){
         System.out.println("+++Visiting "+ method+"+++");
         System.out.println(method.getBody());
         System.out.println("+++++++++++++++");
@@ -74,4 +81,5 @@ public class PointsToAnalysis {
         System.out.println("---------");
     }
 
+    public Set<Constraint> getConstraints(){return ConstraintGenerator.getConstraints();}
 }

@@ -1,23 +1,25 @@
 package AliasAnalysis;
-import sootup.core.jimple.basic.Value;
 
 
 import java.util.HashSet;
 
-//a set of instances pointed ot by a variable
-public class PointsToSet extends HashSet<MemoryLocation>{
-    private String var;
+/**
+*a set of instances pointed at by a variable
+*/
+public class PointsToSet<T> extends HashSet<MemoryLocation>{
+    private String varName;
+    public T constraintSolverSet;    //this is up to solver implementation to set and use
     PointsToSet(String v){
-        this.var=v;
+        this.varName =v;
     }
 
-    public String getVar() {
-        return var;
+    public String getVarName() {
+        return varName;
     }
 
     @Override
     public String toString() {
-        return var;
+        return varName;
     }
 
     //a PointsToSet is equal only to itself

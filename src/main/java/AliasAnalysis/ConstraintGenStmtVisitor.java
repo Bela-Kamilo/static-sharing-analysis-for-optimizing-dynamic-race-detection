@@ -17,6 +17,7 @@ import sootup.core.signatures.MethodSignature;
 import sootup.core.types.ReferenceType;
 
 import javax.annotation.Nonnull;
+import java.awt.*;
 import java.util.*;
 
 //visits a statement, generates constraints
@@ -31,11 +32,22 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     private MethodSignature visitingMethod=null;
 
     ConstraintGenStmtVisitor(){
-        this.varsToLocationsMap = new HashMap<>();
         this.constraints= new HashSet<>();
         this.parametersLocationsMap= new HashMap<>();
         this.returnedLocationsMap = new HashMap<>();
         this.methodsInvoked= new HashSet<>();
+        this.varsToLocationsMap = new TreeMap<>(new Comparator<Value>() {       // we want to differentiate between same name locals
+            @Override                                                           //of different methods
+            public int compare(Value o1, Value o2) {
+                if(o1==o2) return 0;
+                int r =o1.toString().compareTo(o2.toString());
+                return r==0? 1 : r;
+            }
+        });
+    }
+
+    public Map<Value, PointsToSet> getVarsToLocationsMap() {
+        return varsToLocationsMap;
     }
 
     public Set<MethodSignature> getMethodsInvoked() {
@@ -121,7 +133,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     private PointsToSet getOrCreateMappingOf(Value v){
         if(varsToLocationsMap.containsKey(v))
             return varsToLocationsMap.get(v);
-        PointsToSet set = new PointsToSet(v.toString());
+        PointsToSet set = new PointsToSet(visitingMethod.getName() +":"+v);
         varsToLocationsMap.put(v, set);
         return set;
     }
@@ -158,7 +170,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
      class ConstraintGenInvokeVisitor extends AbstractValueVisitor{
 
 
-        //method invokations
+        //method invocations
         @Override
         public void caseSpecialInvokeExpr(@Nonnull JSpecialInvokeExpr expr) {
             defaultInvokeExpr(expr);

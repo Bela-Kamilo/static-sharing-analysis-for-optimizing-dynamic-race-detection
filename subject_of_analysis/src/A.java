@@ -5,10 +5,12 @@ public class A {
 	public A a(A d, int c){
 		A x= new A();
 		A y= new A();
-		A z= new A();
+		z= new A();
 		
 		w = ( c==1 )? x : y; 
-	
+
+		for(int i =0 ; i <100 ; i++)
+			z= new A();	
 		z=f(x,y);	
 		f2(x,x);		
 		f2(y,y);

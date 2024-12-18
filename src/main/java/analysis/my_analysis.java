@@ -115,17 +115,17 @@ public class my_analysis {  //unsure of what this class will do yet
         System.out.println("--");
         cg.callsFrom(methodSignature).stream()
                 .forEach(tgt -> System.out.println(methodSignature + " may call " + tgt));
-        */
+
 
         System.out.println("--");
         System.out.println("sootclass of " +analysis.sootClass);
         System.out.println("sootmethod of " +analysis.method.getBody());
         System.out.println("--");
-
+        */
        // PrintClassesOfTypesOfDefinitions(analysis);
 
         PointsToAnalysis PTA = new PointsToAnalysis(analysis.view);
-        PTA.GenerateConstraints(analysis.method);
+        PTA.analise(analysis.method);
 
         // analysis.live_variables(true);
         //analysis.dominator_analysis(true);

@@ -10,7 +10,7 @@ public class SubsetOfConstraint implements  Constraint{
         this.subSet =SubSet;
     }
 
-    public String toString(){ return subSet.getVar() +" is a subset of "+ superSet.getVar();}
+    public String toString(){ return subSet.getVarName() +" is a subset of "+ superSet.getVarName();}
 
     public PointsToSet getSubSet() {
         return subSet;
