@@ -1,6 +1,10 @@
 package AliasAnalysis;
 
-import AliasAnalysis.ConstraintSolver.SolverElement;
+
+import sootup.core.types.Type;
+
+import java.util.HashMap;
+import java.util.Map;
 
 //represents the object instances any variable may point to
 public class MemoryLocation {
@@ -9,13 +13,15 @@ public class MemoryLocation {
                                             //will be used as the id of each MemoryLocation instance
     final private int lineNumber;
     final private int id;
-    public SolverElement<?> constraintSolverElement;
+    final private Map<String,PointsToSet> fields;
+    public Object constraintSolverElement;
 
 
     MemoryLocation(int lineNumber){
         this.id=locationCounter++;
         this.lineNumber=lineNumber;
         this.constraintSolverElement=null;
+        this.fields= new HashMap<>();
     }
 
     public int getId() {
@@ -26,6 +32,15 @@ public class MemoryLocation {
     public String toString() {
         return "m"+lineNumber+" ("+id+")";
     }
-    public static int getLocationCounter(){return MemoryLocation.locationCounter;}
+    public static int getLocationCounter(){return MemoryLocation.locationCounter-1;}
 
+    public void setField(String field , PointsToSet fieldTPSet){
+        fields.put(field, fieldTPSet);
+    }
+    public PointsToSet getField(String field){
+        return fields.get(field);
+    }
+    public boolean existsField(String field){
+        return fields.containsKey(field);
+    }
 }

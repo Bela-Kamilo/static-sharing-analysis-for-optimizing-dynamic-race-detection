@@ -18,7 +18,6 @@ import java.util.*;
 //we do not need to deal with dereferencing and such
 public class PointsToAnalysis {
 
-
     ConstraintGenStmtVisitor ConstraintGenerator;
     Set <MethodSignature> visitedMethods;
     View view;
@@ -34,7 +33,7 @@ public class PointsToAnalysis {
         Solver solver= new Solver(this.ConstraintGenerator.getConstraints());
         solver.solve();
         Map<Value, PointsToSet> debug = this.ConstraintGenerator.getVarsToLocationsMap();
-        return null;
+        return debug;
     }
 
     //generates constraints for all methods reachable from entryMethod

@@ -1,11 +1,12 @@
 package AliasAnalysis;
 
 import sootup.core.jimple.basic.LValue;
-import sootup.core.jimple.basic.Local;
-import sootup.core.jimple.basic.StmtPositionInfo;
 import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.expr.*;
+import sootup.core.jimple.common.ref.JFieldRef;
+import sootup.core.jimple.common.ref.JInstanceFieldRef;
 import sootup.core.jimple.common.ref.JParameterRef;
+import sootup.core.jimple.common.ref.JThisRef;
 import sootup.core.jimple.common.stmt.JAssignStmt;
 import sootup.core.jimple.common.stmt.JIdentityStmt;
 import sootup.core.jimple.common.stmt.JInvokeStmt;
@@ -15,20 +16,21 @@ import sootup.core.jimple.visitor.AbstractStmtVisitor;
 import sootup.core.jimple.visitor.AbstractValueVisitor;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.ReferenceType;
+import sootup.core.types.Type;
 
 import javax.annotation.Nonnull;
-import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 //visits a statement, generates constraints
 public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
-    private Map<Value,PointsToSet> varsToLocationsMap;
-    private Map<MethodSignature, PointsToSet> returnedLocationsMap;
-    private Map<MethodSignature, Vector<PointsToSet>> parametersLocationsMap;
-    private Set<Constraint> constraints;
+    private final Map<Value,PointsToSet> varsToLocationsMap;
+    private final Map<MethodSignature, PointsToSet> returnedLocationsMap;
+    private final Map<MethodSignature, Vector<PointsToSet>> parametersLocationsMap;
+    private final Set<Constraint> constraints;
 
-    private Set<MethodSignature> methodsInvoked; //method invocation will be visited after
+    private final Set<MethodSignature> methodsInvoked; //method invocation will be visited after
     private MethodSignature visitingMethod=null;
 
     ConstraintGenStmtVisitor(){
@@ -58,12 +60,13 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         return constraints;
     }
 
-    //<< f(a1,a2...an); >> treat as f.args = ai and add f in MethodsInvoked
+    //<< x.f(a1,a2...an); >> treat as f(x,a1,a2...an) >>  f.params = args and add f in MethodsInvoked
     @Override
     public void caseInvokeStmt(@Nonnull JInvokeStmt stmt) {
         stmt.getInvokeExpr().accept(new ConstraintGenInvokeVisitor() );
 
     }
+
     public void caseIdentityStmt(@Nonnull JIdentityStmt stmt) {
         Value leftOp= stmt.getLeftOp();
         Value rightOp= stmt.getRightOp();
@@ -72,13 +75,23 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         if(!(rightOp.getType() instanceof ReferenceType)) return;
 
         if(rightOp instanceof JParameterRef){
-            subset=getOrCreateMappingOf(visitingMethod,((JParameterRef) rightOp).getIndex());
+            subset=getOrCreateMappingOf(visitingMethod,((JParameterRef) rightOp).getIndex()+1);
             superset=getOrCreateMappingOf(leftOp);
-            constraints.add(new SubsetOfConstraint( subset, superset ));
+            constraints.add(new SupersetOfConstraint(superset, subset));
             return;
         }
 
-        //figure out what happens with 'this' identity
+
+
+        if(rightOp instanceof JThisRef){
+            //this := @this: Type;     =>   let 'this' as a Local be a superset of all the instances calling this method
+            //                              it s ok as long as this as a Local doesnt get assigned (which is illegal anyways)
+            subset=getOrCreateMappingOf(visitingMethod,0);
+            superset=getOrCreateMappingOf(leftOp);      //left op is 'this'; should be visitingMethod.this
+            constraints.add(new SupersetOfConstraint(superset, subset));
+            return;
+        }
+
         return;
     }
 
@@ -90,7 +103,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
         PointsToSet superset =getOrCreateMappingOf(visitingMethod);
         PointsToSet subset=getOrCreateMappingOf(stmt.getOp());
-        constraints.add(new SubsetOfConstraint( subset, superset ));
+        constraints.add(new SupersetOfConstraint(superset, subset));
     }
     @Override
     public void caseRetStmt(@Nonnull JRetStmt stmt){System.out.println("VISITED A RET STATEMENT");}
@@ -116,24 +129,60 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
             PointsToSet superset =getOrCreateMappingOf(leftOp);
             PointsToSet subset=getOrCreateMappingOf(((AbstractInvokeExpr) rightOp).getMethodSignature());
-            constraints.add(new SubsetOfConstraint( subset, superset ));
+            constraints.add(new SupersetOfConstraint(superset, subset));
             return;
         }
 
-        //copy rule
-        PointsToSet superset =getOrCreateMappingOf(leftOp);
-        PointsToSet subset=getOrCreateMappingOf(rightOp);
-        constraints.add(new SubsetOfConstraint( subset, superset ));
+
+        copyRule(leftOp, rightOp);
 
     }
+    /*
+        -------------------
+        [a=b] ->  a )= b
+     */
+    void copyRule(LValue leftOp, Value rightOp){
 
+        //checks if field references are apart of this assignement
+        AbstractValueVisitor<Tuple<Value,String>> fieldValueVisitor =new AbstractValueVisitor<>() {
+            @Override
+            public void caseInstanceFieldRef(@Nonnull JInstanceFieldRef ref) {
+                setResult(new Tuple<>(ref.getBase(), ref.getFieldSignature().toString()));
+            }
+
+            @Override
+            public void defaultCaseValue(@Nonnull Value v) {
+                setResult(null);
+            }
+        };
+        leftOp.accept(fieldValueVisitor);
+        Tuple<Value,String> leftOpFieldTuple=fieldValueVisitor.getResult();
+        rightOp.accept(fieldValueVisitor);
+        Tuple<Value,String> rightOpFieldTuple=fieldValueVisitor.getResult();
+        Value supersetBase= leftOp;
+        String supersetField=null;
+        Value subsetBase= rightOp;
+        String subsetField=null;
+        if(leftOpFieldTuple!=null){
+            supersetBase = leftOpFieldTuple.getElem1();
+            supersetField= leftOpFieldTuple.getElem2();
+        }
+        if(rightOpFieldTuple!=null){
+            subsetBase = rightOpFieldTuple.getElem1();
+            subsetField= rightOpFieldTuple.getElem2();
+        }
+        PointsToSet superset =getOrCreateMappingOf(supersetBase);
+        PointsToSet subset=getOrCreateMappingOf(subsetBase);
+        constraints.add(new SupersetOfConstraint(superset, supersetField, subset, subsetField));
+
+    }
 
 
     // value -> PTSet
     private PointsToSet getOrCreateMappingOf(Value v){
         if(varsToLocationsMap.containsKey(v))
             return varsToLocationsMap.get(v);
-        PointsToSet set = new PointsToSet(visitingMethod.getName() +":"+v);
+        PointsToSet set = new PointsToSet(visitingMethod +":"+v);
         varsToLocationsMap.put(v, set);
         return set;
     }
@@ -157,8 +206,14 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         }
 
         Vector<PointsToSet> paramVector= new Vector<>();
-        for(int i=0; i< method.getParameterTypes().size();i++)
-            paramVector.add(new PointsToSet(method+"."+i));
+        paramVector.add(new PointsToSet(method+".this"));
+        List<Type> types = method.getParameterTypes();
+        for(int i=1; i< types.size()+1;i++) {
+            if(types.get(i-1) instanceof ReferenceType)
+                paramVector.add(new PointsToSet(method + "." + i));
+            else
+                paramVector.add(null);
+        }
         parametersLocationsMap.put(method, paramVector);
         return paramVector.get(paramOrdinal);
     }
@@ -169,7 +224,11 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     //we only need this class for invocations
      class ConstraintGenInvokeVisitor extends AbstractValueVisitor{
 
-
+       /* @Override
+        public void caseInstanceFieldRef(@Nonnull JInstanceFieldRef ref) {
+            super.caseInstanceFieldRef(ref);
+        }
+*/
         //method invocations
         @Override
         public void caseSpecialInvokeExpr(@Nonnull JSpecialInvokeExpr expr) {
@@ -179,6 +238,11 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         @Override
         public void caseVirtualInvokeExpr(@Nonnull JVirtualInvokeExpr expr) {
             defaultInvokeExpr(expr);
+
+            //x.f(a); >> f.this=x
+            PointsToSet superset =getOrCreateMappingOf(expr.getMethodSignature(), 0);
+            PointsToSet subset=getOrCreateMappingOf(expr.getBase());
+            constraints.add(new SupersetOfConstraint(superset, subset));
         }
 
         @Override
@@ -198,14 +262,14 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
 
         private  void defaultInvokeExpr(AbstractInvokeExpr invokeExpr ){
-
              methodsInvoked.add(invokeExpr.getMethodSignature());
-
-            int i=0;
+            int i=1;
             for(Value arg : invokeExpr.getArgs()) {
+                if (! (arg.getType() instanceof  ReferenceType))
+                    continue;
                 PointsToSet superset =getOrCreateMappingOf(invokeExpr.getMethodSignature(), i);
                 PointsToSet subset=getOrCreateMappingOf(arg);
-                constraints.add(new SubsetOfConstraint( subset, superset ));
+                constraints.add(new SupersetOfConstraint(superset, subset));
                 i++;
             }
         }
@@ -214,3 +278,27 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
 }
 
+ class Tuple<T1,T2>{
+   private T1 elem1;
+   private T2 elem2;
+
+    Tuple(T1 e1, T2 e2){
+        elem1=e1;
+        elem2=e2;
+    }
+     public void setElem1(T1 elem1) {
+         this.elem1 = elem1;
+     }
+
+     public void setElem2(T2 elem2) {
+         this.elem2 = elem2;
+     }
+
+     public T1 getElem1() {
+         return elem1;
+     }
+
+     public T2 getElem2() {
+         return elem2;
+     }
+ }

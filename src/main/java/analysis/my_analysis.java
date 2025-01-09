@@ -139,7 +139,7 @@ public class my_analysis {  //unsure of what this class will do yet
             System.out.println(stmt.getPositionInfo().getStmtPosition().getFirstLine());
             //System.out.println(stmt.getClass());
         }
-        //analysis.method.get
+
     }
 
     static void PrintClassesOfTypesOfDefinitions(my_analysis analysis){

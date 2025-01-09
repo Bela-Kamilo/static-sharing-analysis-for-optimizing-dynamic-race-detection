@@ -3,22 +3,11 @@ public class A {
 	A x, y,z,w;
 	int fld;
 	public A a(A d, int c){
-		A x= new A();
-		A y= new A();
-		z= new A();
-		
-		w = ( c==1 )? x : y; 
-
-		for(int i =0 ; i <100 ; i++)
-			z= new A();	
-		z=f(x,y);	
-		f2(x,x);		
-		f2(y,y);
-		f2(x,x);		
-		return x;
+		A ekz= new A();
+		A ekz2 = new A();
+		ekz.x =ekz2;
+		ekz.x=ekz;
+		//ekz2=ekz.x;	prolvima
+		return ekz;
 	}
-
-	public void f2(A p1, A p2){};
-	public void f2(int p1, int p2){};
-	public A f(A a1, A a2){return a1;}
 }

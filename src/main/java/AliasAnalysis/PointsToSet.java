@@ -2,15 +2,18 @@ package AliasAnalysis;
 
 
 import java.util.HashSet;
+import java.util.Set;
 
 /**
 *a set of instances pointed at by a variable
 */
-public class PointsToSet<T> extends HashSet<MemoryLocation>{
-    private String varName;
-    public T constraintSolverSet;    //this is up to solver implementation to set and use
-    PointsToSet(String v){
+public class PointsToSet extends HashSet<MemoryLocation>{
+    private final String varName;
+    public Object constraintSolverSet;    //this is up to solver implementation to set and use
+   // private final Set<Field> fieldSet;//
+   public PointsToSet(String v){
         this.varName =v;
+    //    fieldSet= new HashSet<>();//
     }
 
     public String getVarName() {
