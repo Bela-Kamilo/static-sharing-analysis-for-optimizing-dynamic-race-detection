@@ -7,7 +7,7 @@ import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
-
+import java.util.Arrays;
 
 
 /*  p )= q.f     l_q in q    l_f in l_q.f
@@ -38,12 +38,18 @@ public class FieldReadPropagator extends Propagator<SetVar> {
         ISet l_qs= q.getLB();
         // each l_f in l_q.f must be in p
         for(int l_q : l_qs){
-            SetVar l_qField = locationsManager.getOrCreateField(l_q, field);// getFieldSet(l_q , field);
+            SetVar l_qField = getField(l_q, field);// getFieldSet(l_q , field);
             ISet l_fs = l_qField.getLB();
             for(int l_f : l_fs)
                 p.force(l_f,this);
 
         }
+    }
+    private SetVar getField(int lId, String field){
+        SetVar fieldSet = locationsManager.getOrCreateField(lId,field);
+        if(!Arrays.asList(this.vars).contains(fieldSet))
+            this.addVariable(fieldSet);
+        return fieldSet;
     }
 
     @Override
@@ -54,10 +60,11 @@ public class FieldReadPropagator extends Propagator<SetVar> {
         ISet l_qs= q.getValue();
         // each l_f in l_q.f must be in p
         for(int l_q : l_qs){
-            SetVar l_qField = locationsManager.getOrCreateField(l_q,field);//getFieldSet(l_q , field);
+            SetVar l_qField = locationsManager.getOrCreateField(l_q,field);
+            if(!l_qField.isInstantiated()) return ESat.UNDEFINED;
             ISet l_fs = l_qField.getValue();
             for(int l_f : l_fs)
-                if(!p.getLB().contains(l_f)) return ESat.FALSE;
+                if(!p.getValue().contains(l_f)) return ESat.FALSE;
 
         }
         return  ESat.TRUE;
@@ -65,7 +72,7 @@ public class FieldReadPropagator extends Propagator<SetVar> {
 
     @Override
     public int getPropagationConditions(int vIdx){
-        if (vIdx ==1)   //this propagator will make changes  when q (OR SOME l_q.f !) changes
+        if (vIdx !=0)   //this propagator will make changes  when q (OR SOME l_q.f !) changes
             return SetEventType.ADD_TO_KER.getMask();
         return SetEventType.VOID.getMask();
     }

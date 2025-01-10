@@ -56,12 +56,12 @@ public class LocationsManager {
         model.setObjective(Model.MINIMIZE, totalElementsOfSetVarsOfModel());
         model.getSolver().
                 setSearch(
-                        Search.setVarSearch(new FailureBased<SetVar>(model.retrieveSetVars(),
-                                new Date().getTime(),1) ,
+                        Search.setVarSearch(new FailureBased<SetVar>(model.retrieveSetVars(), new Date().getTime(), 1),
                                 new SetDomainMin(),
                                 false ,
                                 model.retrieveSetVars()));
     }
+
      private IntVar totalElementsOfSetVarsOfModel(){
         SetVar[] setvars =model.retrieveSetVars();
         if(setvars.length ==0){System.out.println("!No setVars in model "+model+"!"); return model.intVar(0,0);}

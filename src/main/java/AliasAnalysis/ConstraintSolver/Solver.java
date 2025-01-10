@@ -69,13 +69,6 @@ public class Solver {
                     model.subsetEq(new SetVar[]{modelSubSet,modelSuperSet}).post();
                     break;
             }
-
-
-            //SetVar modelSuperSet=model.setVar(superSet.toString(),new int[]{}, Solver.AllLocationsArray);
-            //SetVar modelSubSet=model.setVar(subSet.toString(),new int[]{}, Solver.AllLocationsArray);
-
-
-
            return;
         }
         if (c instanceof ElementOfConstraint){
@@ -108,12 +101,18 @@ public class Solver {
     }
 
     public void solve(){
-       while(model.getSolver().solve()){
-            System.out.println("+++solution found+++");
-            Arrays.stream(model.retrieveSetVars()).forEach(System.out::println);
-            new Scanner(System.in).nextLine();
+      try{
+          while(model.getSolver().solve()){
+              System.out.println("+++solution found+++");
+              Arrays.stream(model.retrieveSetVars()).forEach(System.out::println);
+              new Scanner(System.in).nextLine();
 
-       }
+          }
+          model.getSolver().printStatistics();
+      } catch (Exception e) {
+          System.out.println(e);
+          ;
+      }
     }
     public static int[] allLocations(){return AllLocationsArray;}
 }
