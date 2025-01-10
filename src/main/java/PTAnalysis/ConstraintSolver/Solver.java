@@ -105,7 +105,6 @@ public class Solver {
           while(model.getSolver().solve()){
               System.out.println("+++solution found+++");
               Arrays.stream(model.retrieveSetVars()).forEach(System.out::println);
-              new Scanner(System.in).nextLine();
 
           }
           model.getSolver().printStatistics();
