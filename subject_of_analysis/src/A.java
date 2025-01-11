@@ -1,29 +1,20 @@
 public class A {
 
-	A x, y,z,w;
+	A x , y;
 	int fld;
 	public A a(A d, int c){
-		A x= new A();
-		A y= new A();
-		z= new A();
-		
-		w = ( c==1 )? x : y; 
+		A one= new A();
+		A two= new A();
+		A oneAndTwo;
 
-		for(int i =0 ; i <100 ; i++)
-			z= new A();	
-		z=f(x,y);	
-		x.f2(x,x);		
-		f2(y,y);
-		f2(x,x);
-		this.x=this.y;
-		this.y=this.x;
-		return x;
+		oneAndTwo = ( c==1 )? one : two;
+
+		oneAndTwo.x=one.f(two,two);
+		return oneAndTwo;
 	}
 
-	public void f2(A p1, A p2){
-		A k= new A();
-		k.a(new A(), 5);
-	}
-	public void f2(int p1, int p2){}
-	public A f(A a1, A a2){return a1;}
+	public A f(A a1, A a2){
+		A three = new A();
+		three.x=new A();
+		return three.x;}
 }

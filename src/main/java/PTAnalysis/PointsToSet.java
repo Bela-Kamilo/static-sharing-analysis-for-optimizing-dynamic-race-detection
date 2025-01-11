@@ -1,8 +1,7 @@
-package AliasAnalysis;
+package PTAnalysis;
 
 
 import java.util.HashSet;
-import java.util.Set;
 
 /**
 *a set of instances pointed at by a variable

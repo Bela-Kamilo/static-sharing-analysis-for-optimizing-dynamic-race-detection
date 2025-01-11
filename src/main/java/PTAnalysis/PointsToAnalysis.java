@@ -1,13 +1,10 @@
-package AliasAnalysis;
+package PTAnalysis;
 
-import AliasAnalysis.ConstraintSolver.Solver;
-import analysis.my_analysis;
+import PTAnalysis.ConstraintSolver.Solver;
 import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.model.SootMethod;
 import sootup.core.signatures.MethodSignature;
-import sootup.core.types.ClassType;
-import sootup.core.types.ReferenceType;
 import sootup.core.types.Type;
 import sootup.core.views.View;
 

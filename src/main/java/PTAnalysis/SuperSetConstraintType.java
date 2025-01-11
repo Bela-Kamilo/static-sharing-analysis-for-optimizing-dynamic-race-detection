@@ -1,4 +1,4 @@
-package AliasAnalysis;
+package PTAnalysis;
 
 public enum SuperSetConstraintType {
     FIELDLESS,

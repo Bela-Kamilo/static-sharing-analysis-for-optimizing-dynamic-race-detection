@@ -2,10 +2,9 @@ package analysis;
 
 
 
-import AliasAnalysis.PointsToAnalysis;
+import PTAnalysis.PointsToAnalysis;
 import sootup.core.graph.BasicBlock;
 import sootup.core.graph.DominanceFinder;
-import sootup.core.graph.StmtGraph;
 import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.jimple.basic.LValue;
 import sootup.core.jimple.common.stmt.Stmt;

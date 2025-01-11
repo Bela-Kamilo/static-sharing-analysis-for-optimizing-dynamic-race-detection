@@ -1,7 +1,5 @@
-package AliasAnalysis;
+package PTAnalysis;
 
-
-import sootup.core.types.Type;
 
 import java.util.HashMap;
 import java.util.Map;

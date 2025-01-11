@@ -1,4 +1,4 @@
-package AliasAnalysis;
+package PTAnalysis;
 
 public class ElementOfConstraint implements Constraint{
     private final MemoryLocation element;

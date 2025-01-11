@@ -1,7 +1,7 @@
-package AliasAnalysis.ConstraintSolver;
+package PTAnalysis.ConstraintSolver;
 
-import AliasAnalysis.MemoryLocation;
-import AliasAnalysis.PointsToSet;
+import PTAnalysis.MemoryLocation;
+import PTAnalysis.PointsToSet;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.search.strategy.Search;

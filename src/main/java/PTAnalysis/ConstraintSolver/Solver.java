@@ -1,9 +1,8 @@
-package AliasAnalysis.ConstraintSolver;
+package PTAnalysis.ConstraintSolver;
 
-import AliasAnalysis.*;
+import PTAnalysis.*;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
-import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.FailureBased;

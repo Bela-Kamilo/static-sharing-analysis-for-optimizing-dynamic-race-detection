@@ -1,4 +1,4 @@
-package AliasAnalysis;
+package PTAnalysis;
 
 import java.util.Objects;
 import java.util.Optional;

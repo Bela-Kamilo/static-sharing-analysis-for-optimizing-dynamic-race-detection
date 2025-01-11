@@ -1,3 +1,3 @@
-package AliasAnalysis;
+package PTAnalysis;
 
 public interface Constraint {}
