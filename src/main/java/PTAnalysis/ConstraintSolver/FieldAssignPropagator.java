@@ -11,7 +11,7 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  *-----------------------------------------[field-assign] </br>
  *              l_q in l_p.f                              </br>
  *
- * @see <a href="https://github.com/Bela-Kamilo/Java-NUMA-locality-and-object-lifetime-static-analysis/blob/master/src/main/java/PTAnalysis/README.md">Repo Readme</a>
+ * @see <a href="https://github.com/Bela-Kamilo/Java-thread-locality-static-analysis/blob/master/src/main/java/PTAnalysis/README.md">Repo Readme</a>
  */
 public class FieldAssignPropagator extends Propagator<SetVar> {
 
