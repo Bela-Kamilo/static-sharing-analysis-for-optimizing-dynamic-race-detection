@@ -7,12 +7,11 @@ import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
-/*  p.f )= q    l_p in p        l_q in q
- *-----------------------------------------[field-assign]
- *              l_q in l_p.f
+/**  p.f )= q ,   l_p in p  ,      l_q in q               </br>
+ *-----------------------------------------[field-assign] </br>
+ *              l_q in l_p.f                              </br>
  *
- *
- *
+ * @see <a href="https://github.com/Bela-Kamilo/Java-NUMA-locality-and-object-lifetime-static-analysis/blob/master/src/main/java/PTAnalysis/README.md">Repo Readme</a>
  */
 public class FieldAssignPropagator extends Propagator<SetVar> {
 
@@ -37,7 +36,6 @@ public class FieldAssignPropagator extends Propagator<SetVar> {
             for( int l_q : q.getLB()){
                 //l_q in l_p.f
                 SetVar l_pfield=locationsManager.getOrCreateField(l_p, field);
-                //if(l_pfield==null) throw new ContradictionException();
                 l_pfield.force(l_q,this);
             }
     }

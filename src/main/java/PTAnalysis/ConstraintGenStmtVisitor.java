@@ -21,7 +21,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.List;
 
-//visits a statement, generates constraints
+/** visits a statement, generates appropriate constraints */
 public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
     private final Map<Value,PointsToSet> varsToLocationsMap;
@@ -137,9 +137,9 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         copyRule(leftOp, rightOp);
 
     }
-    /*
-        -------------------
-        [a=b] ->  a )= b
+    /**
+     *   -------------------
+     *  [a=b] ->  a )= b
      */
     void copyRule(LValue leftOp, Value rightOp){
 
@@ -178,7 +178,8 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     }
 
 
-    // value -> PTSet
+    /** value -> PTSet
+     * A mapping of a value to its PTSet*/
     private PointsToSet getOrCreateMappingOf(Value v){
         if(varsToLocationsMap.containsKey(v))
             return varsToLocationsMap.get(v);
@@ -186,7 +187,10 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         varsToLocationsMap.put(v, set);
         return set;
     }
-    //method-> PTSet    ,returned locations
+
+    /** method-> PTSet    returned locations
+     * A mapping of a method to a PTSet of its possibly returned locations
+     * */
     private PointsToSet getOrCreateMappingOf(MethodSignature method){
         if(returnedLocationsMap.containsKey(method))
             return returnedLocationsMap.get(method);
@@ -195,7 +199,9 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         return set;
     }
 
-    //method -> parametersPTSet
+    /** method -> parametersPTSet
+     * A mapping of a method to PTSets of its parameters
+     * */
     private PointsToSet getOrCreateMappingOf(MethodSignature method,int paramOrdinal){
 
         try {
@@ -220,12 +226,11 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     public void setVisitingMethod(MethodSignature method){visitingMethod=method;}
 
 
-    //generates constraints for a single value
-    //we need this class for invocations
+    /** Visits a value, generates constraints for method invocations */
      class ConstraintGenInvokeVisitor extends AbstractValueVisitor{
 
 
-        //method invocations
+
         @Override
         public void caseSpecialInvokeExpr(@Nonnull JSpecialInvokeExpr expr) {
             defaultInvokeExpr(expr);

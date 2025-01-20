@@ -13,12 +13,13 @@ import org.chocosolver.solver.variables.SetVar;
 import java.util.Date;
 import java.util.HashMap;
 
-/*
-*
- */
+/** Acts as an interface between MemoryLocations and a model
+ * A memory location for the model is an integer
+ * A points-to set for the model is a set variable (SetVar) containing ints
+ * */
 public class LocationsManager {
-    HashMap<Integer, MemoryLocation> locationsMap;
-    Model model;
+    private final HashMap<Integer, MemoryLocation> locationsMap;
+    private final Model model;
     final int totalLocations;
 
     LocationsManager(Model m){
@@ -27,6 +28,9 @@ public class LocationsManager {
         totalLocations= MemoryLocation.getLocationCounter();
     }
 
+    /**Stores a MemoryLocation in a HashMap
+     * @param l
+     */
     public void add(MemoryLocation l){
         int id =l.getId();
         if(locationsMap.containsKey(id)){
@@ -36,7 +40,12 @@ public class LocationsManager {
         locationsMap.put(id, l);
     }
 
-
+    /**
+     *
+     * @param locationId    memory location
+     * @param field     name of the field
+     * @return   locationId.field SetVar
+     */
     public SetVar getOrCreateField(int locationId, String field) {
         if(!locationsMap.containsKey(locationId)) throw new RuntimeException("Location "+locationId+" doesnt exist in LocationsManager");
         MemoryLocation l = locationsMap.get(locationId);
@@ -52,14 +61,14 @@ public class LocationsManager {
         return (SetVar) locationsMap.get(locationId).getField(field).constraintSolverSet;
     }
 
-    void updateSearch(){
-        model.setObjective(Model.MINIMIZE, totalElementsOfSetVarsOfModel());
-        model.getSolver().
-                setSearch(
-                        Search.setVarSearch(new FailureBased<SetVar>(model.retrieveSetVars(), new Date().getTime(), 1),
-                                new SetDomainMin(),
-                                false ,
-                                model.retrieveSetVars()));
+  private  void updateSearch(){
+            model.setObjective(Model.MINIMIZE, totalElementsOfSetVarsOfModel());
+            model.getSolver().
+                    setSearch(
+                            Search.setVarSearch(new FailureBased<SetVar>(model.retrieveSetVars(), new Date().getTime(), 1),
+                                    new SetDomainMin(),
+                                    false ,
+                                    model.retrieveSetVars()));
     }
 
      private IntVar totalElementsOfSetVarsOfModel(){

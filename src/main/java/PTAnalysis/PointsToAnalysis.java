@@ -10,10 +10,15 @@ import sootup.core.views.View;
 
 import java.util.*;
 
-//this class will implement a field sensitive Andersen's points to analysis
-//on jimple code
-//we do not need to deal with dereferencing and such
+/** This class implements a field sensitive Andersen's-like points to analysis
+ *  on jimple code. We do not need to deal with dereferencing and such here.
+ *  There s a PointsToSet for every reference local, non-null method, method parameter
+ *  and field (of reference type) possibly held by an instance.
+ *  Assignment statements and method invocations generate constraints on the PointsToSets.
+ *  Every statement (and method) is visited once
+*/
 public class PointsToAnalysis {
+
 
     ConstraintGenStmtVisitor ConstraintGenerator;
     Set <MethodSignature> visitedMethods;
@@ -25,6 +30,7 @@ public class PointsToAnalysis {
         this.view=view;
     }
 
+    /** performs the analysis on reachable code from entryMethod  */
     public Map<Value, PointsToSet> analise(SootMethod entryMethod){
         GenerateConstraints(entryMethod);
         Solver solver= new Solver(this.ConstraintGenerator.getConstraints());
@@ -33,9 +39,10 @@ public class PointsToAnalysis {
         return debug;
     }
 
-    //generates constraints for all methods reachable from entryMethod
-    //we'll go over each method only once
-    public void GenerateConstraints(SootMethod entryMethod){
+    /** passes all methods reachable from entryMethod.
+    * We go over each method only once
+    */
+     public void GenerateConstraints(SootMethod entryMethod){
         //pass entry method
         generateConstraintsForSingleMethod(entryMethod);
         //pass every other method
@@ -54,7 +61,7 @@ public class PointsToAnalysis {
 
         }
     }
-    //generates constraints, notes visited methods
+    /** passes a single method, notes other visited methods */
     public void generateConstraintsForSingleMethod(SootMethod method){
         System.out.println("+++Visiting "+ method+"+++");
         System.out.println(method.getBody());

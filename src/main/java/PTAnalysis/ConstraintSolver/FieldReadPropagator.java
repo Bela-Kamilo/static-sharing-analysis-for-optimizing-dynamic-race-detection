@@ -10,12 +10,12 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import java.util.Arrays;
 
 
-/*  p )= q.f     l_q in q    l_f in l_q.f
- *-----------------------------------------[field-read]
- *              l_f in p
+/**  p )= q.f ,    l_q in q ,   l_f in l_q.f            </br>
+ *-----------------------------------------[field-read] </br>
+ *              l_f in p                                </br>
  *
- *  unsure if all l_q.fs should be held by the propagator in addition to q and f
- *  (seems to work as it is (?))
+ *
+ * @see <a href="https://github.com/Bela-Kamilo/Java-NUMA-locality-and-object-lifetime-static-analysis/blob/master/src/main/java/PTAnalysis/README.md">Repo Readme</a>
  */
 public class FieldReadPropagator extends Propagator<SetVar> {
 
@@ -38,7 +38,7 @@ public class FieldReadPropagator extends Propagator<SetVar> {
         ISet l_qs= q.getLB();
         // each l_f in l_q.f must be in p
         for(int l_q : l_qs){
-            SetVar l_qField = getField(l_q, field);// getFieldSet(l_q , field);
+            SetVar l_qField = getField(l_q, field);
             ISet l_fs = l_qField.getLB();
             for(int l_f : l_fs)
                 p.force(l_f,this);

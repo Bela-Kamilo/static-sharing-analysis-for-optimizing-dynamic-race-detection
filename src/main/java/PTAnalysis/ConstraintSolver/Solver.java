@@ -12,6 +12,9 @@ import org.chocosolver.solver.variables.SetVar;
 import java.util.*;
 import java.util.stream.IntStream;
 
+/** Choco-solver representation and solving process
+ * @see <a href="https://choco-solver.org/">Choco-solver</a>
+ */
 public class Solver {
     private final Model model;
     private final Set<Constraint> PTconstraints;
@@ -20,6 +23,7 @@ public class Solver {
 
     public Solver(Set<Constraint> constraints){
         this.PTconstraints=constraints;
+        AllLocationsArray = IntStream.rangeClosed(1, MemoryLocation.getLocationCounter()).toArray();
         this.model = new Model("Points To Analysis");
         this.locationsManager= new LocationsManager(model);
         createModelConstraints();
@@ -30,12 +34,11 @@ public class Solver {
                , model.retrieveSetVars()));
 
    }
+   /** Constructs the choco-solver representation */
     public void createModelConstraints(){
-        AllLocationsArray = IntStream.rangeClosed(1, MemoryLocation.getLocationCounter()).toArray();
         PTconstraints.forEach(this::PTConstraint2ModelConstraint);
         IntVar totalElements= totalElementsOfSetVarsOfModel();
         model.setObjective(Model.MINIMIZE, totalElements);
-
    }
 
     private void PTConstraint2ModelConstraint(Constraint c){
@@ -47,7 +50,7 @@ public class Solver {
             SetVar modelSubSet=getOrCreateModelSetFromPTSet(subSet);
 
             switch (((SupersetOfConstraint )c).getSuperSetConstraintType()){
-                case FIELD_SUPERSET_OF_FIELD : throw new RuntimeException(" found a.f=b.f-like assignment while converting constraints");
+                case FIELD_SUPERSETOF_FIELD: throw new RuntimeException(" found a.f=b.f-like assignment while converting constraints");
                 case SUBSET_FIELD:
                     Optional<String> field= ((SupersetOfConstraint) c).getSubSetField();
                     if(field.isEmpty()) throw new RuntimeException("SUBSET_FIELD constraint should have subset field");
@@ -80,11 +83,9 @@ public class Solver {
         }
     }
     private SetVar getOrCreateModelSetFromPTSet(PointsToSet set){
-      ///*
-        if(set.constraintSolverSet ==null){
-            //set.constraintSolverSet = new SolverSetHolder<SetVar>();
+
+        if(set.constraintSolverSet ==null)
             set.constraintSolverSet =model.setVar(set.getVarName(),new int[]{}, Solver.AllLocationsArray);
-        }//*/
 
        return (SetVar) set.constraintSolverSet;
     }
@@ -99,6 +100,7 @@ public class Solver {
         return sum.intVar();
     }
 
+    /** produces a solution w/ respect to the model's constraints */
     public void solve(){
       try{
           while(model.getSolver().solve()){

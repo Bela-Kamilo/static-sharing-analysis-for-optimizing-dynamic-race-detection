@@ -4,7 +4,7 @@ package PTAnalysis;
 import java.util.HashMap;
 import java.util.Map;
 
-//represents the object instances any variable may point to
+/** represents the object instances any variable may point to */
 public class MemoryLocation {
     static private int  locationCounter=1;  //to be incremented each time
                                             // there s a new object created
@@ -38,6 +38,9 @@ public class MemoryLocation {
     public PointsToSet getField(String field){
         return fields.get(field);
     }
+    /**@return true if this memory location holds field 'field'
+     * @return false otherwise
+     * */
     public boolean existsField(String field){
         return fields.containsKey(field);
     }

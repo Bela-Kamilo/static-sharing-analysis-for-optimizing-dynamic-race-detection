@@ -1,8 +1,8 @@
 package PTAnalysis;
 
-public enum SuperSetConstraintType {
+public enum SuperSetOfConstraintType {
     FIELDLESS,
     SUPERSET_FIELD,
     SUBSET_FIELD,
-    FIELD_SUPERSET_OF_FIELD     //this is not legal jimple i believe
+    FIELD_SUPERSETOF_FIELD     //this is not legal jimple i believe
 }

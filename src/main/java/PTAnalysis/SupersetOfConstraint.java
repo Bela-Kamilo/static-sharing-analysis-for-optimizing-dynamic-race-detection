@@ -3,6 +3,7 @@ package PTAnalysis;
 import java.util.Objects;
 import java.util.Optional;
 
+/** superset(.superSetField) ⊇ subset(.subSetField) */
 public class SupersetOfConstraint implements  Constraint{
     private final PointsToSet superSet;
     private final PointsToSet subSet;
@@ -48,15 +49,15 @@ public class SupersetOfConstraint implements  Constraint{
     public Optional<String> getSuperSetField() {
         return superSetField == null? Optional.empty() : Optional.of(superSetField);
     }
-    public SuperSetConstraintType getSuperSetConstraintType(){
+    public SuperSetOfConstraintType getSuperSetConstraintType(){
         if(getSuperSetField().isPresent()){
             return getSubSetField().isPresent()?
-                    SuperSetConstraintType.FIELD_SUPERSET_OF_FIELD
-                    : SuperSetConstraintType.SUPERSET_FIELD;
+                    SuperSetOfConstraintType.FIELD_SUPERSETOF_FIELD
+                    : SuperSetOfConstraintType.SUPERSET_FIELD;
         }
         return getSubSetField().isPresent()?
-                SuperSetConstraintType.SUBSET_FIELD
-                : SuperSetConstraintType.FIELDLESS;
+                SuperSetOfConstraintType.SUBSET_FIELD
+                : SuperSetOfConstraintType.FIELDLESS;
     }
     @Override
     public boolean equals(Object obj) {

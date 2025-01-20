@@ -4,15 +4,16 @@ package PTAnalysis;
 import java.util.HashSet;
 
 /**
-*a set of instances pointed at by a variable
+*a set of instances pointed at by a variable (PTSet)
 */
 public class PointsToSet extends HashSet<MemoryLocation>{
     private final String varName;
-    public Object constraintSolverSet;    //this is up to solver implementation to set and use
-   // private final Set<Field> fieldSet;//
+    /** up to solver implementation to set and use */
+    public Object constraintSolverSet;
+
    public PointsToSet(String v){
         this.varName =v;
-    //    fieldSet= new HashSet<>();//
+
     }
 
     public String getVarName() {
@@ -24,10 +25,9 @@ public class PointsToSet extends HashSet<MemoryLocation>{
         return varName;
     }
 
-    //a PointsToSet is equal only to itself
+    /** a PointsToSet is equal only to itself */
     public boolean equals(Object o){return this==o;}
 
-    //let PointsToSet hash as a set though
 
     @Override
     public int hashCode() {
