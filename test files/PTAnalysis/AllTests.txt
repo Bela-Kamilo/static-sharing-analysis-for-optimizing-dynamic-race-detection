@@ -1,0 +1,350 @@
+A x = new A();				NEW RULE
+---------------
+x = {1}
+
+++++++++
+
+A x = new A();
+x = new A();
+x = new A();
+x = new A();
+---------------
+x = {1,2,3,4}
+
+++++++++
+
+A x = new A();				COPY RULE
+A y = x;
+---------------
+x = {1}
+y = {2}
+
+++++++++
+
+A x = new A();
+x = new A();
+A y = x;
+---------------
+x = {1,2}
+y = {1,2}
+
+++++++++
+
+A x = new A();
+A y = new A();
+A z = c ? x : y;
+---------------
+x = {1}
+y = {2}
+z = {1,2}
+
+++++++++
+
+A x = new A();
+A y = new A();
+A z = c ? x : y;
+z = new A();
+---------------
+x = {1}
+y = {2}
+z = {1,2,3}
+
+++++++++
+
+A x = new A();				METHOD INVOCATION RULE
+A y = new A();
+m(x,y);
+
+static void m(A p1, A p2 ){return;}
+---------------
+x = {1}
+y = {2}
+m.this = {}
+m.p1 ={1}
+m.p2 ={2}
+
+++++++++
+
+A x = new A();
+A y = new A();
+x.m(x,y);
+
+void m(A p1, A p2 ){return;}
+---------------
+x = {1}
+y = {2}
+m.this = {1}
+m.p1 ={1}
+m.p2 ={2}
+
+++++++++
+
+A x = new A();
+x = new A();
+A y = new A();
+y = new A();
+y.m(x,y);
+
+void m(A p1, A p2 ){return;}
+---------------
+x = {1,2}
+y = {3,4}
+m.this = {3,4}
+m.p1 ={1,2}
+m.p2 ={3,4}
+
+++++++++
+
+A x = new A();				RETURN RULE
+A y = new A();
+m(x,y);
+
+static A m(A p1, A p2 ){return new A();}
+---------------
+x = {1}
+y = {2}
+m.this = {}
+m.p1 ={1}
+m.p2 ={2}
+A m(A,A) = {3}	
+
+++++++++
+
+A x = new A();
+A y = new A();
+m(x,y);
+
+static A m(A p1, A p2 ){return p2;}
+---------------
+x = {1}
+y = {2}
+m.this = {}
+m.p1 ={1}
+m.p2 ={2}
+A m(A,A) = {2}
+
+++++++++	
+
+A x = new A();
+A y = new A();
+y.m(x,y);
+
+A m(A p1, A p2 ){return p2;}
+---------------
+x = {1}
+y = {2}
+m.this = {2}
+m.p1 ={1}
+m.p2 ={2}
+A m(A,A) = {2}
+
+++++++++
+
+A x = new A();				METHOD ASSIGNMENT RULE
+A y = new A();
+A res = m(x,y);
+
+static A m(A p1, A p2 ){return p2;}
+---------------
+x = {1}
+y = {2}
+m.this = {}
+m.p1 ={1}
+m.p2 ={2}
+A m(A,A) = {2}
+res = {2}
+
+++++++++
+
+A x = new A();
+A y = new A();
+A res = x.m(x,y);
+
+A m(A p1, A p2 ){return new A();}
+---------------
+x = {1}
+y = {2}
+m.this = {1}
+m.p1 ={1}
+m.p2 ={2}
+A m(A,A) = {3}
+res = {3}
+
+++++++++
+
+				------ FIELD SENSITIVITY -----
+
+
+
+
+A x = new A();				FIELD ASSIGN RULE
+x.f= new A();
+---------------
+x = {1}
+1.f = {2}
+
+++++++++
+
+A x = new A();
+x.f = new A();
+x.f = new A();
+---------------
+x = {1}
+1.f = {2,3}
+
+++++++++
+
+A x = new A();
+x.f= x;
+---------------
+x = {1}
+1.f = {1}
+
+++++++++
+
+A x = new A();
+x = new A();
+x = new A();
+x.f = new A();
+
+---------------
+x = {1,2,3}
+1.f = {4}
+2.f = {4}
+3.f = {4}
+
+++++++++
+	
+A x = new A();
+x = new A();
+x = new A();
+A y = new A();
+y = new A();
+y = new A();
+x.f=y;
+x.f= new A();
+---------------
+x = {1,2,3}
+y = {4,5,6}
+1.f = {4,5,6,7}
+2.f = {4,5,6,7}
+3.f = {4,5,6,7}
+
+++++++++
+
+A x = new A();				FIELD READ RULE
+x.f = new A();
+A y = x.f;
+---------------
+x = {1}
+1.f = {2}
+y = {2}
+
+++++++++
+
+A x = new A();
+x.f = new A();
+x.f = new A();
+A y = x.f;
+---------------
+x = {1}
+1.f = {2,3}
+y = {2,3}
+
+++++++++
+
+A x = new A();	
+x.f = new A();
+A y = new A();
+y = x.f;
+---------------
+x = {1}
+1.f = {2}
+y = {2,3}
+
+++++++++
+
+					REST
+
+A x = new A();
+x = new A();
+A y = new A();
+y = new A();
+x.f = new A();
+y.f = x.f;
+y.f = new A();
+---------------
+x = {1,2}
+y = {3,4}
+1.f = {5}
+2.f = {5}
+3.f = {5,6}
+4.f = {5,6}
+
+++++++++
+
+A x = new A();
+x = new A();
+A y = new A();
+y = new A();
+x.f =y;
+y.f = x;
+---------------
+x = {1,2}
+y = {3,4}
+1.f = {3,4}
+2.f = {3,4}
+3.f = {1,2}
+4.f = {1,2}
+
+++++++++
+
+A x = new A();
+x = new A();
+A y = new A();
+y = new A();
+x.f = y;
+y.f = x;
+x.f = y.f;
+---------------
+x = {1,2}
+y = {3,4}
+1.f = {1,2,3,4}
+2.f = {1,2,3,4}
+3.f = {1,2}
+4.f = {1,2}
+
+++++++++
+
+A x = new A();
+x = new A();
+A y = new A();
+y = new A();
+x.f = y;
+y.f = x;
+x.f = y.f;
+y.f = x.f;
+---------------
+x = {1,2}
+y = {3,4}
+1.f = {1,2,3,4}
+2.f = {1,2,3,4}
+3.f = {1,2,3,4}
+4.f = {1,2,3,4}
+
+
+A x = new A();
+A y = new A();
+int z=5;
+int res = x.m(x,y,z);
+
+int m(A p1, A p2, int p3 ){return p3;}
+---------------
+x = {1}
+y = {2}
+m.this = {1}
+m.p1 ={1}
+m.p2 ={2}
+
+
+//shadowing?	
