@@ -1,3 +1,10 @@
-x1 = {1,2,3}
-x2= {4, 5, 6}
-x3={7}
+$stack4 = {1}
+l3 = {1}
+
+
+<A1: void a(A,int)>.this=[]
+<A: void <init>()>.this=[] 
+<A: void <init>()>:this=[] 
+<A1: void a(A,int)>.1=[]
+<A1: void a(A,int)>:l1=[]
+<A1: void a(A,int)>:this=[]

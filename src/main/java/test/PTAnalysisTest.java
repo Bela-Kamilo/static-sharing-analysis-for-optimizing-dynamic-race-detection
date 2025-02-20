@@ -1,54 +1,101 @@
 package test;
 
+import PTAnalysis.PointsToAnalysis;
+import PTAnalysis.PointsToSet;
+import analysis.my_analysis;
+import sootup.core.jimple.basic.Value;
+import sootup.core.model.SootMethod;
+import sootup.java.core.views.JavaView;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
-public class TestParser {
+public class PTAnalysisTest extends Test {
     private final String basePath="test files/PTAnalysis";
-    private String filepath=basePath+"/new/A1.out";
+    private String testClass="A1";
+    private String dir="new/";
+    private String filepath=basePath+"/"+dir+testClass+".out";
+    private String entryMethodString ="void a(A,int)";
+    private String defaultVarprefix = "<"+testClass+": "+entryMethodString+">:";
+
 
     public void test(){
-        parseTestFile(filepath);
+        Map<String, Set<Integer>> expectedResults = parseTestFile(filepath);
+        JavaView pathView =my_analysis.getViewFromPath(basePath+"/new");
+        SootMethod entryMethod=my_analysis.getMethodFromView(pathView,"A1","void a (A,int)");
+        Map<String, Set<Integer>> analysisResults = new PointsToAnalysis(pathView).analise(entryMethod);
+        System.out.println(testClass+".class :");
+        expectedResults.forEach((name,intset)->System.out.println(name+"="+intset));
+        System.out.println(analysisResults);
+        //System.out.println("should be all true v");
+        //expectedResults.forEach((name,intset)->System.out.println(analysisResults.get(name).equals(intset)));
+
+        if (expectedResults.equals(analysisResults)) pass(testClass);
+        else fail(testClass);
     }
 
     public Map<String, Set<Integer>> parseTestFile(String filepath) {
         Map<String,Set<Integer>> res= new HashMap<>();
-        String word= "[a-zA-Z][a-zA-Z0-9_]*";
+
+        //String varNameWSignature= "[$a-zA-Z0-9()<>.,:][$a-zA-Z0-9()<>.,:\\s]*[$a-zA-Z0-9()<>.,:]";
         File expectedResultFile = new File(filepath);
         try {
-            Scanner expectedResultsScanner=new Scanner(expectedResultFile);
-            expectedResultsScanner.useDelimiter("\\s*,\\s*");
+            Scanner lineScanner= new Scanner(expectedResultFile);
+            while (lineScanner.hasNextLine()) {
+                String line = lineScanner.nextLine();
+                if(line.isEmpty()) continue;    //skip empty lines
 
-            while (expectedResultsScanner.hasNextLine()) {
-                //read word
-                String var =expectedResultsScanner.findInLine(word);
-                if(var==null) throw new InputMismatchException();
+                Scanner expectedResultsScanner= new Scanner(line);
+                expectedResultsScanner.useDelimiter("\\s*,\\s*");
+                //read variable name
+                String var= parseLocationHolder(expectedResultsScanner);
                 //read '='
                 if (expectedResultsScanner.findInLine("=")==null) throw new InputMismatchException();
                 //read '{'
-                if ( expectedResultsScanner.findInLine("\\{")==null)throw new InputMismatchException();
+                if ( expectedResultsScanner.findInLine("\\{|\\[")==null)throw new InputMismatchException();
                 //read ints
                 Set<Integer> memLocations = new HashSet<>();
                 while(expectedResultsScanner.hasNextInt())
                     memLocations.add(expectedResultsScanner.nextInt());
-                int lastInt = Integer.parseInt(expectedResultsScanner.findInLine("\\d"));
+                String lastIntString=expectedResultsScanner.findInLine("\\d|}|]");
+                if(lastIntString.equals("}")||lastIntString.equals("]")){
+                    res.put(var ,memLocations);
+                    continue;
+                }
+                int lastInt = Integer.parseInt(lastIntString);
                 memLocations.add(lastInt);
                 //read '}'
-                if (expectedResultsScanner.findInLine("}")==null)throw new InputMismatchException();
-            //    expectedResultsScanner.close();
-               expectedResultsScanner.nextLine();
+                if (expectedResultsScanner.findInLine("}|]")==null)throw new InputMismatchException();
+
                 res.put(var ,memLocations);
+                expectedResultsScanner.close();
             }
-        //return res;
+            lineScanner.close();
         } catch (Exception e) {
             if (e instanceof  FileNotFoundException)
-                System.out.println("!Error! test file "+filepath+" not found");
+                System.err.println("!Error! test file "+filepath+" not found");
             else if (e instanceof InputMismatchException || e instanceof NumberFormatException)
-                System.out.println("!Error! test file" + filepath + " has invalid syntax");
+                System.err.println("!Error! test file" + filepath + " has invalid syntax");
             else
-                System.out.println(e);
+                System.err.println(e);
         }
         return res;
     }
+
+    private String parseLocationHolder(Scanner s){
+        String varName= "(\\$?[a-zA-Z][a-zA-Z0-9_]*)";
+        String paramsAndRetlocations="\\d";
+        String fieldsOfMemLocations="\\d\\."+varName;
+        String signature="<.*>[:.]";
+        String possibleFieldOfMemLocation = s.findInLine(fieldsOfMemLocations);
+        if(possibleFieldOfMemLocation!=null) return possibleFieldOfMemLocation;
+        String possibleSignature = s.findInLine(signature);
+        String var =s.findInLine(varName+"|"+paramsAndRetlocations);
+        if(var==null) throw new InputMismatchException();
+        var = possibleSignature == null ? defaultVarprefix+var : possibleSignature+var ;
+
+        return var;
+    }
+
 }

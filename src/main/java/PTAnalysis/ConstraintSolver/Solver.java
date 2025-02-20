@@ -101,18 +101,34 @@ public class Solver {
     }
 
     /** produces a solution w/ respect to the model's constraints */
-    public void solve(){
+    public Map<String, Set<Integer>> solve(){
+        Map<String, Set<Integer>> solution= new HashMap<>(MemoryLocation.getLocationCounter());
+        boolean morethanonesolutions=false;
       try{
           while(model.getSolver().solve()){
               System.out.println("+++solution found+++");
-              Arrays.stream(model.retrieveSetVars()).forEach(System.out::println);
-
+              Arrays.stream(model.retrieveSetVars()).forEach((x)-> {
+                    System.out.println(x);
+                    solution.put(x.getName(),setVarToSet(x));});
+              if(morethanonesolutions) throw new RuntimeException("There exist more than one solutions for "+model.getName()+"model");
+              morethanonesolutions =true;
           }
           model.getSolver().printStatistics();
       } catch (Exception e) {
-          System.out.println(e);
-          ;
+          System.err.println(e);
       }
+          return solution;
+
+    }
+
+    /**
+     * @param x converts its lower bound (which is an ISet)
+     * @return a new Set of the integers in x's lower bound
+     */
+    private Set<Integer> setVarToSet(SetVar x){
+        Set<Integer> whydotheyusetheirowndatastructures = new HashSet<>();
+        x.getLB().forEach(whydotheyusetheirowndatastructures::add);
+        return whydotheyusetheirowndatastructures;
     }
     public static int[] allLocations(){return AllLocationsArray;}
 }

@@ -31,12 +31,12 @@ public class PointsToAnalysis {
     }
 
     /** performs the analysis on reachable code from entryMethod  */
-    public Map<Value, PointsToSet> analise(SootMethod entryMethod){
+    public Map<String, Set<Integer>> analise(SootMethod entryMethod){
         GenerateConstraints(entryMethod);
         Solver solver= new Solver(this.ConstraintGenerator.getConstraints());
-        solver.solve();
-        Map<Value, PointsToSet> debug = this.ConstraintGenerator.getVarsToLocationsMap();
-        return debug;
+        return solver.solve();
+      //  Map<Value, PointsToSet> debug = this.ConstraintGenerator.getVarsToLocationsMap();
+       // return debug;
     }
 
     /** passes all methods reachable from entryMethod.

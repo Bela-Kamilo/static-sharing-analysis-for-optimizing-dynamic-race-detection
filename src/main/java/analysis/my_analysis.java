@@ -2,12 +2,12 @@ package analysis;
 
 
 
-import PTAnalysis.PointsToAnalysis;
 import sootup.core.graph.BasicBlock;
 import sootup.core.graph.DominanceFinder;
 import sootup.core.inputlocation.AnalysisInputLocation;
 import sootup.core.jimple.basic.LValue;
 import sootup.core.jimple.common.stmt.Stmt;
+import sootup.core.model.SootClass;
 import sootup.java.bytecode.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.core.*;
 import sootup.java.core.interceptors.LocalLivenessAnalyser;
@@ -16,6 +16,7 @@ import sootup.java.core.views.JavaView;
 
 import sootup.core.model.SootMethod;
 import sootup.core.signatures.MethodSignature;
+import test.PTAnalysisTest;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -30,16 +31,39 @@ public class my_analysis {  //unsure of what this class will do yet
     private  SootMethod method;
     private LocalLivenessAnalyser live_analysis=null;
     private DominanceFinder dominator_analysis=null;
+
+    public static JavaView getViewFromPath(String sourcepath){
+        return new JavaView( new JavaClassPathAnalysisInputLocation(sourcepath));
+    }
+    public static SootMethod getMethodFromView(JavaView view,String className, String methodSignatureString){
+        String[] methodSignatureStrings=methodSignatureString.split("\\s");
+        String retType= methodSignatureStrings[0];
+        String methodName= methodSignatureStrings[1];
+        String methodArguments=methodSignatureStrings[2];
+        methodArguments=methodArguments.substring(1, methodArguments.length()-1); //remove parentheses
+        JavaClassType classType1= view.getIdentifierFactory().getClassType(className);
+        MethodSignature methodSignature1 = view.getIdentifierFactory()
+                        .getMethodSignature(classType1,
+                                methodName,
+                                retType,
+                                Arrays.stream(methodArguments.split("\\s*,\\s*")).toList());
+        Optional<JavaSootMethod> opt1= view.getMethod(methodSignature1);
+        if(!opt1.isPresent()){
+            System.err.println("!Error! couldn't get method "+methodSignatureString);
+            return null;
+        }
+        return  opt1.get();
+    }
     //instantiates the above fields
     private  void init(){
-        //location->view->classType->SootClass->method->SootMethod->cfg
+        //location->view->classType->SootClass
+                                //->methodSignature->SootMethod
         inputLocation =
                 new JavaClassPathAnalysisInputLocation("subject_of_analysis/bytecode");
         view = new JavaView( inputLocation);
         classType =
                 view.getIdentifierFactory().getClassType("A");
         sootClass = view.getClass(classType).get();
-        
         methodSignature =
                 view
                         .getIdentifierFactory()
@@ -52,11 +76,10 @@ public class my_analysis {  //unsure of what this class will do yet
         opt = view.getMethod(methodSignature);
 
         if(!opt.isPresent()){
+            System.err.println("!Error! couldn't get method");
             return;
         }
         method = opt.get();
-
-
     }
 
     String numbered_block_to_string(BasicBlock<?> block, Integer i){
@@ -123,8 +146,10 @@ public class my_analysis {  //unsure of what this class will do yet
         */
        // PrintClassesOfTypesOfDefinitions(analysis);
 
-        PointsToAnalysis PTA = new PointsToAnalysis(analysis.view);
-        PTA.analise(analysis.method);
+       // PointsToAnalysis PTA = new PointsToAnalysis(analysis.view);
+       // PTA.analise(analysis.method);
+        PTAnalysisTest test=new PTAnalysisTest();
+        test.test();
 
         // analysis.live_variables(true);
         //analysis.dominator_analysis(true);
@@ -146,5 +171,3 @@ public class my_analysis {  //unsure of what this class will do yet
             System.out.println(def +"   "+ def.getType().getClass());
     }
 }
-
-
