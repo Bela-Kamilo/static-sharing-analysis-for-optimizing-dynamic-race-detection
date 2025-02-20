@@ -8,7 +8,11 @@ import sootup.core.signatures.MethodSignature;
 import sootup.core.types.Type;
 import sootup.core.views.View;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /** This class implements a field sensitive Andersen's-like points to analysis
  *  on jimple code. We do not need to deal with dereferencing and such here.
@@ -23,8 +27,11 @@ public class PointsToAnalysis {
     ConstraintGenStmtVisitor ConstraintGenerator;
     Set <MethodSignature> visitedMethods;
     View view;
+    private final Logger constraintLogger;
 
     public PointsToAnalysis(View view){
+        constraintLogger= Logger.getLogger("constraintLogger");
+        initConstraintGenerationLog();
         this.ConstraintGenerator = new ConstraintGenStmtVisitor();
         this.visitedMethods = new HashSet<>();
         this.view=view;
@@ -52,7 +59,7 @@ public class PointsToAnalysis {
             if ( Type.isObjectLikeType(method.getDeclClassType()) || visitedMethods.contains(method)) continue;
 
             Optional<? extends SootMethod> opt = view.getMethod(method);
-            if(!opt.isPresent()) { System.out.println("!Coulnt get SootMethod of "+ method+"!"); continue;}
+            if(!opt.isPresent()) { System.err.println("!Coulnt get SootMethod of "+ method+"!"); continue;}
             generateConstraintsForSingleMethod(opt.get());
             //note every other method to be passed over
             ConstraintGenerator.getMethodsInvoked().stream().
@@ -63,26 +70,47 @@ public class PointsToAnalysis {
     }
     /** passes a single method, notes other visited methods */
     public void generateConstraintsForSingleMethod(SootMethod method){
-        System.out.println("+++Visiting "+ method+"+++");
-        System.out.println(method.getBody());
-        System.out.println("+++++++++++++++");
+        constraintLogger.info("+++Visiting "+ method+"+++");
+        constraintLogger.info(method.getBody().toString());
+        constraintLogger.info("+++++++++++++++");
         ConstraintGenerator.setVisitingMethod(method.getSignature());
         for (Stmt stmt : method.getBody().getStmts()) {
             stmt.accept( ConstraintGenerator);
         }
         visitedMethods.add(method.getSignature());
-        PrintConstraints();
-        System.out.println("------------\nMethods invoked:\n"+ConstraintGenerator.getMethodsInvoked());
-        System.out.println("------------");
+        PrintConstraintsToLog();
+        constraintLogger.info("------------\nMethods invoked:\n"+ConstraintGenerator.getMethodsInvoked());
+        constraintLogger.info("------------");
     }
 
-    public void PrintConstraints(){
-        System.out.println("---------\nConstraints:");
+    public void PrintConstraintsToLog(){
+        constraintLogger.info("---------\nConstraints:");
         int i=1;
         for (Constraint c : ConstraintGenerator.getConstraints() )
-            System.out.println((i++) + " "+ c);
-        System.out.println("---------");
+            constraintLogger.info((i++) + " "+ c);
+        constraintLogger.info("---------");
     }
 
     public Set<Constraint> getConstraints(){return ConstraintGenerator.getConstraints();}
+
+    //make this a factory or something
+    private void initConstraintGenerationLog(){
+        FileHandler fh;
+        try {
+
+            fh = new FileHandler("logs/ConstraintGenerationLogFile.log");
+            constraintLogger.addHandler(fh);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        constraintLogger.setUseParentHandlers(false);
+        constraintLogger.info("Constraint Generation Log created");
+
+    }
+
 }

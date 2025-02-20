@@ -9,7 +9,11 @@ import org.chocosolver.solver.search.strategy.selectors.variables.FailureBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 import java.util.stream.IntStream;
 
 /** Choco-solver representation and solving process
@@ -20,8 +24,11 @@ public class Solver {
     private final Set<Constraint> PTconstraints;
     private static int[] AllLocationsArray =null;
     private final LocationsManager locationsManager;
+    private final Logger solverLog;
 
     public Solver(Set<Constraint> constraints){
+        solverLog= Logger.getLogger("Solver Log");
+        initSolverLog();
         this.PTconstraints=constraints;
         AllLocationsArray = IntStream.rangeClosed(1, MemoryLocation.getLocationCounter()).toArray();
         this.model = new Model("Points To Analysis");
@@ -92,7 +99,7 @@ public class Solver {
 
      IntVar totalElementsOfSetVarsOfModel( ){
         SetVar[] setvars =model.retrieveSetVars();
-        if(setvars.length ==0){System.out.println("!No setVars in model "+model+"!"); return model.intVar(0,0);}
+        if(setvars.length ==0){solverLog.info("!No setVars in model "+model+"!"); return model.intVar(0,0);}
         ArExpression sum= setvars[0].getCard();
         if(setvars.length ==1) return sum.intVar();
         for(int i =1;i< setvars.length;i++)
@@ -106,9 +113,9 @@ public class Solver {
         boolean morethanonesolutions=false;
       try{
           while(model.getSolver().solve()){
-              System.out.println("+++solution found+++");
+              solverLog.info("+++solution found+++");
               Arrays.stream(model.retrieveSetVars()).forEach((x)-> {
-                    System.out.println(x);
+                  solverLog.info(x.toString());
                     solution.put(x.getName(),setVarToSet(x));});
               if(morethanonesolutions) throw new RuntimeException("There exist more than one solutions for "+model.getName()+"model");
               morethanonesolutions =true;
@@ -131,4 +138,24 @@ public class Solver {
         return whydotheyusetheirowndatastructures;
     }
     public static int[] allLocations(){return AllLocationsArray;}
+    private void initSolverLog(){
+        FileHandler fh;
+        try {
+
+            fh = new FileHandler("logs/SolverLogFile.log");
+            solverLog.addHandler(fh);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        solverLog.setUseParentHandlers(false);
+        solverLog.info("Solver Log created");
+
+    }
+
 }
+

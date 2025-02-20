@@ -106,7 +106,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         constraints.add(new SupersetOfConstraint(superset, subset));
     }
     @Override
-    public void caseRetStmt(@Nonnull JRetStmt stmt){System.out.println("VISITED A RET STATEMENT");}
+    public void caseRetStmt(@Nonnull JRetStmt stmt){System.out.println("VISITED A RET STATEMENT(?)");}
     
 
     @Override
@@ -208,7 +208,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             if (parametersLocationsMap.containsKey(method))
                 return parametersLocationsMap.get(method).get(paramOrdinal);
         } catch (Exception e) {
-            System.out.println("!failed to get "+method+" 's parameter"+paramOrdinal);
+            System.err.println("!failed to get "+method+" 's parameter"+paramOrdinal);
         }
 
         Vector<PointsToSet> paramVector= new Vector<>();

@@ -9,7 +9,11 @@ import sootup.java.core.views.JavaView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class PTAnalysisTest extends Test {
     private final String basePath="test files/PTAnalysis";
@@ -18,16 +22,37 @@ public class PTAnalysisTest extends Test {
     private String filepath=basePath+"/"+dir+testClass+".out";
     private String entryMethodString ="void a(A,int)";
     private String defaultVarprefix = "<"+testClass+": "+entryMethodString+">:";
+    private final Logger PTAtestLog;
 
+   public PTAnalysisTest(){
+        PTAtestLog=  Logger.getLogger("Points To Analysis Test");
+        FileHandler fh;
+        try {
+            fh = new FileHandler("logs/PTATestLogFile.log");
+            PTAtestLog.addHandler(fh);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        PTAtestLog.setUseParentHandlers(false);
+        PTAtestLog.info("Points To Analysis Test Log created");
+
+    }
 
     public void test(){
         Map<String, Set<Integer>> expectedResults = parseTestFile(filepath);
         JavaView pathView =my_analysis.getViewFromPath(basePath+"/new");
         SootMethod entryMethod=my_analysis.getMethodFromView(pathView,"A1","void a (A,int)");
         Map<String, Set<Integer>> analysisResults = new PointsToAnalysis(pathView).analise(entryMethod);
-        System.out.println(testClass+".class :");
-        expectedResults.forEach((name,intset)->System.out.println(name+"="+intset));
-        System.out.println(analysisResults);
+        PTAtestLog.info(testClass+".class ");
+        PTAtestLog.info("Expected results :");
+        expectedResults.forEach((name,intset)->PTAtestLog.info(name+"="+intset));
+        PTAtestLog.info("Actual results :");
+        PTAtestLog.info(analysisResults.toString().replace(",","\n"));
         //System.out.println("should be all true v");
         //expectedResults.forEach((name,intset)->System.out.println(analysisResults.get(name).equals(intset)));
 
