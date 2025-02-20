@@ -52,9 +52,10 @@ public class PTAnalysisTest extends Test {
         PTAtestLog.info("Expected results :");
         expectedResults.forEach((name,intset)->PTAtestLog.info(name+"="+intset));
         PTAtestLog.info("Actual results :");
-        PTAtestLog.info(analysisResults.toString().replace(",","\n"));
-        //System.out.println("should be all true v");
-        //expectedResults.forEach((name,intset)->System.out.println(analysisResults.get(name).equals(intset)));
+
+        for (var entry : analysisResults.entrySet())
+            PTAtestLog.info(entry.getKey() + "=" + entry.getValue());
+
 
         if (expectedResults.equals(analysisResults)) pass(testClass);
         else fail(testClass);
