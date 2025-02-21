@@ -41,8 +41,10 @@ public class PointsToAnalysis {
     public Map<String, Set<Integer>> analise(SootMethod entryMethod){
         GenerateConstraints(entryMethod);
         Solver solver= new Solver(this.ConstraintGenerator.getConstraints());
-        return solver.solve();
-      //  Map<Value, PointsToSet> debug = this.ConstraintGenerator.getVarsToLocationsMap();
+        Map<String,Set<Integer>> res= solver.solve();
+        MemoryLocation.reset();
+        return res;
+        //  Map<Value, PointsToSet> debug = this.ConstraintGenerator.getVarsToLocationsMap();
        // return debug;
     }
 

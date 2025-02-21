@@ -14,15 +14,17 @@ import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+import java.util.stream.Stream;
 
 public class PTAnalysisTest extends Test {
     private final String basePath="test files/PTAnalysis";
     private String testClass="A1";
     private String dir="new/";
-    private String filepath=basePath+"/"+dir+testClass+".out";
+
     private String entryMethodString ="void a(A,int)";
-    private String defaultVarprefix = "<"+testClass+": "+entryMethodString+">:";
+
     private final Logger PTAtestLog;
+    private final String entryMethodWSpace ="void a (A,int)";
 
    public PTAnalysisTest(){
         PTAtestLog=  Logger.getLogger("Points To Analysis Test");
@@ -44,11 +46,38 @@ public class PTAnalysisTest extends Test {
     }
 
     public void test(){
-        Map<String, Set<Integer>> expectedResults = parseTestFile(filepath);
-        JavaView pathView =my_analysis.getViewFromPath(basePath+"/new");
-        SootMethod entryMethod=my_analysis.getMethodFromView(pathView,"A1","void a (A,int)");
+
+       File[] files = new File(basePath).listFiles();
+       Arrays.sort(files);
+
+       for (File directory : files) {
+           if (directory.isDirectory()) {
+               File[] filesOfDir = new File(directory.getPath()).listFiles();
+               //for(File testfile : testfiles)
+                 //  System.out.println(testfile.getName());
+               /*Arrays.stream(testfiles).filter(file->(file.isFile()&&
+                       file.getName().split("\\.")[1].equals("class")
+                       &&!file.getName().equals("A.class"))).forEach(file->singleTest(directory.getName(),file.getName().split("\\.")[0]));*/
+               Stream<File>testfiles=Arrays.stream(filesOfDir).filter(file->(file.isFile()
+                       && file.getName().split("\\.")[1].equals("class")
+                       &&!file.getName().equals("A.class")));
+                //testfiles.forEach(testfile->System.out.println(directory.getName() + ": "+testfile.getName().split("\\.")[0]));
+                testfiles.forEach(file->singleTest(directory.getName() ,file.getName().split("\\.")[0]));
+           }
+           else {
+              ;
+           }
+       }
+        singleTest("1 New", "New1");
+}
+
+    private void singleTest(String parentDir, String testClassName){
+        String filepath=basePath+"/"+parentDir+"/"+testClassName+".out";
+        Map<String, Set<Integer>> expectedResults = parseTestFile(filepath,testClassName);
+        JavaView pathView =my_analysis.getViewFromPath(basePath+"/"+parentDir);
+        SootMethod entryMethod=my_analysis.getMethodFromView(pathView,testClassName,entryMethodWSpace);  //TODO fix the space thing
         Map<String, Set<Integer>> analysisResults = new PointsToAnalysis(pathView).analise(entryMethod);
-        PTAtestLog.info(testClass+".class ");
+        PTAtestLog.info(testClassName+".class ");
         PTAtestLog.info("Expected results :");
         expectedResults.forEach((name,intset)->PTAtestLog.info(name+"="+intset));
         PTAtestLog.info("Actual results :");
@@ -57,11 +86,11 @@ public class PTAnalysisTest extends Test {
             PTAtestLog.info(entry.getKey() + "=" + entry.getValue());
 
 
-        if (expectedResults.equals(analysisResults)) pass(testClass);
-        else fail(testClass);
+        if (expectedResults.equals(analysisResults)) pass(testClassName);
+        else fail(testClassName);
     }
 
-    public Map<String, Set<Integer>> parseTestFile(String filepath) {
+    public Map<String, Set<Integer>> parseTestFile(String filepath,String testclassName) {
         Map<String,Set<Integer>> res= new HashMap<>();
 
         //String varNameWSignature= "[$a-zA-Z0-9()<>.,:][$a-zA-Z0-9()<>.,:\\s]*[$a-zA-Z0-9()<>.,:]";
@@ -75,7 +104,7 @@ public class PTAnalysisTest extends Test {
                 Scanner expectedResultsScanner= new Scanner(line);
                 expectedResultsScanner.useDelimiter("\\s*,\\s*");
                 //read variable name
-                String var= parseLocationHolder(expectedResultsScanner);
+                String var= parseLocationHolder(expectedResultsScanner,testclassName);
                 //read '='
                 if (expectedResultsScanner.findInLine("=")==null) throw new InputMismatchException();
                 //read '{'
@@ -109,11 +138,12 @@ public class PTAnalysisTest extends Test {
         return res;
     }
 
-    private String parseLocationHolder(Scanner s){
+    private String parseLocationHolder(Scanner s, String testClassName){
         String varName= "(\\$?[a-zA-Z][a-zA-Z0-9_]*)";
         String paramsAndRetlocations="\\d";
         String fieldsOfMemLocations="\\d\\."+varName;
         String signature="<.*>[:.]";
+        String defaultVarprefix = "<"+testClassName+": "+entryMethodString+">:";
         String possibleFieldOfMemLocation = s.findInLine(fieldsOfMemLocations);
         if(possibleFieldOfMemLocation!=null) return possibleFieldOfMemLocation;
         String possibleSignature = s.findInLine(signature);

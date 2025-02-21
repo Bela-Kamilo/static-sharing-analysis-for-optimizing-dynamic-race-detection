@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.stream.IntStream;
 
+
 /** Choco-solver representation and solving process
  * @see <a href="https://choco-solver.org/">Choco-solver</a>
  */
@@ -120,6 +121,8 @@ public class Solver {
               if(morethanonesolutions) throw new RuntimeException("There exist more than one solutions for "+model.getName()+"model");
               morethanonesolutions =true;
           }
+          model.getSolver().log().remove(System.out);
+         // model.getSolver().log().add(LoggerPrintStream(solverLog));  TODO
           model.getSolver().printStatistics();
       } catch (Exception e) {
           System.err.println(e);

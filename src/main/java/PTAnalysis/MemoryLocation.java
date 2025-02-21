@@ -44,4 +44,5 @@ public class MemoryLocation {
     public boolean existsField(String field){
         return fields.containsKey(field);
     }
+    public  static void reset(){MemoryLocation.locationCounter=1;}      //only call when PTAnalysis is over
 }
