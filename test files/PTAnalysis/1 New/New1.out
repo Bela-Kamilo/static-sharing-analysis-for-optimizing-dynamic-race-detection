@@ -1,0 +1,9 @@
+$stack4 ={1}
+l3 = {1}
+
+<New1: void a(A,int)>.this=[]
+<A: void <init>()>.this=[]
+<A: void <init>()>:this=[]
+<New1: void a(A,int)>.1=[]
+<New1: void a(A,int)>:l1=[]
+<New1: void a(A,int)>:this=[]
