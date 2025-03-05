@@ -1,0 +1,8 @@
+
+
+<MethodInvocation2: void a(A,int)>.this=[]
+<A: void <init>()>.this=[]
+<A: void <init>()>:this=[]
+<MethodInvocation2: void a(A,int)>.1=[]
+<MethodInvocation2: void a(A,int)>:l1=[]
+<MethodInvocation2: void a(A,int)>:this=[]

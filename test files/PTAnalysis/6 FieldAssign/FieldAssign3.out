@@ -1,0 +1,8 @@
+
+
+<FieldAssign3: void a(A,int)>.this=[]
+<A: void <init>()>.this=[]
+<A: void <init>()>:this=[]
+<FieldAssign3: void a(A,int)>.1=[]
+<FieldAssign3: void a(A,int)>:l1=[]
+<FieldAssign3: void a(A,int)>:this=[]
