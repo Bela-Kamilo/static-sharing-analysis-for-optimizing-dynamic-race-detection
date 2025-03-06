@@ -1,3 +1,1 @@
-<object data="AllTests.txt" width="300" height="200">
-Not supported
-</object>
+<div><object data="AllTests.txt" height="3000"></object></div>
