@@ -1,4 +1,3 @@
-<p>
-<iframe src="AllTests.txt" width=200 height=400 frameborder=0 >
-</iframe>
-</p>
+<object data="AllTests.txt" width="300" height="200">
+Not supported
+</object>
