@@ -130,8 +130,8 @@ public class Solver {
           System.err.println(e);
       }
 
-      for(Handler h: solverLog.getHandlers())
-          h.close();
+     // for(Handler h: solverLog.getHandlers())
+      //    h.close();
       return solution;
 
     }
