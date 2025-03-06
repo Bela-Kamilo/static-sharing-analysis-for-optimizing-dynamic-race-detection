@@ -1,3 +1,13 @@
+$stack5={1}
+l3={1}
+$stack6={2}
+l4={2}
+<A: void m1(A,A)>.this={1}	%this noted by our analysis
+<A: void m1(A,A)>:this={1}	%this as a local of m1
+<A: void m1(A,A)>.1={1}
+<A: void m1(A,A)>:l1={1}	%l1 is m1.1
+<A: void m1(A,A)>.2={2}
+<A: void m1(A,A)>:l2={2}	%l2 is m1.2
 
 
 <MethodInvocation2: void a(A,int)>.this=[]

@@ -1,6 +1,6 @@
 $stack4 ={1}
 l3 = {1}
-
+%comment comment
 <New1: void a(A,int)>.this=[]
 <A: void <init>()>.this=[]
 <A: void <init>()>:this=[]

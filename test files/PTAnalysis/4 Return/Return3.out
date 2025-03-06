@@ -1,3 +1,14 @@
+$stack5 = {1}
+l3={1}
+$stack6={2}
+l4={2}
+<A: A m(A,A)>.this={2}
+<A: A m(A,A)>:this={2}
+<A: A m(A,A)>.1={1}
+<A: A m(A,A)>:l1={1}
+<A: A m(A,A)>.2={2}
+<A: A m(A,A)>:l2={2}
+<A: A m(A,A)>={2}
 
 
 <Return3: void a(A,int)>.this=[]

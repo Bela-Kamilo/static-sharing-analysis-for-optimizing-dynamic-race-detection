@@ -1,6 +1,7 @@
 package PTAnalysis;
 
 import PTAnalysis.ConstraintSolver.Solver;
+import other.EmptyFormatter;
 import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.model.SootMethod;
@@ -102,7 +103,7 @@ public class PointsToAnalysis {
 
             fh = new FileHandler("logs/ConstraintGenerationLogFile.log");
             constraintLogger.addHandler(fh);
-            SimpleFormatter formatter = new SimpleFormatter();
+            EmptyFormatter formatter = new EmptyFormatter();
             fh.setFormatter(formatter);
 
         } catch (SecurityException e) {

@@ -8,10 +8,12 @@ import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.FailureBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import other.EmptyFormatter;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.stream.IntStream;
@@ -127,7 +129,10 @@ public class Solver {
       } catch (Exception e) {
           System.err.println(e);
       }
-          return solution;
+
+      for(Handler h: solverLog.getHandlers())
+          h.close();
+      return solution;
 
     }
 
@@ -147,7 +152,7 @@ public class Solver {
 
             fh = new FileHandler("logs/SolverLogFile.log");
             solverLog.addHandler(fh);
-            SimpleFormatter formatter = new SimpleFormatter();
+            EmptyFormatter formatter = new EmptyFormatter();
             fh.setFormatter(formatter);
 
         } catch (SecurityException e) {

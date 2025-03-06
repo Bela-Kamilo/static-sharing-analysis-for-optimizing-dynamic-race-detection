@@ -1,4 +1,5 @@
-
+$stack5 = {1}
+l4={1}
 
 <Copy1: void a(A,int)>.this=[]
 <A: void <init>()>.this=[]

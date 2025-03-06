@@ -1,4 +1,13 @@
-
+$stack6={1}
+l3={1}
+$stack7={2}
+%<A: A m(A,A)>.this={}
+<A: A m(A,A)>.1={1}
+<A: A m(A,A)>:l0={1}
+<A: A m(A,A)>.2={2}
+<A: A m(A,A)>:l1={2}
+<A: A m(A,A)>={2}
+l5={2}
 
 <MethodAssignment1: void a(A,int)>.this=[]
 <A: void <init>()>.this=[]

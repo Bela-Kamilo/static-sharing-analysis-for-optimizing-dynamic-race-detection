@@ -1,3 +1,6 @@
+$stack4={1}
+l3={1}
+1.<A: A f>={1}
 
 
 <FieldAssign3: void a(A,int)>.this=[]

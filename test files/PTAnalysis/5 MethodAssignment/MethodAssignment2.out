@@ -1,3 +1,17 @@
+$stack6 = {1}
+l3={1}
+$stack7={2}
+l4={2}
+<A: A m1(A,A)>.this={1}
+<A: A m1(A,A)>:this={1}
+<A: A m1(A,A)>.1={1}
+<A: A m1(A,A)>:l1={1}
+<A: A m1(A,A)>.2={2}
+<A: A m1(A,A)>:l2={2}
+<A: A m1(A,A)>={3}
+l5={3}
+
+<A: A m1(A,A)>:$stack3={3}
 
 
 <MethodAssignment2: void a(A,int)>.this=[]

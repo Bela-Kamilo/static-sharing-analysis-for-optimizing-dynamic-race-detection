@@ -112,7 +112,10 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     @Override
     public void caseAssignStmt(@Nonnull JAssignStmt stmt) {
 
-        if( !(stmt.getLeftOp().getType() instanceof ReferenceType) ) return; //we re only interested in refs
+        if( !(stmt.getLeftOp().getType() instanceof ReferenceType) ){//we re only interested in refs
+            stmt.getRightOp().accept(new ConstraintGenInvokeVisitor());
+            return;
+        }
         LValue leftOp = stmt.getLeftOp();
         Value rightOp = stmt.getRightOp();
 

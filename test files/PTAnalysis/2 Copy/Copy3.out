@@ -1,3 +1,7 @@
+$stack6={1}
+l3={1}
+$stack7={2}
+l5={1,2}
 
 
 <Copy3: void a(A,int)>.this=[]
