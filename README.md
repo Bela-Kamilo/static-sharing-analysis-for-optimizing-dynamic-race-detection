@@ -4,7 +4,7 @@ This project uses and relies on the  <a target="_blank" href="https://github.com
 
 Constraint solving through [Choco-solver](https://github.com/chocoteam/choco-solver)
 ___
-## parts :
+## Parts :
 
 [Points-To analysis](/src/main/java/PTAnalysis)
 
