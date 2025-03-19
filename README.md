@@ -1,4 +1,4 @@
-# -
+# Static sharing analysis for optimizing dynamic race detection for java 
 
 This project uses and relies on the  <a target="_blank" href="https://github.com/soot-oss/SootUp">SootUp framework</a> 
 
