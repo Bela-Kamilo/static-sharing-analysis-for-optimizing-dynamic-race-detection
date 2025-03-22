@@ -1,12 +1,11 @@
 package test;
 
 import PTAnalysis.PointsToAnalysis;
-import PTAnalysis.PointsToSet;
 import analysis.my_analysis;
-import other.EmptyFormatter;
-import sootup.core.jimple.basic.Value;
+import util.EmptyFormatter;
 import sootup.core.model.SootMethod;
 import sootup.java.core.views.JavaView;
+import util.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,7 +14,6 @@ import java.io.PrintWriter;
 import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import java.util.stream.Stream;
 
 public class PTAnalysisTest extends Test {
@@ -30,21 +28,7 @@ public class PTAnalysisTest extends Test {
     private static PrintWriter jimpleFile ;
 
    public PTAnalysisTest(){
-        PTAtestLog=  Logger.getLogger("Points To Analysis Test");
-        FileHandler fh;
-        try {
-           // PTAnalysisTest.jimpleFile= new PrintWriter("jimple.test");
-            fh = new FileHandler("logs/PTATestLogFile.log");
-            PTAtestLog.addHandler(fh);
-            EmptyFormatter formatter = new EmptyFormatter();
-            fh.setFormatter(formatter);
-
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        PTAtestLog.setUseParentHandlers(false);
+        PTAtestLog=  new LoggerFactory().createLogger("Points To Analysis Test");
         PTAtestLog.info("Points To Analysis Test Log created");
 
     }
@@ -70,8 +54,7 @@ public class PTAnalysisTest extends Test {
               ;
            }
        }
-       //PTAnalysisTest.jimpleFile.close();
-
+       LoggerFactory.closeHandlerls(PTAtestLog);
 }
 
     private void singleTest(String parentDir, String testClassName){

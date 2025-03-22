@@ -1,8 +1,6 @@
-package other;
-import java.util.logging.FileHandler;
+package util;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 public class EmptyFormatter extends Formatter {
 

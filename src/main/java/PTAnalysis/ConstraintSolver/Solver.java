@@ -8,14 +8,13 @@ import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.FailureBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import other.EmptyFormatter;
+import util.EmptyFormatter;
+import util.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.FileHandler;
-import java.util.logging.Handler;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import java.util.stream.IntStream;
 
 
@@ -30,8 +29,7 @@ public class Solver {
     private final Logger solverLog;
 
     public Solver(Set<Constraint> constraints){
-        solverLog= Logger.getLogger("Solver Log");
-        initSolverLog();
+        solverLog= new LoggerFactory().createLogger("SolverResults");
         this.PTconstraints=constraints;
         AllLocationsArray = IntStream.rangeClosed(1, MemoryLocation.getLocationCounter()).toArray();
         this.model = new Model("Points To Analysis");
@@ -126,6 +124,7 @@ public class Solver {
           model.getSolver().log().remove(System.out);
          // model.getSolver().log().add(LoggerPrintStream(solverLog));  TODO
           model.getSolver().printStatistics();
+          LoggerFactory.closeHandlerls(solverLog);
       } catch (Exception e) {
           System.err.println(e);
       }
@@ -146,24 +145,6 @@ public class Solver {
         return whydotheyusetheirowndatastructures;
     }
     public static int[] allLocations(){return AllLocationsArray;}
-    private void initSolverLog(){
-        FileHandler fh;
-        try {
-
-            fh = new FileHandler("logs/SolverLogFile.log");
-            solverLog.addHandler(fh);
-            EmptyFormatter formatter = new EmptyFormatter();
-            fh.setFormatter(formatter);
-
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        solverLog.setUseParentHandlers(false);
-        solverLog.info("Solver Log created");
-
-    }
 
 }
 

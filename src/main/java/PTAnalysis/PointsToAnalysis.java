@@ -1,19 +1,18 @@
 package PTAnalysis;
 
 import PTAnalysis.ConstraintSolver.Solver;
-import other.EmptyFormatter;
-import sootup.core.jimple.basic.Value;
+import util.EmptyFormatter;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.model.SootMethod;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.Type;
 import sootup.core.views.View;
+import util.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 /** This class implements a field sensitive Andersen's-like points to analysis
  *  on jimple code. We do not need to deal with dereferencing and such here.
@@ -31,8 +30,7 @@ public class PointsToAnalysis {
     private final Logger constraintLogger;
 
     public PointsToAnalysis(View view){
-        constraintLogger= Logger.getLogger("constraintLogger");
-        initConstraintGenerationLog();
+        constraintLogger= new LoggerFactory().createLogger("ConstraintGeneration");
         this.ConstraintGenerator = new ConstraintGenStmtVisitor();
         this.visitedMethods = new HashSet<>();
         this.view=view;
@@ -70,6 +68,7 @@ public class PointsToAnalysis {
                         forEach(everyOtherMethod::add);
 
         }
+        LoggerFactory.closeHandlerls(constraintLogger);
     }
     /** passes a single method, notes other visited methods */
     public void generateConstraintsForSingleMethod(SootMethod method){
@@ -95,25 +94,5 @@ public class PointsToAnalysis {
     }
 
     public Set<Constraint> getConstraints(){return ConstraintGenerator.getConstraints();}
-
-    //make this a factory or something
-    private void initConstraintGenerationLog(){
-        FileHandler fh;
-        try {
-
-            fh = new FileHandler("logs/ConstraintGenerationLogFile.log");
-            constraintLogger.addHandler(fh);
-            EmptyFormatter formatter = new EmptyFormatter();
-            fh.setFormatter(formatter);
-
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        constraintLogger.setUseParentHandlers(false);
-        constraintLogger.info("Constraint Generation Log created");
-
-    }
 
 }
