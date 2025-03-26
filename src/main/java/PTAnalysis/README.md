@@ -1,8 +1,12 @@
+The above is a static, context-insensitive, intra-procedural, set-based, may, points-to analysis. <br/><br/>
 Using the rules bellow , a Points To Set is created and monitored for each variable, parameter, non void method and instance field
 
 $$ \frac{}{\left\| p= new\text{ } A_i() \right\| \mapsto l_i \in p }[new] $$
 
 $$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q }[copy] $$
+
+
+$$\frac{}{\left\| p[i]= q \right\| \mapsto p \supseteq q }[array] $$
 
 $$\frac{}{\left\| i.m(a_1 ... a_n) \right\| \mapsto m.this \supseteq i,\ p_j \supseteq a_j }[method \text{-} invocation] $$
 
