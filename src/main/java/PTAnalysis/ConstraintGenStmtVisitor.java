@@ -1,8 +1,10 @@
 package PTAnalysis;
 
 import sootup.core.jimple.basic.LValue;
+import sootup.core.jimple.basic.Local;
 import sootup.core.jimple.basic.Value;
 import sootup.core.jimple.common.expr.*;
+import sootup.core.jimple.common.ref.JArrayRef;
 import sootup.core.jimple.common.ref.JInstanceFieldRef;
 import sootup.core.jimple.common.ref.JParameterRef;
 import sootup.core.jimple.common.ref.JThisRef;
@@ -145,7 +147,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
      *   -------------------
      *  [a=b] ->  a )= b
      */
-    void copyRule(LValue leftOp, Value rightOp){
+    private void copyRule(LValue leftOp, Value rightOp){
 
         //checks if field references are a part of this assignement
         AbstractValueVisitor<Tuple<Value,String>> fieldValueVisitor =new AbstractValueVisitor<>() {
@@ -155,9 +157,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             }
 
             @Override
-            public void defaultCaseValue(@Nonnull Value v) {
-                setResult(null);
-            }
+            public void defaultCaseValue(@Nonnull Value v) {setResult(null);}
         };
         leftOp.accept(fieldValueVisitor);
         Tuple<Value,String> leftOpBaseAndFieldTuple=fieldValueVisitor.getResult();
@@ -192,6 +192,21 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         return set;
     }
 
+    /** value -> PTSet
+     * A mapping of a value to its PTSet*/
+    /*
+    private PointsToSet getOrCreateMappingOf_final(Value v){
+        if(v instanceof AbstractInvokeExpr){
+            MethodSignature m = ((AbstractInvokeExpr) v).getMethodSignature();
+        }
+
+        if(varsToLocationsMap.containsKey(v))
+            return varsToLocationsMap.get(v);
+        PointsToSet set = new PointsToSet(visitingMethod +":"+v);
+        varsToLocationsMap.put(v, set);
+        return set;
+    }
+*/
     /** method-> PTSet    returned locations
      * A mapping of a method to a PTSet of its possibly returned locations
      * */
@@ -233,7 +248,10 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     /** Visits a value, generates constraints for method invocations */
      class ConstraintGenInvokeVisitor extends AbstractValueVisitor{
 
-
+         /*
+        public void caseArrayRef(@Nonnull JArrayRef ref) {
+            Local base = ref.getBase();
+        }*/
 
         @Override
         public void caseSpecialInvokeExpr(@Nonnull JSpecialInvokeExpr expr) {

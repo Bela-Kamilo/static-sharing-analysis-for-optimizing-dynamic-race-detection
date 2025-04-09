@@ -17,10 +17,7 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 public class PTAnalysisTest extends Test {
-    private final String basePath="test files/PTAnalysis";
-    private String testClass="A1";
-    private String dir="new/";
-
+    private final String basePath="test_files/PTAnalysis";
     private String entryMethodString ="void a(A,int)";
 
     private final Logger PTAtestLog;
@@ -42,8 +39,6 @@ public class PTAnalysisTest extends Test {
            if (directory.isDirectory()) {
                File[] filesOfDir = new File(directory.getPath()).listFiles();
                Arrays.sort(filesOfDir);
-           /*    Arrays.stream(filesOfDir).filter(file->(file.isFile()
-                       && file.getName().equals("A.class"))).forEach((x)->print_A_class(directory.getPath()));*/
                Stream<File>testfiles=Arrays.stream(filesOfDir).filter(file->(file.isFile()
                        && file.getName().split("\\.")[1].equals("class")
                        &&!file.getName().equals("A.class")));
@@ -62,12 +57,7 @@ public class PTAnalysisTest extends Test {
         Map<String, Set<Integer>> expectedResults = parseTestFile(filepath,testClassName);
         JavaView pathView =my_analysis.getViewFromPath(basePath+"/"+parentDir);
         SootMethod entryMethod=my_analysis.getMethodFromView(pathView,testClassName,entryMethodWSpace);  //TODO fix the space thing
-        //
-       //  PTAnalysisTest.jimpleFile.println(testClassName.split("\\.")[0]);
-       // PTAnalysisTest.jimpleFile.println(entryMethod.getBody());
-      // print_to_outfile(parentDir,testClassName);
-       // System.out.println(testClassName);
-        ///*
+
         Map<String, Set<Integer>> analysisResults = new PointsToAnalysis(pathView).analise(entryMethod);
         PTAtestLog.info(testClassName+".class ");
         PTAtestLog.info("Expected results :");
@@ -81,14 +71,12 @@ public class PTAnalysisTest extends Test {
 
         if (expectedResults.equals(analysisResults)) pass(testClassName);
         else fail(testClassName);
-        //*/
 
    }
 
     public Map<String, Set<Integer>> parseTestFile(String filepath,String testclassName) {
         Map<String,Set<Integer>> res= new HashMap<>();
 
-        //String varNameWSignature= "[$a-zA-Z0-9()<>.,:][$a-zA-Z0-9()<>.,:\\s]*[$a-zA-Z0-9()<>.,:]";
         File expectedResultFile = new File(filepath);
         try {
             Scanner lineScanner= new Scanner(expectedResultFile);

@@ -1,30 +1,34 @@
-The above is a static, context-insensitive, intra-procedural, set-based, may, points-to analysis. <br/><br/>
+### The above is a static, context-insensitive, intra-procedural, set-based, may, points-to analysis for java based on Andersen's analysis for C <br/><br/>
+_______________________
 Using the rules bellow , a Points To Set is created and monitored for each variable, parameter, non void method and instance field
 
-$$ \frac{}{\left\| p= new\text{ } A_i() \right\| \mapsto l_i \in p }[new] $$
+<br/>
 
-$$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q }[copy] $$
+$$ \frac{}{\left\| p= new\text{ } A_i() \right\| \mapsto l_i \in p }[news \text{-} signment\text{-} statement] $$
 
+$$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q }[copys\text{-}statement] $$
 
-$$\frac{}{\left\| p[i]= q \right\| \mapsto p \supseteq q }[array] $$
-
-$$\frac{}{\left\| i.m(a_1 ... a_n) \right\| \mapsto m.this \supseteq i,\ p_j \supseteq a_j }[method \text{-} invocation] $$
+$$\frac{}{\left\| i.m(a_1 ... a_n) \right\| \mapsto m.this \supseteq i,\ p_j \supseteq a_j }[method \text{-} invocation \text{-}value ] $$
 
 $$\text {where }  p_j \text { are } m \text{'s parameters}$$
 
-$$\frac{}{\left\| q= i.m(a_1 ... a_n) \right\| \mapsto q \supseteq m, \ m.this \supseteq i,\ p_j \supseteq a_j }[method \text{-} assignment] $$
+$$\frac{}{\left\| q= i.m(a_1 ... a_n) \right\| \mapsto q \supseteq m}[method \text{-} assignment\text{-}statement] $$
 
-$$\frac{}{\left\| return \  p \right\| \mapsto m \supseteq p }[return]$$
+$$\frac{}{\left\| return \  p \right\| \mapsto m \supseteq p }[return\text{-}statement ]$$
 
 $$ \text {where } m \text { is the enclosing method }  \newline $$
+<br/>
+$$array \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i] \ as \ if
+\ it \ were \ ar $$
+
 _______________________
 $$\frac{p \supseteq q \ \ \ \ \ l_x \in q}{l_x \in p}[superset] $$
 $$\newline\newline\newline$$
 ___
 $$FIELD \ SENSITIVITY $$
 
-$$\frac{}{\left\|   p= q.f \right\| \mapsto p \supseteq q.f }[field\text-read] \newline \newline$$
-$$\frac{}{\left\|   p.f= q \right\| \mapsto p.f \supseteq q }[field\text-assign] \newline$$
+$$\frac{}{\left\|   p= q.f \right\| \mapsto p \supseteq q.f }[field\text-read\text{-} assignment\text{-} statement] \newline \newline$$
+$$\frac{}{\left\|   p.f= q \right\| \mapsto p.f \supseteq q }[field\text-assign\text{-} assignment\text{-} statement] \newline$$
 ___
 $$\frac{p \supseteq q.f \ \ \ \ \ l_q \in q \ \ \ \ \ l_f \in l_q.f}{l_f \in p }[field\text-read] \newline \newline$$
 $$\frac{p.f \supseteq q \ \ \ \ \ l_p \in p \ \ \ \ \ l_q \in q}{l_q \in l_p.f }[field\text-assign] \newline \newline$$
