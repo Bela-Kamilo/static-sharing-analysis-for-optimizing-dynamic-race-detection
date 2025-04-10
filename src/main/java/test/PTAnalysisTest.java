@@ -69,8 +69,9 @@ public class PTAnalysisTest extends Test {
             PTAtestLog.info(entry.getKey() + "=" + entry.getValue());
         PTAtestLog.info("");
 
-        if (expectedResults.equals(analysisResults)) pass(testClassName);
-        else fail(testClassName);
+        if (expectedResults.equals(analysisResults)) pass(Test.testsCount +" " +testClassName);
+        else fail(Test.testsCount +" " +testClassName);
+        Test.testsCount++;
 
    }
 
