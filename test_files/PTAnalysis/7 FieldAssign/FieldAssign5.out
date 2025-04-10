@@ -1,0 +1,23 @@
+$stack5={1}
+% l3={1}
+$stack10={2}
+% l3={1,2}
+$stack9={3}
+l3={1,2,3}
+$stack6={4}
+% l4={4}
+$stack8={5}
+% l4={4,5}
+$stack7={6}
+l4={4,5,6}
+1.<A: A f>={4,5,6}
+2.<A: A f>={4,5,6}
+3.<A: A f>={4,5,6}
+
+
+<FieldAssign5: void a(A,int)>.this=[]
+<A: void <init>()>.this=[]
+<A: void <init>()>:this=[]
+<FieldAssign5: void a(A,int)>.1=[]
+<FieldAssign5: void a(A,int)>:l1=[]
+<FieldAssign5: void a(A,int)>:this=[]

@@ -1,0 +1,15 @@
+$stack5={1}
+l3={1}
+$stack6={2}
+% 1.f={2}
+$stack7={3}
+1.<A: A f>={2,3}
+l4={2,3}
+
+
+<FieldRead2: void a(A,int)>.this=[]
+<A: void <init>()>.this=[]
+<A: void <init>()>:this=[]
+<FieldRead2: void a(A,int)>.1=[]
+<FieldRead2: void a(A,int)>:l1=[]
+<FieldRead2: void a(A,int)>:this=[]

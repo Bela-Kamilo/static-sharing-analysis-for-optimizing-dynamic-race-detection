@@ -1,0 +1,16 @@
+$stack5={1,2}
+l3={1,2}
+$stack6={3,4}
+l4={3,4}
+1.<A: A f>={3,4}
+2.<A: A f>={3,4}
+3.<A: A f>={1,2}
+4.<A: A f>={1,2}
+
+
+<Other2: void a(A,int)>.this=[]
+<A: void <init>()>.this=[]
+<A: void <init>()>:this=[]
+<Other2: void a(A,int)>.1=[]
+<Other2: void a(A,int)>:l1=[]
+<Other2: void a(A,int)>:this=[]
