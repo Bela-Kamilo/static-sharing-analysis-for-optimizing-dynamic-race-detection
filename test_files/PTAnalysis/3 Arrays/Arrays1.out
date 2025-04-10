@@ -1,0 +1,15 @@
+$stack4 = {1}
+$stack5 = {2}
+$stack6 = {3}
+$stack7 = {4}
+$stack8 = {5}
+l3 = {1, 2, 3, 4, 5}
+
+
+<A: void <init>()>:this = {}
+<A: void <init>()>.this = {}
+<Arrays1: void a(A,int)>.this = {}
+<Arrays1: void a(A,int)>:this = {}
+<Arrays1: void a(A,int)>:l1 = {}
+<Arrays1: void a(A,int)>.1 = {}
+

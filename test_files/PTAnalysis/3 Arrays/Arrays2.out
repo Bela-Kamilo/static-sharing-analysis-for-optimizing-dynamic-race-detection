@@ -1,0 +1,13 @@
+%l3#0 = {}
+%l3#1 = {}
+l3#2 = {1}
+$stack4 = {1}
+
+
+<A: void <init>()>:this = {}
+<A: void <init>()>.this = {}
+<Arrays2: void a(A,int)>.this = {}
+<Arrays2: void a(A,int)>:this = {}
+<Arrays2: void a(A,int)>:l1 = {}
+<Arrays2: void a(A,int)>.1 = {}
+
