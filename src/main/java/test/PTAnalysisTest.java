@@ -24,7 +24,12 @@ public class PTAnalysisTest extends Test {
     private final String entryMethodWSpace ="void a (A,int)";
     private static PrintWriter jimpleFile ;
 
-   public PTAnalysisTest(){
+    public static void main(String[] args){
+        PTAnalysisTest test=new PTAnalysisTest();
+        test.test();
+    }
+
+    public PTAnalysisTest(){
         PTAtestLog=  new LoggerFactory().createLogger("Points To Analysis Test");
         PTAtestLog.info("Points To Analysis Test Log created");
 
@@ -50,6 +55,7 @@ public class PTAnalysisTest extends Test {
            }
        }
        LoggerFactory.closeHandlerls(PTAtestLog);
+       System.out.println("See logs for details");
 }
 
     private void singleTest(String parentDir, String testClassName){
