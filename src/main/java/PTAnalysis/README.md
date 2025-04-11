@@ -170,4 +170,16 @@ We get such results :
 3.<A: A x> = {4}                % location 3 may hold location4 in its x field
 1.<A: A x> = {4}
 2.<A: A x> = {4}
-```
+````
+# Use
+
+------
+Call ``` Map<String, Set<Integer>> analise(SootMethod)``` located in ```PointsToAnalysis.java```
+
+see [retrieving a Sootmethod](https://soot-oss.github.io/SootUp/latest/getting-started/)</br>
+
+The analysis is performed on [Jimple IR](https://soot-oss.github.io/SootUp/latest/jimple/)
+and so the mapping is from Jimple value holders to (sets of) abstract locations
+
+This project uses and relies on the  [SootUp framework](https://github.com/soot-oss/SootUp)
+and [Choco-solver](https://github.com/chocoteam/choco-solver)
