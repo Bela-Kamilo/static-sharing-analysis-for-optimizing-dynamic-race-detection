@@ -43,6 +43,8 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             @Override                                                           //of different methods
             public int compare(Value o1, Value o2) {
                 if(o1==o2) return 0;
+                if(o1 instanceof JStaticFieldRef && o2 instanceof JStaticFieldRef)//static field values however are different for the same field
+                    return ((JStaticFieldRef) o1).getFieldSignature().compareTo(((JStaticFieldRef) o2).getFieldSignature());
                 int r =o1.toString().compareTo(o2.toString());
                 return r==0? 1 : r;
             }

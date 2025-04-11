@@ -35,12 +35,12 @@ x.use();                                         $stack7 = new A;
                                                    virtualinvoke l3.<A: void use()>();            
                                                                                                   
                                                 
- ---------------                                --------------
- x = {1,2,3,4}	                                $stack4={1}
-                                                $stack7={2}
-                                                $stack6={3}
-                                                $stack5={4}
-                                                l3={1,2,3,4}
+---------------                                --------------
+x = {1,2,3,4}	                               $stack4={1}
+                                               $stack7={2}
+                                               $stack6={3}
+                                               $stack5={4}
+                                               l3={1,2,3,4}
                                                 
 
 
@@ -73,9 +73,9 @@ y.use();                                          specialinvoke $stack5.<A: void
                                                   virtualinvoke $stack5.<A: void use()>();	  
                                                 
                                                
- ---------------                                --------------
- x = {1,2}                                      $stack5={1,2}
- y = {1,2}	                                l4={1,2}					
+---------------                               	 --------------
+x = {1,2}                                     	 $stack5={1,2}
+y = {1,2}	                              	 l4={1,2}					
 
 ++++++++					
 					3	Copy3
@@ -135,7 +135,7 @@ z.use();
                                         
 ++++++++	                                       
 
-			ARRAYS
+				ARRAYS
 				1		Arrays1      	
 A[] x = new A[5];		            $stack4 = new A;
 x[0]= new A();                    	    specialinvoke $stack4.<A: void <init>()>();
@@ -162,6 +162,7 @@ x={1,2,3,4,5}  				     $stack4 = {1}
                                              l3 = {1, 2, 3, 4, 5}
 
 
+++++++++	                                       
 				2		Arrays2
 A[] x = new A[5];			    l3#0 = newarray (A)[5];                    		
 x= new A[7];                                l3#1 = newarray (A)[7];
@@ -172,6 +173,8 @@ x[3]= new A();                              $stack4 = new A;
 ---------------				    ---------------
 x={1}					    l3#2 = {1}
 					    $stack4 = {1}
+
+++++++++	                                       
 
 				3		Arrays3
 A[] x = new A[5];		      	    $stack5 = new A;
@@ -194,9 +197,7 @@ y={1,2,3}				    $stack6={2}
 					    l4#1={3}
 
 
-
-
-
+++++++++	                                       
 
 
 			METHOD INVOCATION RULE
@@ -310,17 +311,19 @@ void m2(A p1, A p2 ){return;}                     goto label2;
                                                   l4 = $stack6;                                     
                                                   virtualinvoke l4.<A: void m2(A,A)>($stack5, l4);  
                                                   
-  ---------------                                --------------
- x = {1,2}                                      $stack5={1,2}
- y = {3,4}                                      l3={1,2}
- m2.this = {3,4}                                $stack6={3,4}
- m2.p1 ={1,2}                                   l4={3,4}
- m2.p2 ={3,4}	                                <A: void m2(A,A)>.this={3,4}
-                                                <A: void m2(A,A)>:this={3,4}
-                                                <A: void m2(A,A)>.1={1,2}
-                                                <A: void m2(A,A)>:l1={1,2}
-                                                <A: void m2(A,A)>.2={3,4}
-                                                <A: void m2(A,A)>:l2={3,4}				
+---------------                                --------------
+x = {1,2}                                      $stack5={1,2}
+y = {3,4}                                      l3={1,2}
+m2.this = {3,4}                                $stack6={3,4}
+m2.p1 ={1,2}                                   l4={3,4}
+m2.p2 ={3,4}	                               <A: void m2(A,A)>.this={3,4}
+                                               <A: void m2(A,A)>:this={3,4}
+                                               <A: void m2(A,A)>.1={1,2}
+                                               <A: void m2(A,A)>:l1={1,2}
+                                               <A: void m2(A,A)>.2={3,4}
+                                               <A: void m2(A,A)>:l2={3,4}				
+
+++++++++
 
 						MethodInvocation4
 A[] x = new A[100];                         $stack5 = new A;
@@ -345,6 +348,7 @@ m.p2={2}                                    l4={2}
                                             <A: void m(A,A)>.2={2}
                                             <A: void m(A,A)>:l1={2}	%l1 is m.2
 
+++++++++
 
 						MethodInvocation5
 A[] x = new A[100];			    $stack5 = new A;                                   	    
@@ -492,6 +496,7 @@ A m(A p1, A p2 ){return p2;}                    specialinvoke $stack6.<A: void <
                                                 <A: A m(A,A)>:l2={2}
                                                 <A: A m(A,A)>={2}
 
+++++++++
 
 					4		Return4
 A x = new A();					$stack5 = new A;
@@ -517,6 +522,7 @@ m2.p2={2}                                       l4={2}
                                                 <A: A m2(A,A)>:l1={2}	%is m2.2
 
 
+++++++++
 
 					5		Return5 
 A x = new A();					$stack5 = new A;
@@ -771,6 +777,26 @@ x.f=y;                                            specialinvoke $stack10.<A: voi
                                                 3.<A: A f>={4,5,6}
 
 
+				6		FieldAssign6
+A.sf = new A();					$stack3 = new A;
+A.sf = new A();                                 specialinvoke $stack3.<A: void <init>()>();
+A.sf = new A();                                 <A: A sf> = $stack3;
+                                                $stack4 = new A;
+	                                        specialinvoke $stack4.<A: void <init>()>();
+                                                <A: A sf> = $stack4;
+                                                $stack5 = new A;
+                                                specialinvoke $stack5.<A: void <init>()>();
+                                                <A: A sf> = $stack5;
+    
+---------------					---------------
+A.sf={1,2,3}					$stack3={1}       
+                                                $stack4={2}
+                                                $stack5={3}
+                                                <A: A sf>={1,2,3}
+
+
+
+
 ++++++++
 			FIELD READ RULE
 			
@@ -845,6 +871,28 @@ y.use();                                          $stack6 = new A;
                                                 1.<A: A f>={2}
                                                 % l4={3}
                                                 l4={2,3}
+
+++++++++
+
+				4		FieldRead4
+						$stack4 = new A;
+A.sf = new A();                                 specialinvoke $stack4.<A: void <init>()>();
+A.sf = new A();                                 <A: A sf> = $stack4;
+A.sf = new A();                                 $stack5 = new A;
+A y = A.sf;                                     specialinvoke $stack5.<A: void <init>()>();
+                                                <A: A sf> = $stack5;
+                                                $stack6 = new A;
+                                                specialinvoke $stack6.<A: void <init>()>();
+                                                <A: A sf> = $stack6;
+                                                l3 = <A: A sf>;
+---------------					---------------
+A.sf={1,2,3}					$stack4={1}
+y={1,2,3}                                       $stack5={2}
+                                                $stack6={3}
+                                                <A: A sf>={1,2,3}
+                                                l3={1,2,3}
+
+
 
 
 ++++++++

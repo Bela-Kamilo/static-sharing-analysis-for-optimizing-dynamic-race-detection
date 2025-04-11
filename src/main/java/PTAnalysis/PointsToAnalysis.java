@@ -36,7 +36,16 @@ public class PointsToAnalysis {
         this.view=view;
     }
 
-    /** performs the analysis on reachable code from entryMethod  */
+    /** performs the analysis on reachable code from entryMethod
+     * @return A mapping of value holders to sets of memory locations
+     * a value holders are in the form of :
+     * MethodSignature:local
+     *
+    <Other2: void a(A,int)>:$stack5
+     * 1.<A: A f>
+     *<A: A m2(A,A)>
+     *<Other1: A f>
+     * */
     public Map<String, Set<Integer>> analise(SootMethod entryMethod){
         GenerateConstraints(entryMethod);
         Solver solver= new Solver(this.ConstraintGenerator.getConstraints());
