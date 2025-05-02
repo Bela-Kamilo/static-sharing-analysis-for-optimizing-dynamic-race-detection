@@ -18,9 +18,9 @@ import java.util.List;
  *
  * arr should also hold l in its PointsToSet
  */
-public class ArrayPointsToSet extends PointsToSet{
+public class PointsToSetOfArray extends PointsToSet{
     private final List<String> aliases;
-    public ArrayPointsToSet(String v) {
+    public PointsToSetOfArray(String v) {
         super(v);
         aliases = new LinkedList<>();
     }

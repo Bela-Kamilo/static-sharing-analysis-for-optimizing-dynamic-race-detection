@@ -12,19 +12,15 @@ public class MemoryLocation {
     final private int lineNumber;
     final private int id;
     final private Map<String,PointsToSet> fields;
-    public Object constraintSolverElement;
 
 
     MemoryLocation(int lineNumber){
         this.id=locationCounter++;
         this.lineNumber=lineNumber;
-        this.constraintSolverElement=null;
         this.fields= new HashMap<>();
     }
 
-    public int getId() {
-        return id;
-    }
+    public int getId() {return id;}
 
     @Override
     public String toString() {
@@ -41,8 +37,7 @@ public class MemoryLocation {
     /**@return true if this memory location holds field 'field'
      * @return false otherwise
      * */
-    public boolean existsField(String field){
-        return fields.containsKey(field);
-    }
+    public boolean existsField(String field){ return fields.containsKey(field);}
+    public Iterable<PointsToSet> getAllFields(){return fields.values();}
     public  static void reset(){MemoryLocation.locationCounter=1;}      //only call when PTAnalysis is over
 }

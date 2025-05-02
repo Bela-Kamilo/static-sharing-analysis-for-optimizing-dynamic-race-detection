@@ -27,16 +27,20 @@ public class Solver {
     private static int[] AllLocationsArray =null;
     private final LocationsManager locationsManager;
     private final Logger solverLog;
+    private final Set<PointsToSet> PTSets;
+    private Map<String, PointsToSet> solution;
 
     public Solver(Set<Constraint> constraints){
-        solverLog= new LoggerFactory().createLogger("SolverResults");
+        this.solverLog= new LoggerFactory().createLogger("SolverResults");
+        this.PTSets= new HashSet<>();
         this.PTconstraints=constraints;
         AllLocationsArray = IntStream.rangeClosed(1, MemoryLocation.getLocationCounter()).toArray();
         this.model = new Model("Points To Analysis");
         this.locationsManager= new LocationsManager(model);
+        this.solution= new HashMap<>(MemoryLocation.getLocationCounter()*5);
         createModelConstraints();
-       org.chocosolver.solver.Solver solver = model.getSolver();
-       solver.setSearch( Search.setVarSearch(new FailureBased<SetVar>(model.retrieveSetVars(),new Date().getTime(),1)
+        org.chocosolver.solver.Solver solver = model.getSolver();
+        solver.setSearch( Search.setVarSearch(new FailureBased<SetVar>(model.retrieveSetVars(),new Date().getTime(),1)
                ,new SetDomainMin()
                ,false
                , model.retrieveSetVars()));
@@ -44,10 +48,23 @@ public class Solver {
    }
    /** Constructs the choco-solver representation */
     public void createModelConstraints(){
-        PTconstraints.forEach(this::PTConstraint2ModelConstraint);
+        PTconstraints.forEach(c->{
+            PTConstraint2ModelConstraint(c);
+            storeSetsOfConstraint(c);
+        });
+
         IntVar totalElements= totalElementsOfSetVarsOfModel();
         model.setObjective(Model.MINIMIZE, totalElements);
    }
+    private void storeSetsOfConstraint(Constraint c){
+        if(c instanceof SupersetOfConstraint){
+            this.PTSets.add(((SupersetOfConstraint) c).getSubSet());
+            this.PTSets.add(((SupersetOfConstraint) c).getSuperSet());
+        } else if (c instanceof ElementOfConstraint) {
+           this.PTSets.add(((ElementOfConstraint) c).getSet());
+        }
+
+    }
 
     private void PTConstraint2ModelConstraint(Constraint c){
         if (c instanceof SupersetOfConstraint){
@@ -109,15 +126,15 @@ public class Solver {
     }
 
     /** produces a solution w/ respect to the model's constraints */
-    public Map<String, Set<Integer>> solve(){
-        Map<String, Set<Integer>> solution= new HashMap<>(MemoryLocation.getLocationCounter());
-        boolean morethanonesolutions=false;
+    public Map<String, PointsToSet> solve(){
+      boolean morethanonesolutions=false;
       try{
           while(model.getSolver().solve()){
               solverLog.info("+++solution found+++");
-              Arrays.stream(model.retrieveSetVars()).forEach((x)-> {
-                  solverLog.info(x.toString());
-                    solution.put(x.getName(),setVarToSet(x));});
+              //Arrays.stream(model.retrieveSetVars()).forEach((x)-> {
+              //    solverLog.info(x.toString());
+               //     solution.put(x.getName(),setVarToSet(x));});
+              exportSolution();
               if(morethanonesolutions) throw new RuntimeException("There exist more than one solutions for "+model.getName()+"model");
               morethanonesolutions =true;
           }
@@ -125,16 +142,40 @@ public class Solver {
          // model.getSolver().log().add(LoggerPrintStream(solverLog));  TODO
           model.getSolver().printStatistics();
           LoggerFactory.closeHandlerls(solverLog);
+          //PTSets.forEach(System.out::println);
+          //System.out.println("stop");
       } catch (Exception e) {
           System.err.println(e);
       }
 
      // for(Handler h: solverLog.getHandlers())
       //    h.close();
-      return solution;
-
+      return this.solution;
     }
 
+    /**
+     *Export the model's solution to this class.
+     * Fills the PointsToSets
+     * adds elements to <code>>this.solution</code>
+     */
+    private void exportSolution(){
+        PTSets.addAll(locationsManager.getFieldSets());
+        PTSets.forEach((set)->{
+            conformPTSet2InnerSetVar(set);
+            solverLog.info(set.getVarName()+" = "+ set);
+            if(set instanceof PointsToSetOfArray)     //add possible other aliases of the same PTSet
+                ((PointsToSetOfArray) set).getAliases().forEach(a->solution.put(a,set));
+            solution.put(set.getVarName(),set);
+        });
+    }
+
+    private void conformPTSet2InnerSetVar(PointsToSet set){
+        ((SetVar)set.constraintSolverSet).getLB().forEach(set::add);
+    }
+
+    private boolean missedNoSets(){
+        return true;
+    }
     /**
      * @param x converts its lower bound (which is an ISet)
      * @return a new Set of the integers in x's lower bound

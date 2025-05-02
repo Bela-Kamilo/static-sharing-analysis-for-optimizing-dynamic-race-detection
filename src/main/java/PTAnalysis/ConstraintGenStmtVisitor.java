@@ -1,6 +1,5 @@
 package PTAnalysis;
 
-import sootup.core.jimple.basic.Immediate;
 import sootup.core.jimple.basic.LValue;
 import sootup.core.jimple.basic.Local;
 import sootup.core.jimple.basic.Value;
@@ -14,9 +13,9 @@ import sootup.core.jimple.javabytecode.stmt.JRetStmt;
 import sootup.core.jimple.visitor.AbstractStmtVisitor;
 import sootup.core.jimple.visitor.AbstractValueVisitor;
 import sootup.core.signatures.MethodSignature;
+import sootup.core.types.ArrayType;
 import sootup.core.types.ReferenceType;
 import sootup.core.types.Type;
-import util.Tuple;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -28,6 +27,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     private final Map<Value,PointsToSet> varsToLocationsMap;
     private final Map<MethodSignature, PointsToSet> returnedLocationsMap;
     private final Map<MethodSignature, Vector<PointsToSet>> parametersLocationsMap;
+    private final Map<Local, PointsToSet> arraysMap;
     private final Set<Constraint> constraints;
     private final int THIS_INDEX=0;
 
@@ -39,6 +39,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         this.parametersLocationsMap= new HashMap<>();
         this.returnedLocationsMap = new HashMap<>();
         this.methodsInvoked= new HashSet<>();
+        this.arraysMap= new HashMap<>();
         this.varsToLocationsMap = new TreeMap<>(new Comparator<Value>() {       // we want to differentiate between same name locals
             @Override                                                           //of different methods
             public int compare(Value o1, Value o2) {
@@ -129,7 +130,10 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             constraints.add(new ElementOfConstraint(l,getOrCreateMappingOf(leftOp)));
             return;
         }
-        if(rightOp instanceof JNewArrayExpr ){return;}
+        if(rightOp instanceof JNewArrayExpr || rightOp instanceof JNewMultiArrayExpr ){ return;}
+        if(rightOp instanceof JArrayRef && leftOp.getType() instanceof ArrayType) {
+            aliasArrays(leftOp, rightOp);
+        }
         if(rightOp instanceof AbstractInvokeExpr) {
             rightOp.accept(new ConstraintGenInvokeVisitor());
 
@@ -138,7 +142,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             constraints.add(new SupersetOfConstraint(superset, subset));
             return;
         }
-        //checks if field references are a part of this assignement
+        //checks if field references are a part of this assignment
         AbstractValueVisitor<String> fieldValueVisitor =new AbstractValueVisitor<>() {
             @Override
             public void caseInstanceFieldRef(@Nonnull JInstanceFieldRef ref) {
@@ -157,13 +161,44 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         constraints.add(new SupersetOfConstraint(superset, supersetField, subset, subsetField));
 
     }
+    /**
+     * We make 2 different locals map to the same PointsToSet
+     * We want this for 2 reasons :
+     * 1) In cases of multidimensional arrays arr[i][j] and arr[k]
+     * both refer to the contents of arr
+     *
+     * 2) array instances can be passed around through assignments
+     *  as such
+     * local1= arr
+     * local1[i]= new //memory location l
+     *
+     * arr should also hold l in its PointsToSet
+     */
+    private void aliasArrays(Value lvalue, Value rvalue) {
+        if(!(lvalue.getType() instanceof ArrayType && rvalue.getType() instanceof ArrayType))
+            throw new RuntimeException("expected ArrayType, ArrayType. Got "+lvalue.getType()+" , "+rvalue.getType());
+        if(varsToLocationsMap.containsKey(lvalue)) //think this is WRONG    - figure out what happens w/ case 2)
+            throw new RuntimeException("expected "+lvalue + "not to be mapped to a PointsToSet");
+        Value lvalueBase= lvalue instanceof JArrayRef ? ((JArrayRef) lvalue).getBase() : lvalue;
+        Value rvalueBase= rvalue instanceof JArrayRef ? ((JArrayRef) rvalue).getBase() : rvalue;
+        PointsToSet rvalueSet= getOrCreateMappingOf(rvalue);
+       ///*
+       if(!(rvalueSet instanceof PointsToSetOfArray ))
+            throw new RuntimeException("An array local is mapped to a non PointsToSetOFArray PointsToSet");
+        //((PointsToSetOfArray)rvalueSet).addAlias(rvalueBase.toString());
+        //*/
+        ((PointsToSetOfArray) rvalueSet).addAlias(visitingMethod +":"+lvalueBase.toString());
+        varsToLocationsMap.put(lvalueBase, rvalueSet);//to change this w/ addAlias();
 
+
+    }
     /** value -> PTSet
      * A mapping of a value to its PTSet*/
     private PointsToSet getOrCreateMappingOf(Value v){
         if(v instanceof AbstractInvokeExpr){
             return getOrCreateMappingOfMethod( ( (AbstractInvokeExpr) v).getMethodSignature());
         }
+        if(v instanceof JArrayRef) return getOrCreateMappingOfArray((JArrayRef) v);
         Value v2;
         if(v instanceof JInstanceFieldRef) v2= ((JInstanceFieldRef) v).getBase();
         else if(v instanceof JArrayRef) v2= ((JArrayRef) v).getBase() ;
@@ -210,6 +245,17 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         }
         parametersLocationsMap.put(method, paramVector);
         return paramVector.get(paramOrdinal);
+    }
+    /** Array access-> PTSet
+     *
+     * */
+    private PointsToSet getOrCreateMappingOfArray(JArrayRef ar){
+        Local arrayBase=ar.getBase();
+        if(varsToLocationsMap.containsKey(arrayBase))
+            return varsToLocationsMap.get(arrayBase);
+        PointsToSet set = new PointsToSetOfArray(visitingMethod +":"+arrayBase);
+        varsToLocationsMap.put(arrayBase, set);
+        return set;
     }
 
 

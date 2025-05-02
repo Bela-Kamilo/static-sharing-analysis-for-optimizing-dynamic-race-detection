@@ -10,8 +10,7 @@ import org.chocosolver.solver.search.strategy.selectors.variables.FailureBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 /** Acts as an interface between MemoryLocations and a model
  * A memory location for the model is an integer
@@ -61,7 +60,18 @@ public class LocationsManager {
         return (SetVar) locationsMap.get(locationId).getField(field).constraintSolverSet;
     }
 
-  private  void updateSearch(){
+    /**
+     *
+     * @return every PointsToSet of every field of every
+     * memory location
+     */
+    public Set<PointsToSet> getFieldSets(){
+        HashSet<PointsToSet> allfields= new HashSet<>();
+        locationsMap.values().forEach(x->x.getAllFields().forEach(allfields::add));
+        return allfields;
+    }
+
+    private  void updateSearch(){
             model.setObjective(Model.MINIMIZE, totalElementsOfSetVarsOfModel());
             model.getSolver().
                     setSearch(

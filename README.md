@@ -19,9 +19,10 @@ $$\frac{}{\left\| return \  p \right\| \mapsto m \supseteq p }[return\text{-}sta
 
 $$ \text {where } m \text { is the enclosing method }  \newline $$
 <br/>
-$$array \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i] \ as \ if
-\ it \ were \ ar $$
-
+$$array \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i]...[j] \ as \ if
+\ it \ were \ ar[i] $$
+$$as \ if \ it \ were \ ar[j] \ mapped \ to \ a \   single \ points \ to   \ set$$
+lumpArrays
 _______________________
 $$\frac{p \supseteq q \ \ \ \ \ l_x \in q}{l_x \in p}[superset] $$
 $$\newline\newline\newline$$
