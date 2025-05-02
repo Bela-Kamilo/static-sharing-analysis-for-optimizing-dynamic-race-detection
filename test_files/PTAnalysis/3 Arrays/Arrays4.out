@@ -1,0 +1,12 @@
+$stack4 ={1}	%intermediate subarray locals are not registered in the results
+$stack6 ={1}
+$stack5 = {1}
+l3={1}
+
+<A: void <init>()>:this = {}
+<A: void <init>()>.this = {}
+<Arrays4: void a(A,int)>.this = {}
+<Arrays4: void a(A,int)>:this = {}
+<Arrays4: void a(A,int)>:l1 = {}
+<Arrays4: void a(A,int)>.1 = {}
+
