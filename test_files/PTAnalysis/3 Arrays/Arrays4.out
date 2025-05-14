@@ -1,4 +1,4 @@
-$stack4 ={1}	%intermediate subarray locals are not registered in the results
+$stack4 ={1}
 $stack6 ={1}
 $stack5 = {1}
 l3={1}

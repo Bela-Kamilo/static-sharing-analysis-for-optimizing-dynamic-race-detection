@@ -196,6 +196,21 @@ y={1,2,3}				    $stack6={2}
 					    l4#0={1,2}
 					    l4#1={3}
 
+++++++++	                                       
+						
+				4		Arrays4
+A[][][] x = new A[5][6][7];			l3 = newmultiarray (A)[5][6][7];
+x[1][1][1]= new A();                            $stack4 = l3[1];
+                                                $stack6 = $stack4[1];
+                                                $stack5 = new A;
+                                                specialinvoke $stack5.<A: void <init>()>();
+                                                $stack6[1] = $stack5;	%l1 goes to array aggregate
+--------------					--------------
+x={1}						$stack4={1}
+                                                $stack6={1}
+                                                $stack5={1}
+                                                l3={1}
+
 
 ++++++++	                                       
 

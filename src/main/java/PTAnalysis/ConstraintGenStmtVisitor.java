@@ -131,9 +131,10 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             return;
         }
         if(rightOp instanceof JNewArrayExpr || rightOp instanceof JNewMultiArrayExpr ){ return;}
-        if(rightOp instanceof JArrayRef && leftOp.getType() instanceof ArrayType) {
+        /*if(rightOp instanceof JArrayRef && leftOp.getType() instanceof ArrayType) {
+          if(rightOp.getType() instanceof ArrayType && leftOp.getType() instanceof ArrayType) {
             aliasArrays(leftOp, rightOp);
-        }
+        }*/
         if(rightOp instanceof AbstractInvokeExpr) {
             rightOp.accept(new ConstraintGenInvokeVisitor());
 
@@ -152,6 +153,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             @Override
             public void defaultCaseValue(@Nonnull Value v) {setResult(null);}
         };
+        arraysCopyStmtRule(leftOp,rightOp);
         leftOp.accept(fieldValueVisitor);
         String supersetField=fieldValueVisitor.getResult();
         rightOp.accept(fieldValueVisitor);
@@ -160,6 +162,14 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         PointsToSet subset=getOrCreateMappingOf(rightOp);
         constraints.add(new SupersetOfConstraint(superset, supersetField, subset, subsetField));
 
+    }
+    private void arraysCopyStmtRule(LValue lvalue, Value rvalue){
+        if(lvalue.getType() instanceof ArrayType && rvalue.getType() instanceof  ArrayType){
+            PointsToSet rvalueSet= getOrCreateMappingOf(rvalue);
+            PointsToSet lvalueSet= getOrCreateMappingOf(lvalue);
+            constraints.add(new SupersetOfConstraint(lvalueSet,rvalueSet));
+            constraints.add(new SupersetOfConstraint(rvalueSet,lvalueSet));
+        }
     }
     /**
      * We make 2 different locals map to the same PointsToSet
@@ -182,14 +192,18 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         Value lvalueBase= lvalue instanceof JArrayRef ? ((JArrayRef) lvalue).getBase() : lvalue;
         Value rvalueBase= rvalue instanceof JArrayRef ? ((JArrayRef) rvalue).getBase() : rvalue;
         PointsToSet rvalueSet= getOrCreateMappingOf(rvalue);
-       ///*
+        PointsToSet lvalueSet= getOrCreateMappingOf(lvalue);
+        constraints.add(new SupersetOfConstraint(lvalueSet,rvalueSet));
+        constraints.add(new SupersetOfConstraint(rvalueSet,lvalueSet));
+        return;
+        /*
        if(!(rvalueSet instanceof PointsToSetOfArray ))
             throw new RuntimeException("An array local is mapped to a non PointsToSetOFArray PointsToSet");
         //((PointsToSetOfArray)rvalueSet).addAlias(rvalueBase.toString());
-        //*/
+        //
         ((PointsToSetOfArray) rvalueSet).addAlias(visitingMethod +":"+lvalueBase.toString());
         varsToLocationsMap.put(lvalueBase, rvalueSet);//to change this w/ addAlias();
-
+        */
 
     }
     /** value -> PTSet
