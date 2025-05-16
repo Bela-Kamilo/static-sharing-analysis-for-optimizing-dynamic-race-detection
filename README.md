@@ -22,7 +22,13 @@ $$ \text {where } m \text { is the enclosing method }  \newline $$
 $$array \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i]...[j] \ as \ if
 \ it \ were \ ar[i] $$
 $$as \ if \ it \ were \ ar[j] \ mapped \ to \ a \   single \ points \ to   \ set$$
-lumpArrays
+
+
+$$We \ equate \ arrays \ on \ assignments \ between \ them \ $$
+$$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q\  ,\  q \supseteq p }[array\text{-}copy\text{-}statement] $$
+
+
+$$\text {where }  p \text { and } q \text{ are both Array type }$$
 _______________________
 $$\frac{p \supseteq q \ \ \ \ \ l_x \in q}{l_x \in p}[superset] $$
 $$\newline\newline\newline$$
