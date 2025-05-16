@@ -102,7 +102,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     }
 
 
-    // treat as f(...) = stmt.getOp()
+    // return-statement rule
     @Override
     public void caseReturnStmt(@Nonnull JReturnStmt stmt) {
         if( !(stmt.getOp().getType() instanceof ReferenceType) ) return;
@@ -124,25 +124,11 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             //stmt.getLeftOp().accept(new ConstraintGenInvokeVisitor());
             return;
         }
-       //'new' rule
-        if(rightOp instanceof JNewExpr) {
-            MemoryLocation l = new MemoryLocation(stmt.getPositionInfo().getStmtPosition().getFirstLine());
-            constraints.add(new ElementOfConstraint(l,getOrCreateMappingOf(leftOp)));
-            return;
-        }
         if(rightOp instanceof JNewArrayExpr || rightOp instanceof JNewMultiArrayExpr ){ return;}
-        /*if(rightOp instanceof JArrayRef && leftOp.getType() instanceof ArrayType) {
-          if(rightOp.getType() instanceof ArrayType && leftOp.getType() instanceof ArrayType) {
-            aliasArrays(leftOp, rightOp);
-        }*/
-        if(rightOp instanceof AbstractInvokeExpr) {
-            rightOp.accept(new ConstraintGenInvokeVisitor());
+        if (newAssignmentStmtRule(stmt)) return;
+        if (methodAssignmentStmtRule(stmt)) return;
+        if (arraysCopyStmtRule(leftOp,rightOp))return ;
 
-            PointsToSet superset =getOrCreateMappingOf(leftOp);
-            PointsToSet subset=getOrCreateMappingOf(rightOp);
-            constraints.add(new SupersetOfConstraint(superset, subset));
-            return;
-        }
         //checks if field references are a part of this assignment
         AbstractValueVisitor<String> fieldValueVisitor =new AbstractValueVisitor<>() {
             @Override
@@ -153,7 +139,9 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             @Override
             public void defaultCaseValue(@Nonnull Value v) {setResult(null);}
         };
-        arraysCopyStmtRule(leftOp,rightOp);
+        //copy-statement
+        // field-read-assignment and
+        // field-assign-assignment rules
         leftOp.accept(fieldValueVisitor);
         String supersetField=fieldValueVisitor.getResult();
         rightOp.accept(fieldValueVisitor);
@@ -163,13 +151,37 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         constraints.add(new SupersetOfConstraint(superset, supersetField, subset, subsetField));
 
     }
-    private void arraysCopyStmtRule(LValue lvalue, Value rvalue){
+    private boolean arraysCopyStmtRule(LValue lvalue, Value rvalue){
         if(lvalue.getType() instanceof ArrayType && rvalue.getType() instanceof  ArrayType){
             PointsToSet rvalueSet= getOrCreateMappingOf(rvalue);
             PointsToSet lvalueSet= getOrCreateMappingOf(lvalue);
             constraints.add(new SupersetOfConstraint(lvalueSet,rvalueSet));
             constraints.add(new SupersetOfConstraint(rvalueSet,lvalueSet));
+            return true;
         }
+        return false;
+    }
+
+    private boolean newAssignmentStmtRule(JAssignStmt stmt){
+        if(stmt.getRightOp() instanceof JNewExpr) {
+            MemoryLocation l = new MemoryLocation(stmt.getPositionInfo().getStmtPosition().getFirstLine());
+            constraints.add(new ElementOfConstraint(l,getOrCreateMappingOf(stmt.getLeftOp())));
+            return true;
+        }
+        return false;
+    }
+    private boolean methodAssignmentStmtRule(JAssignStmt stmt){
+        if(stmt.getRightOp() instanceof AbstractInvokeExpr) {
+            Value rightOp = stmt.getRightOp();
+            LValue leftOp = stmt.getLeftOp();
+            rightOp.accept(new ConstraintGenInvokeVisitor());
+
+            PointsToSet superset =getOrCreateMappingOf(leftOp);
+            PointsToSet subset=getOrCreateMappingOf(rightOp);
+            constraints.add(new SupersetOfConstraint(superset, subset));
+            return true;
+        }
+        return false;
     }
     /**
      * We make 2 different locals map to the same PointsToSet
@@ -273,13 +285,10 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     }
 
 
-    /** Visits a value, generates constraints for method invocations */
+    /** Visits a value, generates constraints for method invocations
+     * method-invocation-value rule is implemented here
+     * */
      class ConstraintGenInvokeVisitor extends AbstractValueVisitor{
-
-         /*
-        public void caseArrayRef(@Nonnull JArrayRef ref) {
-            Local base = ref.getBase();
-        }*/
 
         @Override
         public void caseSpecialInvokeExpr(@Nonnull JSpecialInvokeExpr expr) {

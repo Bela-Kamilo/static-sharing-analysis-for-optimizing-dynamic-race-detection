@@ -19,7 +19,7 @@ $$\frac{}{\left\| return \  p \right\| \mapsto m \supseteq p }[return\text{-}sta
 
 $$ \text {where } m \text { is the enclosing method }  \newline $$
 
-$$array \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i]...[j] \ as \ if
+$$arrays \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i]...[j] \ as \ if
 \ it \ were \ ar[i] $$
 $$as \ if \ it \ were \ ar[j] \ mapped \ to \ a \   single \ points \ to   \ set$$
 
