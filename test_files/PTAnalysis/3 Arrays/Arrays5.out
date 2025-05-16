@@ -1,0 +1,15 @@
+$stack5={1}
+%l3={1}
+%l4==l3
+$stack6={2}
+l4={1,2}
+l3={1,2}
+$stack7={1,2}
+
+<A: void <init>()>:this = {}
+<A: void <init>()>.this = {}
+<Arrays5: void a(A,int)>.this = {}
+<Arrays5: void a(A,int)>:this = {}
+<Arrays5: void a(A,int)>:l1 = {}
+<Arrays5: void a(A,int)>.1 = {}
+
