@@ -18,7 +18,7 @@ $$\frac{}{\left\| q= i.m(a_1 ... a_n) \right\| \mapsto q \supseteq m}[method \te
 $$\frac{}{\left\| return \  p \right\| \mapsto m \supseteq p }[return\text{-}statement ]$$
 
 $$ \text {where } m \text { is the enclosing method }  \newline $$
-<br/>
+
 $$array \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i]...[j] \ as \ if
 \ it \ were \ ar[i] $$
 $$as \ if \ it \ were \ ar[j] \ mapped \ to \ a \   single \ points \ to   \ set$$
