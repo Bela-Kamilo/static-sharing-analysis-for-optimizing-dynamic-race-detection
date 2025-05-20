@@ -1,11 +1,13 @@
 package test;
 
 import PTAnalysis.PointsToAnalysis;
-import analysis.my_analysis;
+//import analysis.my_analysis;
+import PTAnalysis.PointsToSet;
 import util.EmptyFormatter;
 import sootup.core.model.SootMethod;
 import sootup.java.core.views.JavaView;
 import util.LoggerFactory;
+import util.SootUpStuff;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -61,10 +63,10 @@ public class PTAnalysisTest extends Test {
     private void singleTest(String parentDir, String testClassName){
         String filepath=basePath+"/"+parentDir+"/"+testClassName+".out";
         Map<String, Set<Integer>> expectedResults = parseTestFile(filepath,testClassName);
-        JavaView pathView =my_analysis.getViewFromPath(basePath+"/"+parentDir);
-        SootMethod entryMethod=my_analysis.getMethodFromView(pathView,testClassName,entryMethodWSpace);  //TODO fix the space thing
+        JavaView pathView =SootUpStuff.getViewFromPath(basePath+"/"+parentDir);
+        SootMethod entryMethod=SootUpStuff.getMethodFromView(pathView,testClassName,entryMethodWSpace);  //TODO fix the space thing
 
-        Map<String, Set<Integer>> analysisResults = new PointsToAnalysis(pathView).analise(entryMethod);
+        Map<String, PointsToSet> analysisResults = new PointsToAnalysis(pathView).analise(entryMethod);
         PTAtestLog.info(testClassName+".class ");
         PTAtestLog.info("Expected results :");
         expectedResults.forEach((name,intset)->PTAtestLog.info(name+"="+intset));
@@ -151,13 +153,13 @@ public class PTAnalysisTest extends Test {
     }
     private void  print_A_class(String filepath){
         System.out.println(filepath);
-        JavaView pathView =my_analysis.getViewFromPath(filepath);
+        JavaView pathView = SootUpStuff.getViewFromPath(filepath);
         boolean firstMethod=true;
         String methods[]={"A m (A,A)","A m1 (A,A)","A m2 (A,A)","void m (A,A)"
                         ,"void m1 (A,A)","void m2 (A,A)","int m (A,A,int)"};
 
         for(String sig : methods){
-            SootMethod m=my_analysis.getMethodFromView(pathView,"A",sig);
+            SootMethod m=SootUpStuff.getMethodFromView(pathView,"A",sig);
             if(m==null) continue;
             if(firstMethod){
                 firstMethod=false;
@@ -201,7 +203,7 @@ public class PTAnalysisTest extends Test {
      * this method is empty and does nothing, we will not consider it for simplicity
      * @param results
      */
-   private void removeUseMethod(Map<String, Set<Integer>> results){
+   private void removeUseMethod(Map<String, PointsToSet> results){
        Map<String, Set<Integer>> resultsCopy = new HashMap<>(results);
        for (var entry : resultsCopy.entrySet())
            if(entry.getKey().contains("use"))

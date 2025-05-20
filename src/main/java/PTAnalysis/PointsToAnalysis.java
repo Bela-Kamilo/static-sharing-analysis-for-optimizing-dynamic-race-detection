@@ -47,10 +47,10 @@ public class PointsToAnalysis {
      * <Class: MethodSignature>         -   for the possible locations the method might return
      *
      */
-    public Map<String, Set<Integer>> analise(SootMethod entryMethod){
+    public Map<String, PointsToSet> analise(SootMethod entryMethod){
         GenerateConstraints(entryMethod);
         Solver solver= new Solver(this.ConstraintGenerator.getConstraints());
-        Map<String,Set<Integer>> res= solver.solve();
+        Map<String,PointsToSet> res= solver.solve();
         MemoryLocation.reset();
         return res;
     }
