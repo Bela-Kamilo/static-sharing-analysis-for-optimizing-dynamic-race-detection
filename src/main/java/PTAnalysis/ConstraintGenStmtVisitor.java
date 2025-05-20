@@ -121,47 +121,19 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         Value rightOp = stmt.getRightOp();
         if( !(leftOp.getType() instanceof ReferenceType)  ){//we re only interested in refs
             stmt.getRightOp().accept(new ConstraintGenInvokeVisitor());
-            //stmt.getLeftOp().accept(new ConstraintGenInvokeVisitor());
+            //stmt.getLeftOp().accept(new ConstraintGenInvokeVisitor());    //no point
             return;
         }
-        if(rightOp instanceof JNewArrayExpr || rightOp instanceof JNewMultiArrayExpr ){ return;}
-        if (newAssignmentStmtRule(stmt)) return;
-        if (methodAssignmentStmtRule(stmt)) return;
-        if (arraysCopyStmtRule(leftOp,rightOp))return ;
+        if(rightOp instanceof JNewArrayExpr || rightOp instanceof JNewMultiArrayExpr ) return;
 
-        //checks if field references are a part of this assignment
-        AbstractValueVisitor<String> fieldValueVisitor =new AbstractValueVisitor<>() {
-            @Override
-            public void caseInstanceFieldRef(@Nonnull JInstanceFieldRef ref) {
-                setResult( ref.getFieldSignature().toString());
-            }
-
-            @Override
-            public void defaultCaseValue(@Nonnull Value v) {setResult(null);}
-        };
-        //copy-statement
-        // field-read-assignment and
-        // field-assign-assignment rules
-        leftOp.accept(fieldValueVisitor);
-        String supersetField=fieldValueVisitor.getResult();
-        rightOp.accept(fieldValueVisitor);
-        String subsetField=fieldValueVisitor.getResult();
-        PointsToSet superset =getOrCreateMappingOf(leftOp);
-        PointsToSet subset=getOrCreateMappingOf(rightOp);
-        constraints.add(new SupersetOfConstraint(superset, supersetField, subset, subsetField));
+        newAssignmentStmtRule(stmt);
+        copyStmtRule(stmt);
+        methodAssignmentStmtRule(stmt);
+        arraysCopyStmtRule(stmt);
+        fieldReadAssignmentStmtRule(stmt);
+        fieldAssignAssignmentStmtRule(stmt);
 
     }
-    private boolean arraysCopyStmtRule(LValue lvalue, Value rvalue){
-        if(lvalue.getType() instanceof ArrayType && rvalue.getType() instanceof  ArrayType){
-            PointsToSet rvalueSet= getOrCreateMappingOf(rvalue);
-            PointsToSet lvalueSet= getOrCreateMappingOf(lvalue);
-            constraints.add(new SupersetOfConstraint(lvalueSet,rvalueSet));
-            constraints.add(new SupersetOfConstraint(rvalueSet,lvalueSet));
-            return true;
-        }
-        return false;
-    }
-
     private boolean newAssignmentStmtRule(JAssignStmt stmt){
         if(stmt.getRightOp() instanceof JNewExpr) {
             MemoryLocation l = new MemoryLocation(stmt.getPositionInfo().getStmtPosition().getFirstLine());
@@ -170,7 +142,34 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         }
         return false;
     }
-    private boolean methodAssignmentStmtRule(JAssignStmt stmt){
+    private boolean copyStmtRule(JAssignStmt stmt){
+        LValue leftOp= stmt.getLeftOp();
+        Value rightOp= stmt.getRightOp();
+        if(copyRuleApplies(leftOp , rightOp)){
+            PointsToSet superset =getOrCreateMappingOf(leftOp);
+            PointsToSet subset=getOrCreateMappingOf(rightOp);
+            constraints.add(new SupersetOfConstraint(superset,  subset));
+            return true;
+        }
+        return false;
+    }
+    /**
+     * true for non array type locals,
+     * non array type array refs,
+     * or static fields
+     */
+    private boolean copyRuleApplies(LValue leftOp, Value rightOp){
+        boolean leftOpOK = leftOp instanceof Local && ! (leftOp.getType() instanceof ArrayType)
+                || (leftOp instanceof JArrayRef && leftOp.getType() instanceof ArrayType &&  ((ArrayType) leftOp.getType()).getDimension()==1)
+                || leftOp instanceof JStaticFieldRef;
+        boolean rightOpOK = rightOp instanceof Local && ! (rightOp.getType() instanceof ArrayType)
+                || (rightOp instanceof JArrayRef && rightOp.getType() instanceof ArrayType &&  ((ArrayType) rightOp.getType()).getDimension()==1)
+                || rightOp instanceof JStaticFieldRef;
+        return leftOpOK &&rightOpOK ;
+    }
+
+
+   private boolean methodAssignmentStmtRule(JAssignStmt stmt){
         if(stmt.getRightOp() instanceof AbstractInvokeExpr) {
             Value rightOp = stmt.getRightOp();
             LValue leftOp = stmt.getLeftOp();
@@ -184,8 +183,8 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         return false;
     }
     /**
-     * We make 2 different locals map to the same PointsToSet
-     * We want this for 2 reasons :
+     * We equate 2 different array locals' points to sets.
+     * We do this for 2 reasons :
      * 1) In cases of multidimensional arrays arr[i][j] and arr[k]
      * both refer to the contents of arr
      *
@@ -196,35 +195,76 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
      *
      * arr should also hold l in its PointsToSet
      */
-    private void aliasArrays(Value lvalue, Value rvalue) {
-        if(!(lvalue.getType() instanceof ArrayType && rvalue.getType() instanceof ArrayType))
-            throw new RuntimeException("expected ArrayType, ArrayType. Got "+lvalue.getType()+" , "+rvalue.getType());
-        if(varsToLocationsMap.containsKey(lvalue)) //think this is WRONG    - figure out what happens w/ case 2)
-            throw new RuntimeException("expected "+lvalue + "not to be mapped to a PointsToSet");
-        Value lvalueBase= lvalue instanceof JArrayRef ? ((JArrayRef) lvalue).getBase() : lvalue;
-        Value rvalueBase= rvalue instanceof JArrayRef ? ((JArrayRef) rvalue).getBase() : rvalue;
-        PointsToSet rvalueSet= getOrCreateMappingOf(rvalue);
-        PointsToSet lvalueSet= getOrCreateMappingOf(lvalue);
-        constraints.add(new SupersetOfConstraint(lvalueSet,rvalueSet));
-        constraints.add(new SupersetOfConstraint(rvalueSet,lvalueSet));
-        return;
-        /*
-       if(!(rvalueSet instanceof PointsToSetOfArray ))
-            throw new RuntimeException("An array local is mapped to a non PointsToSetOFArray PointsToSet");
-        //((PointsToSetOfArray)rvalueSet).addAlias(rvalueBase.toString());
-        //
-        ((PointsToSetOfArray) rvalueSet).addAlias(visitingMethod +":"+lvalueBase.toString());
-        varsToLocationsMap.put(lvalueBase, rvalueSet);//to change this w/ addAlias();
-        */
-
+    private boolean arraysCopyStmtRule(JAssignStmt stmt){
+        LValue lvalue = stmt.getLeftOp();
+        Value rvalue=stmt.getRightOp();
+        if(lvalue.getType() instanceof ArrayType && rvalue.getType() instanceof  ArrayType){
+            PointsToSet rvalueSet= getOrCreateMappingOf(rvalue);
+            PointsToSet lvalueSet= getOrCreateMappingOf(lvalue);
+            constraints.add(new SupersetOfConstraint(lvalueSet,rvalueSet));
+            constraints.add(new SupersetOfConstraint(rvalueSet,lvalueSet));
+            return true;
+        }
+        return false;
     }
+    private boolean fieldReadAssignmentStmtRule(JAssignStmt stmt){
+        if(stmt.getRightOp() instanceof JInstanceFieldRef){
+
+            //checks if field references are a part of this assignment
+            AbstractValueVisitor<String> fieldValueVisitor =new AbstractValueVisitor<>() {
+                @Override
+                public void caseInstanceFieldRef(@Nonnull JInstanceFieldRef ref) {
+                    setResult( ref.getFieldSignature().toString());
+                }
+
+                @Override
+                public void defaultCaseValue(@Nonnull Value v) {setResult(null);}
+            };
+            LValue leftOp= stmt.getLeftOp();
+            Value rightOp= stmt.getRightOp();
+            rightOp.accept(fieldValueVisitor);
+            String subsetField=fieldValueVisitor.getResult();
+            if(subsetField == null) throw new RuntimeException("Field-Read-Assignment-Statement rule applied on no field assignment");
+            PointsToSet superset =getOrCreateMappingOf(leftOp);
+            PointsToSet subset=getOrCreateMappingOf(rightOp);
+            constraints.add(new SupersetOfConstraint(superset,  subset, subsetField));
+            return true;
+        }
+        return false;
+    }
+    private boolean fieldAssignAssignmentStmtRule(JAssignStmt stmt){
+        if(stmt.getLeftOp() instanceof JInstanceFieldRef){
+
+            //checks if field references are a part of this assignment
+            AbstractValueVisitor<String> fieldValueVisitor =new AbstractValueVisitor<>() {
+                @Override
+                public void caseInstanceFieldRef(@Nonnull JInstanceFieldRef ref) {
+                    setResult( ref.getFieldSignature().toString());
+                }
+
+                @Override
+                public void defaultCaseValue(@Nonnull Value v) {setResult(null);}
+            };
+            LValue leftOp= stmt.getLeftOp();
+            Value rightOp= stmt.getRightOp();
+            leftOp.accept(fieldValueVisitor);
+            String superSetField=fieldValueVisitor.getResult();
+            if(superSetField == null) throw new RuntimeException("Field-Assign-Assignment-Statement rule applied on no field assignment");
+            PointsToSet superset =getOrCreateMappingOf(leftOp);
+            PointsToSet subset=getOrCreateMappingOf(rightOp);
+            constraints.add(new SupersetOfConstraint(superset,superSetField,  subset));
+            return true;
+        }
+        return false;
+    }
+
+
     /** value -> PTSet
      * A mapping of a value to its PTSet*/
     private PointsToSet getOrCreateMappingOf(Value v){
         if(v instanceof AbstractInvokeExpr){
             return getOrCreateMappingOfMethod( ( (AbstractInvokeExpr) v).getMethodSignature());
         }
-        if(v instanceof JArrayRef) return getOrCreateMappingOfArray((JArrayRef) v);
         Value v2;
         if(v instanceof JInstanceFieldRef) v2= ((JInstanceFieldRef) v).getBase();
         else if(v instanceof JArrayRef) v2= ((JArrayRef) v).getBase() ;
@@ -271,17 +311,6 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         }
         parametersLocationsMap.put(method, paramVector);
         return paramVector.get(paramOrdinal);
-    }
-    /** Array access-> PTSet
-     *
-     * */
-    private PointsToSet getOrCreateMappingOfArray(JArrayRef ar){
-        Local arrayBase=ar.getBase();
-        if(varsToLocationsMap.containsKey(arrayBase))
-            return varsToLocationsMap.get(arrayBase);
-        PointsToSet set = new PointsToSetOfArray(visitingMethod +":"+arrayBase);
-        varsToLocationsMap.put(arrayBase, set);
-        return set;
     }
 
 

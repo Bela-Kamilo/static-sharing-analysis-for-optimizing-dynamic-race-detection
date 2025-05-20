@@ -246,28 +246,28 @@ y={1,2}						%l3={1}
 
 						Arrays6
 
-						A[] $stack8, l4;
-                                                A[][] $stack5, $stack6;
-                                                A[][][] l3;
-
-						
-A[][] x = new A[5][6];				l3 = newmultiarray (A)[5][6][7];
-A[] y= new A[2];                                l4 = newarray (A)[2];
-x[1]=y;                                         $stack5 = l3[1];	%stack5 == l3
-x[1][1]= new A();                               $stack5[1] = l4;	%stack5 == l4
-                                                $stack6 = l3[1];	%stack6 == l3 
-                                                $stack8 = $stack6[1];	%stack8 == stack6
-                                                $stack7 = new A;
-                                                specialinvoke $stack7.<A: void <init>()>();
-                                                $stack8[1] = $stack7;   
+						A $stack5, l1;
+                                                A[] $stack6, l4;
+                                                A[][] l3;
+                                                
+						l3 = newmultiarray (A)[5][6];
+A[][] x = new A[5][6];				l4 = newarray (A)[2];
+A[] y= new A[2];                                l3[1] = l4;		%l3==l4
+x[1]=y;                                         $stack6 = l3[1];	%$stack6==l3
+x[1][1]= new A();                               $stack5 = new A;	
+                                                specialinvoke $stack5.<A: void <init>()>();
+                                                $stack6[1] = $stack5;
+                                                
+                                                
+                                                
 
 --------------					--------------
-x={1}						$stack7={1}
-y={1}						$stack8={1}
-						$stack6={1}
+x={1}						$stack5={1}
+y={1}						$stack6={1}
 						l3={1}
-						$stack5={1}
-                                                l4={1}
+						l4={1}
+						
+                                                
 
 ++++++++	                                       
 

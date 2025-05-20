@@ -163,8 +163,6 @@ public class Solver {
         PTSets.forEach((set)->{
             conformPTSet2InnerSetVar(set);
             solverLog.info(set.getVarName()+" = "+ set);
-            if(set instanceof PointsToSetOfArray)     //add possible other aliases of the same PTSet
-                ((PointsToSetOfArray) set).getAliases().forEach(a->solution.put(a,set));
             solution.put(set.getVarName(),set);
         });
     }
@@ -173,9 +171,7 @@ public class Solver {
         ((SetVar)set.constraintSolverSet).getLB().forEach(set::add);
     }
 
-    private boolean missedNoSets(){
-        return true;
-    }
+
     /**
      * @param x converts its lower bound (which is an ISet)
      * @return a new Set of the integers in x's lower bound

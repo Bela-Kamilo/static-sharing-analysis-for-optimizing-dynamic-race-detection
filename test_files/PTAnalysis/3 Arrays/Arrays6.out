@@ -1,11 +1,7 @@
-%stack5 == l3
-%stack5 == l4
-%stack6 == l3
-%stack8 == stack6
-$stack7 = {1}
-$stack8 = {1}
-$stack6 = {1}
+%l3==l4
+%stack6==l3
 $stack5 = {1}
+$stack6 = {1}
 l3={1}
 l4={1}
 <A: void <init>()>:this = {}
