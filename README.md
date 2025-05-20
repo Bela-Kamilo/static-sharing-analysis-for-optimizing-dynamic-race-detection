@@ -16,14 +16,13 @@ $$\text {where }  p_j \text { are } m \text{'s parameters}$$
 $$\frac{}{\left\| q= i.m(a_1 ... a_n) \right\| \mapsto q \supseteq m}[method \text{-} assignment\text{-}statement] $$
 
 $$\frac{}{\left\| return \  p \right\| \mapsto m \supseteq p }[return\text{-}statement ]$$
-
 $$ \text {where } m \text { is the enclosing method }  \newline $$
+</br>
+
 
 $$arrays \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i]...[j] \ as \ if
 \ it \ were \ ar[i] $$
-$$as \ if \ it \ were \ ar[j] \ mapped \ to \ a \   single \ points \ to   \ set$$
-
-
+$$as \ if \ it \ were \ ar[j] \ mapped \ to \ a \   single \ points \ to   \ set$$  
 $$We \ equate \ arrays \ on \ assignments \ between \ them \ $$
 $$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q\  ,\  q \supseteq p }[array\text{-}copy\text{-}statement] $$
 
