@@ -9,6 +9,7 @@ public class A {
 		A oneAndTwo;
 	//	stat= new A();
 	//	A.statMethod(stat);
+	// ntn
 
 		oneAndTwo = ( c==1 )? one : two;
 
