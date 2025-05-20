@@ -5,9 +5,12 @@ Using the rules bellow , a Points To Set is created and monitored for each varia
 
 <br/>
 
-$$ \frac{}{\left\| p= new\text{ } A_i() \right\| \mapsto l_i \in p }[news \text{-} signment\text{-} statement] $$
+$$ \frac{}{\left\| p= new\text{ } A_i() \right\| \mapsto l_i \in p }[new \text{-}assignment\text{-} statement] $$
 
-$$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q }[copys\text{-}statement] $$
+$$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q }[copy\text{-}statement] $$
+
+$$\text{where } \ p,\ q \text{ non Array Type locals,}$$
+$$ \text{non Array Type array accesses, or static fields}$$
 
 $$\frac{}{\left\| i.m(a_1 ... a_n) \right\| \mapsto m.this \supseteq i,\ p_j \supseteq a_j }[method \text{-} invocation \text{-}value ] $$
 
@@ -16,12 +19,18 @@ $$\text {where }  p_j \text { are } m \text{'s parameters}$$
 $$\frac{}{\left\| q= i.m(a_1 ... a_n) \right\| \mapsto q \supseteq m}[method \text{-} assignment\text{-}statement] $$
 
 $$\frac{}{\left\| return \  p \right\| \mapsto m \supseteq p }[return\text{-}statement ]$$
-
 $$ \text {where } m \text { is the enclosing method }  \newline $$
-<br/>
-$$array \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i] \ as \ if
-\ it \ were \ ar $$
+</br>
 
+
+$$arrays \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i]...[j] \ as \ if
+\ it \ were \ ar[i] $$
+$$as \ if \ it \ were \ ar[j] \ mapped \ to \ a \   single \ points \ to   \ set$$  
+$$We \ equate \ arrays \ on \ assignments \ between \ them \ $$
+$$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q\  ,\  q \supseteq p }[array\text{-}copy\text{-}statement] $$
+
+
+$$\text {where }  p \text { and } q \text{ are both Array type }$$
 _______________________
 $$\frac{p \supseteq q \ \ \ \ \ l_x \in q}{l_x \in p}[superset] $$
 $$\newline\newline\newline$$
