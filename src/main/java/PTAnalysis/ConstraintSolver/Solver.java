@@ -131,9 +131,6 @@ public class Solver {
       try{
           while(model.getSolver().solve()){
               solverLog.info("+++solution found+++");
-              //Arrays.stream(model.retrieveSetVars()).forEach((x)-> {
-              //    solverLog.info(x.toString());
-               //     solution.put(x.getName(),setVarToSet(x));});
               exportSolution();
               if(morethanonesolutions) throw new RuntimeException("There exist more than one solutions for "+model.getName()+"model");
               morethanonesolutions =true;

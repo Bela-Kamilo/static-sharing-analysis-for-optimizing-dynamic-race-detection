@@ -8,4 +8,7 @@ public abstract class Test {
     protected void pass(String testname){System.out.println("TEST "+testname+": "+ANSI_GREEN+"PASS"+ANSI_RESET);}
     protected void fail(String testname){System.out.println("TEST "+testname+": "+ANSI_RED+"FAIL"+ANSI_RESET);}
     public int getCount(){return testsCount;}
+
+    abstract public void test();
+
 }

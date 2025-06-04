@@ -28,7 +28,7 @@ public class PointsToAnalysis {
     Set <MethodSignature> visitedMethods;
     View view;
     private final Logger constraintLogger;
-
+    private boolean hasBeenPerformed=false;
     public PointsToAnalysis(View view){
         constraintLogger= new LoggerFactory().createLogger("ConstraintGeneration");
         this.ConstraintGenerator = new ConstraintGenStmtVisitor();
@@ -51,6 +51,7 @@ public class PointsToAnalysis {
         GenerateConstraints(entryMethod);
         Solver solver= new Solver(this.ConstraintGenerator.getConstraints());
         Map<String,PointsToSet> res= solver.solve();
+        hasBeenPerformed=true;
         MemoryLocation.reset();
         return res;
     }

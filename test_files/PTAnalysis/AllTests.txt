@@ -851,7 +851,7 @@ x.f=y;                                            specialinvoke $stack10.<A: voi
 
 
 				6		FieldAssign6
-A.sf = new A();					$stack3 = new A;
+A.sf = new A();					                $stack3 = new A;
 A.sf = new A();                                 specialinvoke $stack3.<A: void <init>()>();
 A.sf = new A();                                 <A: A sf> = $stack3;
                                                 $stack4 = new A;
@@ -861,8 +861,8 @@ A.sf = new A();                                 <A: A sf> = $stack3;
                                                 specialinvoke $stack5.<A: void <init>()>();
                                                 <A: A sf> = $stack5;
     
----------------					---------------
-A.sf={1,2,3}					$stack3={1}       
+---------------					                ---------------
+A.sf={1,2,3}					                $stack3={1}
                                                 $stack4={2}
                                                 $stack5={3}
                                                 <A: A sf>={1,2,3}
@@ -875,7 +875,7 @@ A.sf={1,2,3}					$stack3={1}
 			
 			
 					1	FieldRead1
-A x = new A();				        $stack5 = new A;
+A x = new A();				                    $stack5 = new A;
 x.f = new A();                                  specialinvoke $stack5.<A: void <init>()>();
 A y = x.f;                                      l3 = $stack5;
                                                 $stack6 = new A;
@@ -1186,7 +1186,7 @@ y.f = x.f
 ++++++++
 
 
-					5	Other5.java
+					5	Other5
 A x = new A();                                  $stack7 = new A;
 A y = new A();                                  specialinvoke $stack7.<A: void <init>()>();
 int z=5;                                        l3 = $stack7;

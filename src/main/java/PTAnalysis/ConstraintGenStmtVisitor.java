@@ -12,26 +12,36 @@ import sootup.core.jimple.common.stmt.JReturnStmt;
 import sootup.core.jimple.javabytecode.stmt.JRetStmt;
 import sootup.core.jimple.visitor.AbstractStmtVisitor;
 import sootup.core.jimple.visitor.AbstractValueVisitor;
+import sootup.core.signatures.FieldSignature;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.ArrayType;
+import sootup.core.types.ClassType;
 import sootup.core.types.ReferenceType;
 import sootup.core.types.Type;
+import sootup.java.core.types.JavaClassType;
+import util.Tuple;
 
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.List;
 
-/** visits a statement, generates appropriate constraints */
+/** Visits a statement, generates appropriate constraints.
+ * Holds the constraints themselves
+ * Make sure the appropriate visitingMethod has been set before visiting a statement
+ * */
 public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
     private final Map<Value,PointsToSet> varsToLocationsMap;
     private final Map<MethodSignature, PointsToSet> returnedLocationsMap;
     private final Map<MethodSignature, Vector<PointsToSet>> parametersLocationsMap;
-    private final Map<Local, PointsToSet> arraysMap;
     private final Set<Constraint> constraints;
     private final int THIS_INDEX=0;
 
-    private final Set<MethodSignature> methodsInvoked; //method invocation will be visited after
+    private final Map<MethodSignature, Set<Tuple<PointsToSet,FieldSignature >>> fieldsRead;
+    private final Map<MethodSignature, Set<Tuple<PointsToSet,FieldSignature>>> fieldsWritten;
+
+
+    private final Set<MethodSignature> methodsInvoked; //method invocations which will be visited after
     private MethodSignature visitingMethod=null;
 
     ConstraintGenStmtVisitor(){
@@ -39,7 +49,8 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         this.parametersLocationsMap= new HashMap<>();
         this.returnedLocationsMap = new HashMap<>();
         this.methodsInvoked= new HashSet<>();
-        this.arraysMap= new HashMap<>();
+        this.fieldsRead= new HashMap<>();
+        this.fieldsWritten= new HashMap<>();
         this.varsToLocationsMap = new TreeMap<>(new Comparator<Value>() {       // we want to differentiate between same name locals
             @Override                                                           //of different methods
             public int compare(Value o1, Value o2) {
@@ -52,7 +63,11 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         });
     }
 
-    public void setVisitingMethod(MethodSignature method){visitingMethod=method;}
+    public void setVisitingMethod(MethodSignature method){
+        visitingMethod=method;
+        this.fieldsRead.put(method, new HashSet<>());
+        this.fieldsWritten.put(method, new HashSet<>());
+    }
 
     public Map<Value, PointsToSet> getVarsToLocationsMap() {
         return varsToLocationsMap;
@@ -87,8 +102,6 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             return;
         }
 
-
-
         if(rightOp instanceof JThisRef){
             //this := @this: Type;     =>   let 'this' as a Local be a superset of all the instances calling this method
             //                              it s ok as long as this as a Local doesnt get assigned (which is illegal anyways)
@@ -118,10 +131,15 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     @Override
     public void caseAssignStmt(@Nonnull JAssignStmt stmt) {
         LValue leftOp = stmt.getLeftOp();
-        Value rightOp = stmt.getRightOp();
-        if( !(leftOp.getType() instanceof ReferenceType)  ){//we re only interested in refs
+        Value rightOp = stmt.getRightOp();                          // v find a better way
+        if( !(leftOp.getType() instanceof ReferenceType) || leftOp.getType().toString().equals("java.lang.String")){//PTAnalysis is only really interested in refs
             stmt.getRightOp().accept(new ConstraintGenInvokeVisitor());
             //stmt.getLeftOp().accept(new ConstraintGenInvokeVisitor());    //no point
+            readsRule(stmt);
+            writesRule(stmt);
+            return;
+        }
+        if(leftOp.getType().toString().equals("java.lang.String")){
             return;
         }
         if(rightOp instanceof JNewArrayExpr || rightOp instanceof JNewMultiArrayExpr ) return;
@@ -132,8 +150,15 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         arraysCopyStmtRule(stmt);
         fieldReadAssignmentStmtRule(stmt);
         fieldAssignAssignmentStmtRule(stmt);
-
+        readsRule(stmt);
+        writesRule(stmt);
+        return;
     }
+
+    /*              POINTS-TO ANALYSIS RULES
+    ------------------------------------------------------------------------
+     */
+
     private boolean newAssignmentStmtRule(JAssignStmt stmt){
         if(stmt.getRightOp() instanceof JNewExpr) {
             MemoryLocation l = new MemoryLocation(stmt.getPositionInfo().getStmtPosition().getFirstLine());
@@ -258,7 +283,65 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         return false;
     }
 
+    /*              SIDE EFFECTS RULES
+    ------------------------------------------------------------------------
+     */
+    private void readsRule(JAssignStmt stmt){
+       Value rightOp=stmt.getRightOp();
 
+        if(rightOp instanceof JInstanceFieldRef){
+           FieldSignature field = ((JInstanceFieldRef) rightOp).getFieldSignature();
+           PointsToSet baseSet = getOrCreateMappingOf(((JInstanceFieldRef) rightOp).getBase());
+           fieldsRead.get(visitingMethod).add(new Tuple<>(baseSet,field));
+        }
+    }
+
+    private void writesRule(JAssignStmt stmt){
+        LValue leftOp=stmt.getLeftOp();
+
+        if(leftOp instanceof JInstanceFieldRef){
+            FieldSignature field  = ((JInstanceFieldRef) leftOp).getFieldSignature();
+            PointsToSet baseSet = getOrCreateMappingOf(((JInstanceFieldRef) leftOp).getBase());
+            fieldsWritten.get(visitingMethod).add(new Tuple<>(baseSet,field));
+        }
+    }
+    //--------------------------------------------------------------------
+
+    public Set<AccessibleHeapLocation> getWritesOf(MethodSignature m){
+        Set<AccessibleHeapLocation> res= new HashSet<>();
+
+        Set<Tuple<PointsToSet,FieldSignature>> PTSetsAndFields =fieldsWritten.get(m);
+        for(Tuple<PointsToSet,FieldSignature> PTSetAndField : PTSetsAndFields)
+            for(int i : PTSetAndField.getElem1())
+                res.add(new AccessibleHeapLocation(i,PTSetAndField.getElem2()));
+
+        return res;
+    }
+
+    public Set<AccessibleHeapLocation> getReadsOf(MethodSignature m){
+        Set<AccessibleHeapLocation> res= new HashSet<>();
+
+        Set<Tuple<PointsToSet,FieldSignature>> PTSetsAndFields =fieldsRead.get(m);
+        for(Tuple<PointsToSet,FieldSignature> PTSetAndField : PTSetsAndFields)
+            for(int i : PTSetAndField.getElem1())
+                res.add(new AccessibleHeapLocation(i,PTSetAndField.getElem2()));
+
+        return res;
+    }
+
+    public Map<MethodSignature,Set<AccessibleHeapLocation>> getWrites(){
+        Map<MethodSignature, Set<AccessibleHeapLocation>> res= new HashMap<>();
+        fieldsWritten.forEach((method,_)->{res.put(method,getWritesOf(method));});
+
+        return res;
+    }
+
+    public Map<MethodSignature,Set<AccessibleHeapLocation>> getReads(){
+        Map<MethodSignature, Set<AccessibleHeapLocation>> res= new HashMap<>();
+        fieldsRead.forEach((method,_)->{res.put(method,getWritesOf(method));});
+
+        return res;
+    }
     /** value -> PTSet
      * A mapping of a value to its PTSet*/
     private PointsToSet getOrCreateMappingOf(Value v){

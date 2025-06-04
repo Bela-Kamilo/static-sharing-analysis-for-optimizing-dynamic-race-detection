@@ -7,10 +7,12 @@ package util;
         elem1=e1;
         elem2=e2;
    }
+  /*
    public Tuple(){
          elem1=null;
          elem2=null;
-     }
+   }
+
    public void setElem1(T1 elem1) {
        this.elem1 = elem1;
    }
@@ -18,7 +20,7 @@ package util;
    public void setElem2(T2 elem2) {
        this.elem2 = elem2;
    }
-
+*/
    public T1 getElem1() {
        return elem1;
    }
