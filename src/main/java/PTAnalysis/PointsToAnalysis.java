@@ -104,4 +104,13 @@ public class PointsToAnalysis {
 
     public Set<Constraint> getConstraints(){return ConstraintGenerator.getConstraints();}
 
+    public Map<MethodSignature,Set<AccessibleHeapLocation>>  getReads(){
+        if(!hasBeenPerformed) throw new IllegalStateException("analise() need first be called to yield results");
+        return ConstraintGenerator.getReads();
+    }
+    public Map<MethodSignature,Set<AccessibleHeapLocation>>  getWrites(){
+        if(!hasBeenPerformed) throw new IllegalStateException("analise() need first be called to yield results");
+        return ConstraintGenerator.getWrites();
+}
+
 }

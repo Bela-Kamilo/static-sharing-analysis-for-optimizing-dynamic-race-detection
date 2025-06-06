@@ -18,11 +18,12 @@ import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+/**
+ * Test files for this class need be in such a format :
+ *  locationHolder={X,Y,Z}      where X,Y,Z are integers
+ *
+ */
 public class PTAnalysisTest extends Test {
-    private final String basePath="test_files/PTAnalysis";
-    private String entryMethodString ="void a(A,int)";
-
-    private final Logger PTAtestLog;
     private final String entryMethodWSpace ="void a (A,int)";
     private static PrintWriter jimpleFile ;
 
@@ -32,54 +33,30 @@ public class PTAnalysisTest extends Test {
     }
 
     public PTAnalysisTest(){
-        PTAtestLog=  new LoggerFactory().createLogger("Points To Analysis Test");
-        PTAtestLog.info("Points To Analysis Test Log created");
+        super("test_files/PTAnalysis","void a(A,int)","Points To Analysis Test");
 
     }
 
-    public void test(){
-       File[] files = new File(basePath).listFiles();
-       Arrays.sort(files);
-       System.out.println("+PTAnalysis test+");
 
-       for (File directory : files) {
-           if (directory.isDirectory()) {
-               File[] filesOfDir = new File(directory.getPath()).listFiles();
-               Arrays.sort(filesOfDir);
-               Stream<File>testfiles=Arrays.stream(filesOfDir).filter(file->(file.isFile()
-                       && file.getName().split("\\.")[1].equals("class")
-                       &&!file.getName().equals("A.class")));
-                
-               testfiles.forEach(file->singleTest(directory.getName() ,file.getName().split("\\.")[0]));
-           }
-           else {
-              ;
-           }
-       }
-       LoggerFactory.closeHandlerls(PTAtestLog);
-       System.out.println("See logs for details");
-}
-
-    private void singleTest(String parentDir, String testClassName){
+    protected void singleTest(String parentDir, String testClassName){
         String filepath=basePath+"/"+parentDir+"/"+testClassName+".out";
         Map<String, Set<Integer>> expectedResults = parseTestFile(filepath,testClassName);
         JavaView pathView =SootUpStuff.getViewFromPath(basePath+"/"+parentDir);
         SootMethod entryMethod=SootUpStuff.getMethodFromView(pathView,testClassName,entryMethodWSpace);  //TODO fix the space thing
 
         Map<String, PointsToSet> analysisResults = new PointsToAnalysis(pathView).analise(entryMethod);
-        PTAtestLog.info(testClassName+".class ");
-        PTAtestLog.info("Expected results :");
-        expectedResults.forEach((name,intset)->PTAtestLog.info(name+"="+intset));
-        PTAtestLog.info("");
-        PTAtestLog.info("Actual results :");
+        testLog.info(testClassName+".class ");
+        testLog.info("Expected results :");
+        expectedResults.forEach((name,intset)->testLog.info(name+"="+intset));
+        testLog.info("");
+        testLog.info("Actual results :");
         removeUseMethod(analysisResults);
         for (var entry : analysisResults.entrySet())
-            PTAtestLog.info(entry.getKey() + "=" + entry.getValue());
-        PTAtestLog.info("");
+            testLog.info(entry.getKey() + "=" + entry.getValue());
+        testLog.info("");
 
-        if (expectedResults.equals(analysisResults)) pass(Test.testsCount +" " +testClassName);
-        else fail(Test.testsCount +" " +testClassName);
-        Test.testsCount++;
+        if (expectedResults.equals(analysisResults)) pass(testClassName);
+        else fail(testClassName);
 
    }
 
@@ -201,8 +178,8 @@ public class PTAnalysisTest extends Test {
     /**
      * the testfiles define a use method to prevent variables splitting in jimple
      * this method is empty and does nothing, we will not consider it for simplicity
-     * @param results
-     */
+     * @param results results of {@link PTAnalysis.PointsToAnalysis#analise(SootMethod entryMethod) PointsToAnalysis}
+     * */
    private void removeUseMethod(Map<String, PointsToSet> results){
        Map<String, Set<Integer>> resultsCopy = new HashMap<>(results);
        for (var entry : resultsCopy.entrySet())

@@ -8,6 +8,8 @@ import sootup.java.core.types.JavaClassType;
 import sootup.java.core.views.JavaView;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public final class SootUpStuff {
@@ -22,12 +24,15 @@ public final class SootUpStuff {
         String methodName= methodSignatureStrings[1];
         String methodArguments=methodSignatureStrings[2];
         methodArguments=methodArguments.substring(1, methodArguments.length()-1); //remove parentheses
+        List<String> methodArgumentsList = methodArguments.isEmpty() ?
+                Collections.<String>emptyList()
+                : Arrays.stream(methodArguments.split("\\s*,\\s*")).toList();
         JavaClassType classType1= view.getIdentifierFactory().getClassType(className);
         MethodSignature methodSignature1 = view.getIdentifierFactory()
                 .getMethodSignature(classType1,
                         methodName,
                         retType,
-                        Arrays.stream(methodArguments.split("\\s*,\\s*")).toList());
+                        methodArgumentsList);//Arrays.stream(methodArguments.split("\\s*,\\s*")).toList());
         Optional<JavaSootMethod> opt1= view.getMethod(methodSignature1);
         if(!opt1.isPresent()){
             System.err.println("!Error! couldn't get method "+methodSignatureString);

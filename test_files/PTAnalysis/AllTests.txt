@@ -137,12 +137,12 @@ z.use();
 
 				ARRAYS
 				1		Arrays1      	
-A[] x = new A[5];		            $stack4 = new A;
-x[0]= new A();                    	    specialinvoke $stack4.<A: void <init>()>();
+A[] x = new A[5];		                    $stack4 = new A;
+x[0]= new A();                    	        specialinvoke $stack4.<A: void <init>()>();
 x[1]= new A();                              l3[0] = $stack4;
 x[2]= new A();                              $stack5 = new A;
 x[3]= new A();                              specialinvoke $stack5.<A: void <init>()>();
-x[4]= new A();                   	    l3[1] = $stack5;
+x[4]= new A();                   	        l3[1] = $stack5;
                                             $stack6 = new A;
                                             specialinvoke $stack6.<A: void <init>()>();
                                             l3[2] = $stack6;
@@ -153,8 +153,8 @@ x[4]= new A();                   	    l3[1] = $stack5;
                                             specialinvoke $stack8.<A: void <init>()>();
                                             l3[4] = $stack8;
 
----------------				    ---------------
-x={1,2,3,4,5}  				     $stack4 = {1}
+---------------				                ---------------
+x={1,2,3,4,5}  				                 $stack4 = {1}
                                              $stack5 = {2}
                                              $stack6 = {3}
                                              $stack7 = {4}
@@ -164,20 +164,20 @@ x={1,2,3,4,5}  				     $stack4 = {1}
 
 ++++++++	                                       
 				2		Arrays2
-A[] x = new A[5];			    l3#0 = newarray (A)[5];                    		
+A[] x = new A[5];			                l3#0 = newarray (A)[5];
 x= new A[7];                                l3#1 = newarray (A)[7];
 x= new A[10];                               l3#2 = newarray (A)[10];
 x[3]= new A();                              $stack4 = new A;
                                             specialinvoke $stack4.<A: void <init>()>();
                                             l3#2[3] = $stack4;
----------------				    ---------------
-x={1}					    l3#2 = {1}
-					    $stack4 = {1}
+---------------				                ---------------
+x={1}					                    l3#2 = {1}
+					                        $stack4 = {1}
 
 ++++++++	                                       
 
 				3		Arrays3
-A[] x = new A[5];		      	    $stack5 = new A;
+A[] x = new A[5];		      	            $stack5 = new A;
 x[1]= new A();                              specialinvoke $stack5.<A: void <init>()>();
 x[2]= new A();                              l3[1] = $stack5;
 A[] y =x;                                   $stack6 = new A;
@@ -188,25 +188,25 @@ y[3]= new A();                              l3[2] = $stack6;
                                             $stack7 = new A;
                                             specialinvoke $stack7.<A: void <init>()>();
                                             l4#1[3] = $stack7;
----------------				    ---------------
-x={1,2}					    $stack5={1}
-y={1,2,3}				    $stack6={2}
-					    $stack7={3}
-					    l3={1,2}
-					    l4#0={1,2}
-					    l4#1={3}
+---------------				                ---------------
+x={1,2}					                    $stack5={1}
+y={1,2,3}				                    $stack6={2}
+					                        $stack7={3}
+					                        l3={1,2}
+					                        l4#0={1,2}
+					                        l4#1={3}
 
 ++++++++	                                       
 						
 				4		Arrays4
-A[][][] x = new A[5][6][7];			l3 = newmultiarray (A)[5][6][7];
+A[][][] x = new A[5][6][7];			            l3 = newmultiarray (A)[5][6][7];
 x[1][1][1]= new A();                            $stack4 = l3[1];
                                                 $stack6 = $stack4[1];
                                                 $stack5 = new A;
                                                 specialinvoke $stack5.<A: void <init>()>();
                                                 $stack6[1] = $stack5;	%l1 goes to array aggregate
---------------					--------------
-x={1}						$stack4={1}
+--------------					                --------------
+x={1}						                    $stack4={1}
                                                 $stack6={1}
                                                 $stack5={1}
                                                 l3={1}
@@ -214,8 +214,8 @@ x={1}						$stack4={1}
 ++++++++	                                       
 
 				5		Arrays5
-A[] x = new A[12];				  l3 = newarray (A)[12];
-A[] y = new A[12];                     		  l4 = newarray (A)[12];                      
+A[] x = new A[12];				                  l3 = newarray (A)[12];
+A[] y = new A[12];                     		      l4 = newarray (A)[12];
 x[1]= new A();                                    $stack5 = new A;
 if(c==1)                                          specialinvoke $stack5.<A: void <init>()>();
 y=x;                                              l3[1] = $stack5;
@@ -234,24 +234,24 @@ y[2].use();                                       l4 = l3;
                                                   $stack7 = l4[2];
                                                   virtualinvoke $stack7.<A: void use()>();
                                                                                      
---------------					--------------
-x={1,2}						$stack5={1}
-y={1,2}						%l3={1}
+--------------					                --------------
+x={1,2}						                    $stack5={1}
+y={1,2}						                    %l3={1}
                                                 %l4={1}
                                                 $stack6={2}
                                                 l4={1,2}
                                                 l3={1,2} %l3 and l4 have been equated
-						$stack7={1,2}
+						                        $stack7={1,2}
 ++++++++	                                 
 
 						Arrays6
 
-						A $stack5, l1;
+						                        A $stack5, l1;
                                                 A[] $stack6, l4;
                                                 A[][] l3;
                                                 
-						l3 = newmultiarray (A)[5][6];
-A[][] x = new A[5][6];				l4 = newarray (A)[2];
+						                        l3 = newmultiarray (A)[5][6];
+A[][] x = new A[5][6];				            l4 = newarray (A)[2];
 A[] y= new A[2];                                l3[1] = l4;		%l3==l4
 x[1]=y;                                         $stack6 = l3[1];	%$stack6==l3
 x[1][1]= new A();                               $stack5 = new A;	
@@ -261,11 +261,11 @@ x[1][1]= new A();                               $stack5 = new A;
                                                 
                                                 
 
---------------					--------------
-x={1}						$stack5={1}
-y={1}						$stack6={1}
-						l3={1}
-						l4={1}
+--------------					                --------------
+x={1}						                    $stack5={1}
+y={1}						                    $stack6={1}
+						                        l3={1}
+						                        l4={1}
 						
                                                 
 
@@ -328,7 +328,7 @@ static void m(A p1, A p2 ){return;}             specialinvoke $stack6.<A: void <
  m.this = {}                                    $stack6={2}
  m.p1 ={1}                                      l4={2}
  m.p2 ={2}                                      
-		                                <A: void m(A,A)>.1={1}
+		                                        <A: void m(A,A)>.1={1}
                                                 <A: void m(A,A)>:l0={1}	%l0 is m.1
                                                 <A: void m(A,A)>.2={2}
                                                 <A: void m(A,A)>:l1={2}	%l1 is m.2			
@@ -349,7 +349,7 @@ x = {1}                                        $stack5={1}
 y = {2}                                        l3={1}
 m1.this = {1}                                  $stack6={2}
 m1.p1 ={1}                                     l4={2}
-m1.p2 ={2}	                               <A: void m1(A,A)>.this={1}	%this noted by our analysis
+m1.p2 ={2}	                                   <A: void m1(A,A)>.this={1}	%this noted by our analysis
                                                <A: void m1(A,A)>:this={1}	%this as a local of m1
                                                <A: void m1(A,A)>.1={1}
                                                <A: void m1(A,A)>:l1={1}		%l1 is m1.1
@@ -408,8 +408,8 @@ A.m(x[1],y);                                specialinvoke $stack6.<A: void <init
                                             $stack8 = l3[1];
                                             $stack7 = l4[2];
                                             staticinvoke <A: void m(A,A)>($stack8, $stack7);
----------------				    ---------------
-x={1}					    $stack5={1}
+---------------				                ---------------
+x={1}					                    $stack5={1}
 y={2}                                       l3={1}
 m.p1={1}                                    $stack6={2}
 m.p2={2}                                    l4={2}
@@ -424,15 +424,15 @@ m.p2={2}                                    l4={2}
 ++++++++
 
 						MethodInvocation5
-A[] x = new A[100];			    $stack5 = new A;                                   	    
+A[] x = new A[100];			                $stack5 = new A;
 A[] y = new A[200];                         specialinvoke $stack5.<A: void <init>()>();                    
 x[10]= new A();                             l3[10] = $stack5;                                              
 y[20]= new A();                             $stack6 = new A;                                               
 A.mArrays(x,y);                             specialinvoke $stack6.<A: void <init>()>();                    
                                             l4[20] = $stack6;
                                             staticinvoke <A: void mArrays(A[],A[])>(l3, l4);   
----------------			            ---------------
-x={1}					    $stack5={1}                                         	
+---------------			                    ---------------
+x={1}					                    $stack5={1}
 y={2}                                       l3={1}
 m.p1={1}                                    $stack6={2}
 m.p2={2}                                    l4={2}
@@ -572,7 +572,7 @@ A m(A p1, A p2 ){return p2;}                    specialinvoke $stack6.<A: void <
 ++++++++
 
 					4		Return4
-A x = new A();					$stack5 = new A;
+A x = new A();					                $stack5 = new A;
 A[] y = new A[20];                              specialinvoke $stack5.<A: void <init>()>();
 y[2]= new A();                                  l3 = $stack5;
 A.m2(x,y[2]);                                   l4 = newarray (A)[20];
@@ -581,8 +581,8 @@ static A m2(A p1, A p2 ){return p2;}            specialinvoke $stack6.<A: void <
                                                 l4[2] = $stack6;
                                                 $stack7 = l4[2];
                                                 staticinvoke <A: A m2(A,A)>($stack5, $stack7);
----------------			           	---------------
-x={1}						$stack5={1}
+---------------			           	            ---------------
+x={1}						                    $stack5={1}
 y={2}                                           l3={1}
 m2.p1={1}                                       $stack6={2}
 m2.p2={2}                                       l4={2}
@@ -598,21 +598,21 @@ m2.p2={2}                                       l4={2}
 ++++++++
 
 					5		Return5 
-A x = new A();					$stack5 = new A;
+A x = new A();					                $stack5 = new A;
 A[] y = new A[20];                              specialinvoke $stack5.<A: void <init>()>();
 y[2]= new A();                                  l3 = $stack5;
 y[3]= new A();                                  l4 = newarray (A)[20];
 A.m2Arrays(x,y);                                $stack6 = new A;
                                                 specialinvoke $stack6.<A: void <init>()>();
-static A[] m2Arrays(A p1, A[] p2 ){		l4[2] = $stack6;
-	return p2;}                             $stack7 = new A;
+static A[] m2Arrays(A p1, A[] p2 ){		        l4[2] = $stack6;
+	return p2;}                                 $stack7 = new A;
                                                 specialinvoke $stack7.<A: void <init>()>();
                                                 l4[3] = $stack7;
                                                 staticinvoke <A: A[] m2Arrays(A,A[])>($stack5, l4);   
                                                 
 
----------------			           	---------------
-x={1}						$stack5={1}                                      
+---------------			           	            ---------------
+x={1}						                    $stack5={1}
 y={2,3}                                         l3={1}
 m2Arrays.p1={1}                                 $stack6={2}
 m2Arrays.p2={2,3}                               l4={2,3}
@@ -691,12 +691,12 @@ A m1(A p1, A p2 ){return new A();}              specialinvoke $stack7.<A: void <
 ---------------                                --------------
 x = {1}                                       	$stack6 = {1}
 y = {2}                                         l3={1}
-m.this = {1}                          		$stack7={2}
+m.this = {1}                          		    $stack7={2}
 m.p1 ={1}                                     	l4={2}
 m.p2 ={2}                                     	<A: A m1(A,A)>.this={1}
 A m(A,A) = {3}                                	<A: A m1(A,A)>:this={1}
 res = {3}                                     	<A: A m1(A,A)>.1={1}
-						<A: A m1(A,A)>:l1={1}
+						                        <A: A m1(A,A)>:l1={1}
                                                 <A: A m1(A,A)>.2={2}
                                                 <A: A m1(A,A)>:l2={2}
                                                 <A: A m1(A,A)>={3}
@@ -855,7 +855,7 @@ A.sf = new A();					                $stack3 = new A;
 A.sf = new A();                                 specialinvoke $stack3.<A: void <init>()>();
 A.sf = new A();                                 <A: A sf> = $stack3;
                                                 $stack4 = new A;
-	                                        specialinvoke $stack4.<A: void <init>()>();
+	                                            specialinvoke $stack4.<A: void <init>()>();
                                                 <A: A sf> = $stack4;
                                                 $stack5 = new A;
                                                 specialinvoke $stack5.<A: void <init>()>();
@@ -1038,9 +1038,9 @@ y = {3,4}                                      l3={1,2}
 2.f = {5}                                      l4={3,4}
 3.f = {5,6}                                    $stack7={5}
 4.f = {5,6}                                    1.<A: A f>={5}
-		                               2.<A: A f>={5}
-                		               $stack8={5,6}
-					       3.<A: A f>={5,6}
+		                                       2.<A: A f>={5}
+                		                       $stack8={5,6}
+					                           3.<A: A f>={5,6}
                              	       	       4.<A: A f>={5,6}
 
 

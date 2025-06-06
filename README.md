@@ -7,7 +7,7 @@ Constraint solving through [Choco-solver](https://github.com/chocoteam/choco-sol
 ___
 ## Parts :
 
-[Points-To analysis](/src/main/java/PTAnalysis)
+[Points-To analysis and method side effects](/src/main/java/PTAnalysis)
 
 
 // TODO

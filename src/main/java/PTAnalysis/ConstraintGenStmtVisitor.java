@@ -15,10 +15,8 @@ import sootup.core.jimple.visitor.AbstractValueVisitor;
 import sootup.core.signatures.FieldSignature;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.ArrayType;
-import sootup.core.types.ClassType;
 import sootup.core.types.ReferenceType;
 import sootup.core.types.Type;
-import sootup.java.core.types.JavaClassType;
 import util.Tuple;
 
 import javax.annotation.Nonnull;
@@ -135,8 +133,8 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         if( !(leftOp.getType() instanceof ReferenceType) || leftOp.getType().toString().equals("java.lang.String")){//PTAnalysis is only really interested in refs
             stmt.getRightOp().accept(new ConstraintGenInvokeVisitor());
             //stmt.getLeftOp().accept(new ConstraintGenInvokeVisitor());    //no point
-            readsRule(stmt);
-            writesRule(stmt);
+            sideEffectReadStmtRule(stmt);
+            sideEffectWriteStmtRule(stmt);
             return;
         }
         if(leftOp.getType().toString().equals("java.lang.String")){
@@ -150,8 +148,8 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         arraysCopyStmtRule(stmt);
         fieldReadAssignmentStmtRule(stmt);
         fieldAssignAssignmentStmtRule(stmt);
-        readsRule(stmt);
-        writesRule(stmt);
+        sideEffectReadStmtRule(stmt);
+        sideEffectWriteStmtRule(stmt);
         return;
     }
 
@@ -286,7 +284,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     /*              SIDE EFFECTS RULES
     ------------------------------------------------------------------------
      */
-    private void readsRule(JAssignStmt stmt){
+    private void sideEffectReadStmtRule(JAssignStmt stmt){
        Value rightOp=stmt.getRightOp();
 
         if(rightOp instanceof JInstanceFieldRef){
@@ -296,7 +294,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         }
     }
 
-    private void writesRule(JAssignStmt stmt){
+    private void sideEffectWriteStmtRule(JAssignStmt stmt){
         LValue leftOp=stmt.getLeftOp();
 
         if(leftOp instanceof JInstanceFieldRef){
@@ -338,7 +336,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
     public Map<MethodSignature,Set<AccessibleHeapLocation>> getReads(){
         Map<MethodSignature, Set<AccessibleHeapLocation>> res= new HashMap<>();
-        fieldsRead.forEach((method,_)->{res.put(method,getWritesOf(method));});
+        fieldsRead.forEach((method,_)->{res.put(method,getReadsOf(method));});
 
         return res;
     }

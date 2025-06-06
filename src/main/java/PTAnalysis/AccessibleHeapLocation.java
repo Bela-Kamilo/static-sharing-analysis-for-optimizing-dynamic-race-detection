@@ -18,4 +18,12 @@ public class AccessibleHeapLocation {
     public String toString() {
         return memoryLocation+"."+field.toString();
     }
+
+    public int getMemoryLocation() {
+        return memoryLocation;
+    }
+
+    public FieldSignature getField() {
+        return field;
+    }
 }

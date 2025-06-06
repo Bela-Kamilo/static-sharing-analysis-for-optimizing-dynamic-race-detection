@@ -181,7 +181,7 @@ We get such results :
 1.<A: A x> = {4}
 2.<A: A x> = {4}
 ````
-# Use
+## Use
 
 ------
 Call ``` Map<String, Set<Integer>> analise(SootMethod)``` located in ```PointsToAnalysis.java```
@@ -193,3 +193,14 @@ and so the mapping is from Jimple value holders to (sets of) abstract locations
 
 This project uses and relies on the  [SootUp framework](https://github.com/soot-oss/SootUp)
 and [Choco-solver](https://github.com/chocoteam/choco-solver)
+------
+# SIDE EFFECTS
+We now have a sense of which locals on the stack may contain which objects on the heap.
+
+Using the rules bellow we track which methods read or write which fields of which objects
+
+
+$$\frac{p=q.f \ \ \ \ \ l_q \in q}{l_q.f \in READS(m)}[side\text{-}effect\text{-}read\text{-}statement] \newline \newline$$
+
+$$\frac{p.f=q \ \ \ \ \ l_p \in p}{l_p.f \in WRITES(m)}[side\text{-}effect\text{-}write\text{-}statement] \newline \newline$$
+$$\text{where  m  is  the  enclosing  method}$$
