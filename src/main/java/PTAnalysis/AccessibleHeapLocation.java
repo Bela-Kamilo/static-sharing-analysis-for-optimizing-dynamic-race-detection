@@ -3,6 +3,8 @@ package PTAnalysis;
 import sootup.core.signatures.FieldSignature;
 import util.Tuple;
 
+import java.util.Objects;
+
 /**
  * Represents a heap location that takes part in a memory access, that is a read or a write.
  * A field of an object instance. ex. 1.SomeField
@@ -25,5 +27,16 @@ public class AccessibleHeapLocation {
 
     public FieldSignature getField() {
         return field;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (! (obj instanceof AccessibleHeapLocation)) return false;
+        return memoryLocation == ((AccessibleHeapLocation) obj).getMemoryLocation() && field.equals(((AccessibleHeapLocation) obj).getField());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(memoryLocation, field);
     }
 }

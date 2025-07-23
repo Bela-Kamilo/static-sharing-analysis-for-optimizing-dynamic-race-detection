@@ -191,8 +191,6 @@ see [retrieving a Sootmethod](https://soot-oss.github.io/SootUp/latest/getting-s
 The analysis is performed on [Jimple IR](https://soot-oss.github.io/SootUp/latest/jimple/)
 and so the mapping is from Jimple value holders to (sets of) abstract locations
 
-This project uses and relies on the  [SootUp framework](https://github.com/soot-oss/SootUp)
-and [Choco-solver](https://github.com/chocoteam/choco-solver)
 ------
 # SIDE EFFECTS
 We now have a sense of which locals on the stack may contain which objects on the heap.

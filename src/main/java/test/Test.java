@@ -4,7 +4,7 @@ import util.LoggerFactory;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.Arrays;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -18,6 +18,7 @@ public abstract class Test {
     public static final String ANSI_RED = "\u001B[31m";
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
+    protected String nextThingBuffer;
     protected void pass(String singleTestName){System.out.println("TEST "+testsCount+" "+singleTestName+": "+ANSI_GREEN+"PASS"+ANSI_RESET);}
     protected void fail(String singleTestName){System.out.println("TEST "+testsCount +" " +singleTestName+": "+ANSI_RED+"FAIL"+ANSI_RESET);}
     public int getCount(){return testsCount;}
@@ -55,6 +56,28 @@ public abstract class Test {
         System.out.println("See logs for details");
     }
     abstract protected void singleTest(String parentDir, String testClassName);
+
+    /**
+     * returns the next match of {@code pattern} from {@code scanner}'s text in any line
+     * ignoring delimeters
+     *
+     * @param scanner
+     * @param pattern
+     * @throws InputMismatchException
+     * TODO add comment syntax
+     */
+    public String getNextThingFrom(Scanner scanner , String pattern) throws InputMismatchException {
+
+        while (nextThingBuffer.isBlank())
+                nextThingBuffer = scanner.nextLine();
+
+            Scanner lineScanner = new Scanner(nextThingBuffer);                 //TODO throw exception on 0123
+            String thing = lineScanner.findInLine(pattern);                     //0123Thing90 => ignores 0123, returns thing, buffers 90
+            if(thing == null) throw new InputMismatchException();
+            nextThingBuffer =nextThingBuffer.substring(nextThingBuffer.indexOf(thing)+thing.length());
+            lineScanner.close();
+        return thing;
+    }
 
     public Test(String basePath, String entryMethodString, String testName){
         this.testName=testName;

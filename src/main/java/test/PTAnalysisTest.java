@@ -42,7 +42,7 @@ public class PTAnalysisTest extends Test {
         String filepath=basePath+"/"+parentDir+"/"+testClassName+".out";
         Map<String, Set<Integer>> expectedResults = parseTestFile(filepath,testClassName);
         JavaView pathView =SootUpStuff.getViewFromPath(basePath+"/"+parentDir);
-        SootMethod entryMethod=SootUpStuff.getMethodFromView(pathView,testClassName,entryMethodWSpace);  //TODO fix the space thing
+        SootMethod entryMethod=SootUpStuff.getMethodFromView(pathView,"<"+testClassName+": "+entryMethodString+">");
 
         Map<String, PointsToSet> analysisResults = new PointsToAnalysis(pathView).analise(entryMethod);
         testLog.info(testClassName+".class ");
@@ -136,7 +136,7 @@ public class PTAnalysisTest extends Test {
                         ,"void m1 (A,A)","void m2 (A,A)","int m (A,A,int)"};
 
         for(String sig : methods){
-            SootMethod m=SootUpStuff.getMethodFromView(pathView,"A",sig);
+            SootMethod m=SootUpStuff.getMethodFromView(pathView,"<A: "+sig+">");
             if(m==null) continue;
             if(firstMethod){
                 firstMethod=false;
