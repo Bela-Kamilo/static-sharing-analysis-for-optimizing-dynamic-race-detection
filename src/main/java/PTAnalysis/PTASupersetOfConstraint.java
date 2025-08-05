@@ -3,7 +3,11 @@ package PTAnalysis;
 import java.util.Objects;
 import java.util.Optional;
 
-/** superset(.superSetField) ⊇ subset(.subSetField) */
+/** superset ⊇ subset
+ * superset.superSetField ⊇ subset
+ * superset ⊇ subset.subSetField
+ * superset.superSetField ⊇ subset.subSetField
+ * */
 public class SupersetOfConstraint implements  Constraint{
     private final PointsToSet superSet;
     private final PointsToSet subSet;
