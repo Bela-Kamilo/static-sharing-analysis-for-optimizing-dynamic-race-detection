@@ -1,5 +1,7 @@
 package PTAnalysis;
 
+import PTAnalysis.ConstraintSolver.Constraint;
+
 import java.util.Objects;
 import java.util.Optional;
 
@@ -8,22 +10,22 @@ import java.util.Optional;
  * superset ⊇ subset.subSetField
  * superset.superSetField ⊇ subset.subSetField
  * */
-public class SupersetOfConstraint implements  Constraint{
+public class PTASupersetOfConstraint implements Constraint {
     private final PointsToSet superSet;
     private final PointsToSet subSet;
     private final String superSetField;
     private final String subSetField;
 
-    public SupersetOfConstraint(PointsToSet SuperSet, PointsToSet SubSet){
+    public PTASupersetOfConstraint(PointsToSet SuperSet, PointsToSet SubSet){
         this(SuperSet, null, SubSet, null);
     }
-    public SupersetOfConstraint(PointsToSet SuperSet, String superSetField, PointsToSet SubSet){
+    public PTASupersetOfConstraint(PointsToSet SuperSet, String superSetField, PointsToSet SubSet){
         this(SuperSet, superSetField, SubSet, null);
     }
-    public SupersetOfConstraint(PointsToSet SuperSet, PointsToSet SubSet, String subSetField){
+    public PTASupersetOfConstraint(PointsToSet SuperSet, PointsToSet SubSet, String subSetField){
         this(SuperSet, null, SubSet, subSetField);
     }
-    public SupersetOfConstraint(PointsToSet SuperSet, String superSetField, PointsToSet SubSet, String subSetField){
+    public PTASupersetOfConstraint(PointsToSet SuperSet, String superSetField, PointsToSet SubSet, String subSetField){
         this.superSet =SuperSet;
         this.subSet =SubSet;
         this.subSetField=subSetField ;
@@ -53,23 +55,23 @@ public class SupersetOfConstraint implements  Constraint{
     public Optional<String> getSuperSetField() {
         return superSetField == null? Optional.empty() : Optional.of(superSetField);
     }
-    public SuperSetOfConstraintType getSuperSetConstraintType(){
+    public PTASuperSetOfConstraintType getSuperSetConstraintType(){
         if(getSuperSetField().isPresent()){
             return getSubSetField().isPresent()?
-                    SuperSetOfConstraintType.FIELD_SUPERSETOF_FIELD
-                    : SuperSetOfConstraintType.SUPERSET_FIELD;
+                    PTASuperSetOfConstraintType.FIELD_SUPERSETOF_FIELD
+                    : PTASuperSetOfConstraintType.SUPERSET_FIELD;
         }
         return getSubSetField().isPresent()?
-                SuperSetOfConstraintType.SUBSET_FIELD
-                : SuperSetOfConstraintType.FIELDLESS;
+                PTASuperSetOfConstraintType.SUBSET_FIELD
+                : PTASuperSetOfConstraintType.FIELDLESS;
     }
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof SupersetOfConstraint)
-            return subSet.equals(((SupersetOfConstraint)obj).getSubSet())
-                    && superSet.equals(((SupersetOfConstraint)obj).getSuperSet())
-                    && getSubSetField().equals(((SupersetOfConstraint)obj).getSubSetField())
-                    && getSuperSetField().equals(((SupersetOfConstraint)obj).getSuperSetField());
+        if (obj instanceof PTASupersetOfConstraint)
+            return subSet.equals(((PTASupersetOfConstraint)obj).getSubSet())
+                    && superSet.equals(((PTASupersetOfConstraint)obj).getSuperSet())
+                    && getSubSetField().equals(((PTASupersetOfConstraint)obj).getSubSetField())
+                    && getSuperSetField().equals(((PTASupersetOfConstraint)obj).getSuperSetField());
         return false;
     }
 

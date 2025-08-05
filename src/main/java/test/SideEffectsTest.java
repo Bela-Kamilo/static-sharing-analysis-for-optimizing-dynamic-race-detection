@@ -59,26 +59,16 @@ public class SideEffectsTest extends Test{
             fail(testClassName);
             return;
         }
-
-        testLog.info(testClassName+".class ");
-        testLog.info("Expected results :");
-        testLog.info(expectedResults.toString());
-        testLog.info("");
-        testLog.info("Actual results :");
-
-    /*   // removeUseMethod(analysisResults);
-        for (var entry : analysisResults.entrySet())
-            testLog.info(entry.getKey() + "=" + entry.getValue());
-        testLog.info("");
-*/
-
         Map<MethodSignature,Set<AccessibleHeapLocation>> expectedREADS=expectedResults.getREADS();
         Map<MethodSignature,Set<AccessibleHeapLocation>> expectedWRITES=expectedResults.getWRITES();
-        if( expectedREADS.equals(READS) && expectedWRITES.equals(WRITES))
+        logResults(READS,WRITES,expectedREADS,expectedWRITES,testClassName);
+       if( expectedREADS.equals(READS) && expectedWRITES.equals(WRITES))
             pass(testClassName);
        else
            fail(testClassName);
     }
+
+
      public ExpectedSideEffects parseTestFile(String filepath,String testclassName) {
          ExpectedSideEffects results = new ExpectedSideEffects();
          String signaturePattern = "<.*>";
@@ -131,10 +121,47 @@ public class SideEffectsTest extends Test{
              }
          }
 
-         return results;
+             return results;
 
      }
+
+     private void logResults(Map<MethodSignature,Set<AccessibleHeapLocation>> READS, Map<MethodSignature,Set<AccessibleHeapLocation>> WRITES,
+                             Map<MethodSignature,Set<AccessibleHeapLocation>> expectedREADS, Map<MethodSignature,Set<AccessibleHeapLocation>> expectedWRITES,
+                             String testClassName){
+         testLog.info("------"+testClassName+".class ------");
+         testLog.info("Expected results :");
+         testLog.info("");
+         testLog.info("     READS:");
+         testLog.info("");
+         for(var entry :expectedREADS.entrySet())
+             testLog.info(entry.getKey() + " ->\n" +
+                     entry.getValue().toString().replace("[","[\t").replace(",",",\n\t")
+                     +"\n");
+         testLog.info("      WRITES:");
+         testLog.info("");
+         for(var entry :expectedWRITES.entrySet())
+             testLog.info(entry.getKey() + " ->\n" +
+                     entry.getValue().toString().replace("[","[\t").replace(",",",\n\t")
+                     +"\n");
+
+         testLog.info("");
+         testLog.info("Actual results :");
+         testLog.info("");
+         testLog.info("     READS:");
+         testLog.info("");
+         for(var entry :READS.entrySet())
+             testLog.info(entry.getKey() + " ->\n" +
+                     entry.getValue().toString().replace("[","[\t").replace(",",",\n\t")
+                     +"\n");
+         testLog.info("      WRITES:");
+         testLog.info("");
+         for(var entry :WRITES.entrySet())
+             testLog.info(entry.getKey() + " ->\n" +
+                     entry.getValue().toString().replace("[","[\t").replace(",",",\n\t")
+                     +"\n");
+    }
 }
+
 class ExpectedSideEffects{
 
     private final Map<MethodSignature, Set<AccessibleHeapLocation>> READS;

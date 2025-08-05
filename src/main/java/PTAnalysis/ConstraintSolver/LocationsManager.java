@@ -1,6 +1,6 @@
 package PTAnalysis.ConstraintSolver;
 
-import PTAnalysis.MemoryLocation;
+import PTAnalysis.ObjectMemoryLocation;
 import PTAnalysis.PointsToSet;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
@@ -17,20 +17,20 @@ import java.util.*;
  * A points-to set for the model is a set variable (SetVar) containing ints
  * */
 public class LocationsManager {
-    private final HashMap<Integer, MemoryLocation> locationsMap;
+    private final HashMap<Integer, ObjectMemoryLocation> locationsMap;
     private final Model model;
     final int totalLocations;
 
     LocationsManager(Model m){
         this.model=m;
         locationsMap= new HashMap<>();
-        totalLocations= MemoryLocation.getLocationCounter();
+        totalLocations= ObjectMemoryLocation.getLocationCounter();
     }
 
-    /**Stores a MemoryLocation in a HashMap
+    /**Stores a ObjectMemoryLocation in a HashMap
      * @param l
      */
-    public void add(MemoryLocation l){
+    public void add(ObjectMemoryLocation l){
         int id =l.getId();
         if(locationsMap.containsKey(id)){
             System.out.println("Location "+id+" already exists in LocationsManager");
@@ -47,7 +47,7 @@ public class LocationsManager {
      */
     public SetVar getOrCreateField(int locationId, String field) {
         if(!locationsMap.containsKey(locationId)) throw new RuntimeException("Location "+locationId+" doesnt exist in LocationsManager");
-        MemoryLocation l = locationsMap.get(locationId);
+        ObjectMemoryLocation l = locationsMap.get(locationId);
 
         if (!l.existsField(field)) {
             SetVar l_field = model.setVar(locationId + "." + field, new int[]{}, Solver.allLocations());

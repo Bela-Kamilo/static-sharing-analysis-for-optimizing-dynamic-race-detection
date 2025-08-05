@@ -1,9 +1,12 @@
 package PTAnalysis;
+
+import PTAnalysis.ConstraintSolver.Constraint;
+
 /** element ∈ set */
-public class ElementOfConstraint implements Constraint{
+public class PTAElementOfConstraint implements Constraint {
     private final ObjectMemoryLocation element;
     private final PointsToSet set;
-   public  ElementOfConstraint(ObjectMemoryLocation e , PointsToSet set ) {
+   public PTAElementOfConstraint(ObjectMemoryLocation e , PointsToSet set ) {
         this.set= set;
         this.element=e;
     }

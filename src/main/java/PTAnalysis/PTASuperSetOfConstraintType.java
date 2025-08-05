@@ -1,6 +1,6 @@
 package PTAnalysis;
 
-public enum SuperSetOfConstraintType {
+public enum PTASuperSetOfConstraintType {
     FIELDLESS,
     SUPERSET_FIELD,
     SUBSET_FIELD,

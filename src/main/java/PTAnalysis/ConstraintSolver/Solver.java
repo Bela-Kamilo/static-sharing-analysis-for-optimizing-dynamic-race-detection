@@ -8,12 +8,9 @@ import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.FailureBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import util.EmptyFormatter;
 import util.LoggerFactory;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
@@ -34,10 +31,10 @@ public class Solver {
         this.solverLog= new LoggerFactory().createLogger("SolverResults");
         this.PTSets= new HashSet<>();
         this.PTconstraints=constraints;
-        AllLocationsArray = IntStream.rangeClosed(1, MemoryLocation.getLocationCounter()).toArray();
+        AllLocationsArray = IntStream.rangeClosed(1, ObjectMemoryLocation.getLocationCounter()).toArray();
         this.model = new Model("Points To Analysis");
         this.locationsManager= new LocationsManager(model);
-        this.solution= new HashMap<>(MemoryLocation.getLocationCounter()*5);
+        this.solution= new HashMap<>(ObjectMemoryLocation.getLocationCounter()*5);
         createModelConstraints();
         org.chocosolver.solver.Solver solver = model.getSolver();
         solver.setSearch( Search.setVarSearch(new FailureBased<SetVar>(model.retrieveSetVars(),new Date().getTime(),1)
@@ -57,27 +54,27 @@ public class Solver {
         model.setObjective(Model.MINIMIZE, totalElements);
    }
     private void storeSetsOfConstraint(Constraint c){
-        if(c instanceof SupersetOfConstraint){
-            this.PTSets.add(((SupersetOfConstraint) c).getSubSet());
-            this.PTSets.add(((SupersetOfConstraint) c).getSuperSet());
-        } else if (c instanceof ElementOfConstraint) {
-           this.PTSets.add(((ElementOfConstraint) c).getSet());
+        if(c instanceof PTASupersetOfConstraint){
+            this.PTSets.add(((PTASupersetOfConstraint) c).getSubSet());
+            this.PTSets.add(((PTASupersetOfConstraint) c).getSuperSet());
+        } else if (c instanceof PTAElementOfConstraint) {
+           this.PTSets.add(((PTAElementOfConstraint) c).getSet());
         }
 
     }
 
     private void PTConstraint2ModelConstraint(Constraint c){
-        if (c instanceof SupersetOfConstraint){
+        if (c instanceof PTASupersetOfConstraint){
 
-            PointsToSet superSet=((SupersetOfConstraint) c).getSuperSet();
-            PointsToSet subSet=((SupersetOfConstraint) c).getSubSet();
+            PointsToSet superSet=((PTASupersetOfConstraint) c).getSuperSet();
+            PointsToSet subSet=((PTASupersetOfConstraint) c).getSubSet();
             SetVar modelSuperSet=getOrCreateModelSetFromPTSet(superSet);
             SetVar modelSubSet=getOrCreateModelSetFromPTSet(subSet);
 
-            switch (((SupersetOfConstraint )c).getSuperSetConstraintType()){
+            switch (((PTASupersetOfConstraint)c).getSuperSetConstraintType()){
                 case FIELD_SUPERSETOF_FIELD: throw new RuntimeException(" found a.f=b.f-like assignment while converting constraints");
                 case SUBSET_FIELD:
-                    Optional<String> field= ((SupersetOfConstraint) c).getSubSetField();
+                    Optional<String> field= ((PTASupersetOfConstraint) c).getSubSetField();
                     if(field.isEmpty()) throw new RuntimeException("SUBSET_FIELD constraint should have subset field");
                     org.chocosolver.solver.constraints.Constraint fieldRead =
                             new org.chocosolver.solver.constraints.Constraint(superSet+"superset of"+subSet+"."+field.get(),
@@ -85,7 +82,7 @@ public class Solver {
                     model.post(fieldRead);
                     break;
                 case SUPERSET_FIELD:
-                    Optional<String> field2= ((SupersetOfConstraint) c).getSuperSetField();
+                    Optional<String> field2= ((PTASupersetOfConstraint) c).getSuperSetField();
                     if(field2.isEmpty()) throw new RuntimeException("SUPERSET_FIELD constraint should have superset field");
                     org.chocosolver.solver.constraints.Constraint fieldAssign =
                             new org.chocosolver.solver.constraints.Constraint(superSet+"."+field2.get()+"superset of"+subSet,
@@ -98,9 +95,9 @@ public class Solver {
             }
            return;
         }
-        if (c instanceof ElementOfConstraint){
-            PointsToSet set=((ElementOfConstraint) c).getSet();
-            MemoryLocation m = ((ElementOfConstraint) c).getElement();
+        if (c instanceof PTAElementOfConstraint){
+            PointsToSet set=((PTAElementOfConstraint) c).getSet();
+            ObjectMemoryLocation m = ((PTAElementOfConstraint) c).getElement();
             locationsManager.add(m);
             SetVar modelSet= getOrCreateModelSetFromPTSet(set);
             model.member(m.getId(),modelSet).post();

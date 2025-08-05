@@ -1,7 +1,7 @@
 package PTAnalysis;
 
+import PTAnalysis.ConstraintSolver.Constraint;
 import PTAnalysis.ConstraintSolver.Solver;
-import util.EmptyFormatter;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.model.SootMethod;
 import sootup.core.signatures.MethodSignature;
@@ -9,9 +9,7 @@ import sootup.core.types.Type;
 import sootup.core.views.View;
 import util.LoggerFactory;
 
-import java.io.IOException;
 import java.util.*;
-import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 
 /** This class implements a field sensitive Andersen's-like points to analysis
@@ -52,7 +50,7 @@ public class PointsToAnalysis {
         Solver solver= new Solver(this.ConstraintGenerator.getConstraints());
         Map<String,PointsToSet> res= solver.solve();
         hasBeenPerformed=true;
-        MemoryLocation.reset();
+        ObjectMemoryLocation.reset();
         return res;
     }
 

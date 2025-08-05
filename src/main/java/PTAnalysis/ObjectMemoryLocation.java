@@ -2,20 +2,18 @@ package PTAnalysis;
 
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /** represents the object instances any ref variable may point to */
-public class MemoryLocation {
+public class ObjectMemoryLocation {
     static private int  locationCounter=1;  //to be incremented each time
                                             // there s a new object created
-                                            //will be used as the id of each MemoryLocation instance
+                                            //will be used as the id of each ObjectMemoryLocation instance
     final private int lineNumber;
     final private int id;
     final private Map<String,PointsToSet> refFields;
 
-    MemoryLocation(int lineNumber){
+    ObjectMemoryLocation(int lineNumber){
         this.id=locationCounter++;
         this.lineNumber=lineNumber;
         this.refFields= new HashMap<>();
@@ -27,7 +25,7 @@ public class MemoryLocation {
     public String toString() {
         return "m"+lineNumber+" ("+id+")";
     }
-    public static int getLocationCounter(){return MemoryLocation.locationCounter-1;}
+    public static int getLocationCounter(){return ObjectMemoryLocation.locationCounter-1;}
 
     public void setField(String field , PointsToSet fieldPTSet){
         refFields.put(field, fieldPTSet);
@@ -40,5 +38,6 @@ public class MemoryLocation {
      * */
     public boolean existsField(String field){ return refFields.containsKey(field);}
     public Iterable<PointsToSet> getAllFields(){return refFields.values();}
-    public  static void reset(){MemoryLocation.locationCounter=1;}      //only call when PTAnalysis is over
+    public  static void reset(){
+        ObjectMemoryLocation.locationCounter=1;}      //only call when PTAnalysis is over
 }

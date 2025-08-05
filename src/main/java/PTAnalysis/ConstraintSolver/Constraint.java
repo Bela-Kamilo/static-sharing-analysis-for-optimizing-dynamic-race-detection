@@ -1,3 +1,3 @@
-package PTAnalysis.ConstraintSolver.GenericSolver;
+package PTAnalysis.ConstraintSolver;
 
 public interface Constraint {}

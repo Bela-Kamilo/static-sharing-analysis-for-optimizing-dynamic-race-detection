@@ -8,7 +8,7 @@ import java.util.logging.Handler;
 import java.util.logging.Logger;
 
 /**
- * Loggers created here create logs in logdir
+ * Loggers created here create logs in <code>LoggerFactory.logdir</code>
  * LoggerFactory keeps track of created logs so that
  * same name logs dont overwrite each other
  */
