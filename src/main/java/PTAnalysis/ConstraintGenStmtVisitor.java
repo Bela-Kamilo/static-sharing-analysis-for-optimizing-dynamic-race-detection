@@ -33,7 +33,9 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     private final Map<Value,PointsToSet> varsToLocationsMap;
     private final Map<MethodSignature, PointsToSet> returnedLocationsMap;
     private final Map<MethodSignature, Vector<PointsToSet>> parametersLocationsMap;
-    private final Set<Constraint> constraints;
+    private final Set<Constraint> PTAconstraints;
+    //private final List<Constraint> SE_WRITESconstraints;
+    //private final List<Constraint> SE_READSconstraints;
     private final int THIS_INDEX=0;
 
     private final Map<MethodSignature, Set<Tuple<PointsToSet,FieldSignature >>> fieldsRead;
@@ -44,7 +46,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     private MethodSignature visitingMethod=null;
 
     ConstraintGenStmtVisitor(){
-        this.constraints= new HashSet<>();
+        this.PTAconstraints = new HashSet<>();
         this.parametersLocationsMap= new HashMap<>();
         this.returnedLocationsMap = new HashMap<>();
         this.methodsInvoked= new HashSet<>();
@@ -76,8 +78,8 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         return methodsInvoked;
     }
 
-    public Set<Constraint> getConstraints() {
-        return constraints;
+    public Set<Constraint> getPTAconstraints() {
+        return PTAconstraints;
     }
 
     //<< x.f(a1,a2...an); >> treat as f(x,a1,a2...an) >>  f.params = args and add f in MethodsInvoked
@@ -97,7 +99,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         if(rightOp instanceof JParameterRef){
             subset=getOrCreateMappingOf(visitingMethod,((JParameterRef) rightOp).getIndex()+1);
             superset=getOrCreateMappingOf(leftOp);
-            constraints.add(new PTASupersetOfConstraint(superset, subset));
+            PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
             return;
         }
 
@@ -106,7 +108,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             //                              it s ok as long as this as a Local doesnt get assigned (which is illegal anyways)
             subset=getOrCreateMappingOf(visitingMethod,THIS_INDEX);
             superset=getOrCreateMappingOf(leftOp);      //left op is 'this'; should be visitingMethod.this
-            constraints.add(new PTASupersetOfConstraint(superset, subset));
+            PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
             return;
         }
 
@@ -121,7 +123,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
         PointsToSet superset =getOrCreateMappingOfMethod(visitingMethod);
         PointsToSet subset=getOrCreateMappingOf(stmt.getOp());
-        constraints.add(new PTASupersetOfConstraint(superset, subset));
+        PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
     }
     @Override
     public void caseRetStmt(@Nonnull JRetStmt stmt){System.out.println("VISITED A RET STATEMENT(?)");}
@@ -161,7 +163,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     private boolean newAssignmentStmtRule(JAssignStmt stmt){
         if(stmt.getRightOp() instanceof JNewExpr) {
             ObjectMemoryLocation l = new ObjectMemoryLocation(stmt.getPositionInfo().getStmtPosition().getFirstLine());
-            constraints.add(new PTAElementOfConstraint(l,getOrCreateMappingOf(stmt.getLeftOp())));
+            PTAconstraints.add(new PTAElementOfConstraint(l,getOrCreateMappingOf(stmt.getLeftOp())));
             return true;
         }
         return false;
@@ -172,7 +174,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         if(copyRuleApplies(leftOp , rightOp)){
             PointsToSet superset =getOrCreateMappingOf(leftOp);
             PointsToSet subset=getOrCreateMappingOf(rightOp);
-            constraints.add(new PTASupersetOfConstraint(superset,  subset));
+            PTAconstraints.add(new PTASupersetOfConstraint(superset,  subset));
             return true;
         }
         return false;
@@ -201,7 +203,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
             PointsToSet superset =getOrCreateMappingOf(leftOp);
             PointsToSet subset=getOrCreateMappingOf(rightOp);
-            constraints.add(new PTASupersetOfConstraint(superset, subset));
+            PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
             return true;
         }
         return false;
@@ -225,8 +227,8 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         if(lvalue.getType() instanceof ArrayType && rvalue.getType() instanceof  ArrayType){
             PointsToSet rvalueSet= getOrCreateMappingOf(rvalue);
             PointsToSet lvalueSet= getOrCreateMappingOf(lvalue);
-            constraints.add(new PTASupersetOfConstraint(lvalueSet,rvalueSet));
-            constraints.add(new PTASupersetOfConstraint(rvalueSet,lvalueSet));
+            PTAconstraints.add(new PTASupersetOfConstraint(lvalueSet,rvalueSet));
+            PTAconstraints.add(new PTASupersetOfConstraint(rvalueSet,lvalueSet));
             return true;
         }
         return false;
@@ -251,7 +253,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             if(subsetField == null) throw new RuntimeException("Field-Read-Assignment-Statement rule applied on no field assignment");
             PointsToSet superset =getOrCreateMappingOf(leftOp);
             PointsToSet subset=getOrCreateMappingOf(rightOp);
-            constraints.add(new PTASupersetOfConstraint(superset,  subset, subsetField));
+            PTAconstraints.add(new PTASupersetOfConstraint(superset,  subset, subsetField));
             return true;
         }
         return false;
@@ -276,7 +278,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             if(superSetField == null) throw new RuntimeException("Field-Assign-Assignment-Statement rule applied on no field assignment");
             PointsToSet superset =getOrCreateMappingOf(leftOp);
             PointsToSet subset=getOrCreateMappingOf(rightOp);
-            constraints.add(new PTASupersetOfConstraint(superset,superSetField,  subset));
+            PTAconstraints.add(new PTASupersetOfConstraint(superset,superSetField,  subset));
             return true;
         }
         return false;
@@ -415,7 +417,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
             //x.f(a); >> f.this=x
             PointsToSet superset =getOrCreateMappingOf(expr.getMethodSignature(), THIS_INDEX);
             PointsToSet subset=getOrCreateMappingOf(expr.getBase());
-            constraints.add(new PTASupersetOfConstraint(superset, subset));
+            PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
         }
 
         @Override
@@ -442,7 +444,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
                     continue;
                 PointsToSet superset =getOrCreateMappingOf(invokeExpr.getMethodSignature(), i);
                 PointsToSet subset=getOrCreateMappingOf(arg);
-                constraints.add(new PTASupersetOfConstraint(superset, subset));
+                PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
                 i++;
             }
         }

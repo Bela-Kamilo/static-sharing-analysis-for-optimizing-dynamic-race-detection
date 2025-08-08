@@ -20,8 +20,6 @@ import java.util.logging.Logger;
  *  Every statement (and method) is visited once
 */
 public class PointsToAnalysis {
-
-
     ConstraintGenStmtVisitor ConstraintGenerator;
     Set <MethodSignature> visitedMethods;
     View view;
@@ -35,21 +33,23 @@ public class PointsToAnalysis {
     }
 
     /** performs the analysis on reachable code from entryMethod
-     * @return A mapping of jimple value holders to sets of memory locations
+     * @return A mapping of jimple value holders to sets of memory locations representing allocated objects
      * value holders are in the form of :
      *
-     * <Class: MethodSignature>:local   -   for locals
-     * <Class: StaticField>             -   for static fields
-     * X.<Class: Type field>            -   for instance fields, where X is an integer representing
-     *                                      an abstract memory location
-     * <Class: MethodSignature>         -   for the possible locations the method might return
-     *
+     * {@literal <Class: MethodSignature>:local   -   for locals } <br>
+     * {@literal <Class: StaticField>             -   for static fields } <br>
+     * {@literal X.<Class: Type field>            -   for instance fields, where X is an integer representing
+     *                                                  an abstract memory location of an object
+     * } <br
+     * {@literal <Class: MethodSignature>         -   for the possible locations the method might return} <br>
+     *}
      */
     public Map<String, PointsToSet> analise(SootMethod entryMethod){
         GenerateConstraints(entryMethod);
-        Solver solver= new Solver(this.ConstraintGenerator.getConstraints());
+        Solver solver= new Solver(this.ConstraintGenerator.getPTAconstraints());
         Map<String,PointsToSet> res= solver.solve();
         hasBeenPerformed=true;
+        //SOLVE FOR SIDE EFFECTS
         ObjectMemoryLocation.reset();
         return res;
     }
@@ -57,7 +57,7 @@ public class PointsToAnalysis {
     /** passes all methods reachable from entryMethod.
     * We go over each method only once
     */
-     public void GenerateConstraints(SootMethod entryMethod){
+     private void GenerateConstraints(SootMethod entryMethod){
         //pass entry method
         generateConstraintsForSingleMethod(entryMethod);
         //pass every other method
@@ -95,12 +95,12 @@ public class PointsToAnalysis {
     public void PrintConstraintsToLog(){
         constraintLogger.info("---------\nConstraints:");
         int i=1;
-        for (Constraint c : ConstraintGenerator.getConstraints() )
+        for (Constraint c : ConstraintGenerator.getPTAconstraints() )
             constraintLogger.info((i++) + " "+ c);
         constraintLogger.info("---------");
     }
 
-    public Set<Constraint> getConstraints(){return ConstraintGenerator.getConstraints();}
+    public Set<Constraint> getConstraints(){return ConstraintGenerator.getPTAconstraints();}
 
     public Map<MethodSignature,Set<AccessibleHeapLocation>>  getReads(){
         if(!hasBeenPerformed) throw new IllegalStateException("analise() need first be called to yield results");

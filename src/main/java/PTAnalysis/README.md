@@ -189,7 +189,7 @@ Call ``` Map<String, Set<Integer>> analise(SootMethod)``` located in ```PointsTo
 see [retrieving a Sootmethod](https://soot-oss.github.io/SootUp/latest/getting-started/)</br>
 
 The analysis is performed on [Jimple IR](https://soot-oss.github.io/SootUp/latest/jimple/)
-and so the mapping is from Jimple value holders to (sets of) abstract locations
+and so the mapping is from Jimple value holders to (sets of) abstract locations of allocated objects
 
 ------
 # SIDE EFFECTS

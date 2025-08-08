@@ -28,14 +28,12 @@ public class SupersetOfConstraint<T> implements GenericConstraint<T> {
     public Set<T> getSubSet() {
         return subSet;
     }
-
     public Set<T> getSuperSet() {
         return superSet;
     }
     public String getSubSetName() {
         return subSetName;
     }
-
     public String getSuperSetName() {
         return superSetName;
     }

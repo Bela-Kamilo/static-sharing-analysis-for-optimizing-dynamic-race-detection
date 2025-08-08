@@ -29,23 +29,36 @@ public class GenericSolver<T> {
     private final Logger solverLog;
     private final LockedVector<T> elements;
     //might remove the locked classes idk
-    private final LockedHashMap<Set<T>, SetVar> sets2Vars;
+    private final LockedIdentityHashMap<Set<T>, SetVar> sets2Vars;
     //private final LockedHashMap<SetVar, Set<T>> vars2Sets;
 
-    public GenericSolver(Set<GenericConstraint<T>> constraints , String problemName){
+    private GenericSolver(String problemName){
+        this.model = new Model(problemName);
+        this.solverLog= new LoggerFactory().createLogger(problemName+" SolverResults");
+        this.elements= new LockedVector<>();
+        this.sets2Vars= new LockedIdentityHashMap<>();
+        //this.vars2Sets= new LockedHashMap<>();
+    }
+
+    public GenericSolver(Collection <GenericConstraint<T>> constraints , String problemName){
         this(problemName);
         //run through every ElementsOfConstraint to note every possible element (need it for SetVar UB)
         for(GenericConstraint<T> c : constraints){
-            if(c instanceof ElementOfConstraint<T>)
+            if(c instanceof ElementOfConstraint<T>) {
                 createElementIndex(((ElementOfConstraint<T>) c).getElement());
+            }
         }
         elements.lock();
-        //run through every SupersetOfConstraint to create all SetVars
+        //run through every Constraint to create all SetVars
         for(GenericConstraint<T> c : constraints){
             if(c instanceof SupersetOfConstraint<T>){
                 createSetVar(((SupersetOfConstraint<T>) c).getSuperSet(),((SupersetOfConstraint<T>) c).getSuperSetName(),null);
                 createSetVar(((SupersetOfConstraint<T>) c).getSubSet(),((SupersetOfConstraint<T>) c).getSubSetName(),null);
             }
+            else if(c instanceof ElementOfConstraint<T>)
+                createSetVar(((ElementOfConstraint<T>) c).getSet(),((ElementOfConstraint<T>) c).getSetName(),null);
+            else
+                throw new IllegalArgumentException();
         }
         sets2Vars.lock();
       //vars2Sets.lock();
@@ -61,13 +74,6 @@ public class GenericSolver<T> {
                 , model.retrieveSetVars()));
     }
 
-    private GenericSolver(String problemName){
-        this.model = new Model(problemName);
-        this.solverLog= new LoggerFactory().createLogger(problemName+" SolverResults");
-        this.elements= new LockedVector<>();
-        this.sets2Vars= new LockedHashMap<>();
-        //this.vars2Sets= new LockedHashMap<>();
-    }
 
     private void addConstraint(GenericConstraint<T> c){
         if(c instanceof ElementOfConstraint<T>){
@@ -75,10 +81,10 @@ public class GenericSolver<T> {
             SetVar set = getSetVar(((ElementOfConstraint<T>) c).getSet());
             model.member(elementIndex ,set).post();
         }
-        if(c instanceof SupersetOfConstraint<T>){
+        else if(c instanceof SupersetOfConstraint<T>){
            SetVar superset = getSetVar(((SupersetOfConstraint<T>) c).getSuperSet());
            SetVar subset = getSetVar(((SupersetOfConstraint<T>) c).getSubSet());
-            model.subsetEq(subset,subset).post();
+            model.subsetEq(new SetVar[] {subset,superset}).post();
         }
         else
             throw new IllegalArgumentException();
@@ -100,8 +106,7 @@ public class GenericSolver<T> {
         SetVar toBe;
                     //default upper bound
         if (allPossibleValues == null) {
-            toBe = model.setVar(setName, ArrayUtils.array(0, elements.size() - 1));
-
+            toBe = model.setVar(setName, new int[] {}, ArrayUtils.array(0, elements.size()-1));
         } else {    //allPossibleValues upper bound
             int[] UBIDs = new int[allPossibleValues.size()];
             int i = 0;
@@ -122,11 +127,15 @@ public class GenericSolver<T> {
 
     public void solve(){
 
+        /*
         org.chocosolver.solver.Solver solver = model.getSolver();
         solver.setSearch( Search.setVarSearch(new FailureBased<SetVar>(model.retrieveSetVars(),new Date().getTime(),1)
                 ,new SetDomainMin()
                 ,false
-                , model.retrieveSetVars()));boolean morethanonesolutions=false;
+                , model.retrieveSetVars()));
+        */
+
+        boolean morethanonesolutions=false;
         try{
             while(model.getSolver().solve()){
                 solverLog.info("+++solution found+++");
@@ -165,10 +174,10 @@ public class GenericSolver<T> {
     }
 }
 
-class LockedHashMap<K,L> extends HashMap<K,L> {
+class LockedIdentityHashMap<K,L> extends IdentityHashMap<K,L> {
     private boolean locked ;
 
-    public LockedHashMap(){ this.locked= false;}
+    public LockedIdentityHashMap(){ this.locked= false;}
 
     public void lock(){ this.locked=true;}
 
