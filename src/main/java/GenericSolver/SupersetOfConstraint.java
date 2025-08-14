@@ -1,6 +1,4 @@
-package PTAnalysis.ConstraintSolver.GenericSolver;
-
-import PTAnalysis.ConstraintSolver.Constraint;
+package GenericSolver;
 
 import java.util.Objects;
 import java.util.Set;

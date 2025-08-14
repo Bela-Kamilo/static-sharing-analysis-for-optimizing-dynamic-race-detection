@@ -1,5 +1,7 @@
 package PTAnalysis;
 
+import GenericSolver.GenericConstraint;
+import GenericSolver.SupersetOfConstraint;
 import PTAnalysis.ConstraintSolver.Constraint;
 import sootup.core.jimple.basic.LValue;
 import sootup.core.jimple.basic.Local;
@@ -30,13 +32,16 @@ import java.util.List;
  * */
 public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
 
+    //PTA data structures
     private final Map<Value,PointsToSet> varsToLocationsMap;
     private final Map<MethodSignature, PointsToSet> returnedLocationsMap;
     private final Map<MethodSignature, Vector<PointsToSet>> parametersLocationsMap;
     private final Set<Constraint> PTAconstraints;
-    //private final List<Constraint> SE_WRITESconstraints;
-    //private final List<Constraint> SE_READSconstraints;
     private final int THIS_INDEX=0;
+    //Side Effects data structures
+    private final Set<GenericConstraint<AccessibleHeapLocation>> sideEffectsConstraints;
+    private final Map<MethodSignature,Set<AccessibleHeapLocation>> readSets;
+    private final Map<MethodSignature,Set<AccessibleHeapLocation>> writeSets;
 
     private final Map<MethodSignature, Set<Tuple<PointsToSet,FieldSignature >>> fieldsRead;
     private final Map<MethodSignature, Set<Tuple<PointsToSet,FieldSignature>>> fieldsWritten;
@@ -62,6 +67,9 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
                 return r==0? 1 : r;
             }
         });
+        this.sideEffectsConstraints= new HashSet<>();
+        this.readSets= new HashMap<>();
+        this.writeSets= new HashMap<>();
     }
 
     public void setVisitingMethod(MethodSignature method){
@@ -86,7 +94,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     @Override
     public void caseInvokeStmt(@Nonnull JInvokeStmt stmt) {
         stmt.getInvokeExpr().accept(new ConstraintGenInvokeVisitor() );
-
+        sideEffectsInvocationValueRule(stmt.getInvokeExpr());
     }
 
     public void caseIdentityStmt(@Nonnull JIdentityStmt stmt) {
@@ -153,6 +161,7 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
         fieldAssignAssignmentStmtRule(stmt);
         sideEffectReadStmtRule(stmt);
         sideEffectWriteStmtRule(stmt);
+        sideEffectsInvocationValueRule(stmt.getRightOp());
         return;
     }
 
@@ -287,26 +296,79 @@ public class ConstraintGenStmtVisitor extends AbstractStmtVisitor {
     /*              SIDE EFFECTS RULES
     ------------------------------------------------------------------------
      */
-    private void sideEffectReadStmtRule(JAssignStmt stmt){
+    private boolean sideEffectReadStmtRule(JAssignStmt stmt){
        Value rightOp=stmt.getRightOp();
 
         if(rightOp instanceof JInstanceFieldRef){
            FieldSignature field = ((JInstanceFieldRef) rightOp).getFieldSignature();
            PointsToSet baseSet = getOrCreateMappingOf(((JInstanceFieldRef) rightOp).getBase());
            fieldsRead.get(visitingMethod).add(new Tuple<>(baseSet,field));
+           return true;
         }
+        return false;
     }
 
-    private void sideEffectWriteStmtRule(JAssignStmt stmt){
+    private boolean sideEffectWriteStmtRule(JAssignStmt stmt){
         LValue leftOp=stmt.getLeftOp();
 
         if(leftOp instanceof JInstanceFieldRef){
             FieldSignature field  = ((JInstanceFieldRef) leftOp).getFieldSignature();
             PointsToSet baseSet = getOrCreateMappingOf(((JInstanceFieldRef) leftOp).getBase());
             fieldsWritten.get(visitingMethod).add(new Tuple<>(baseSet,field));
+            return true;
         }
+        return false;
     }
+
+    private boolean sideEffectsInvocationValueRule(Value v){
+        if(v instanceof AbstractInvokeExpr){
+            MethodSignature m = ((AbstractInvokeExpr) v).getMethodSignature();
+            sideEffectsConstraints.add(new SupersetOfConstraint<>(
+                    getOrCreateMethodReadSet(visitingMethod),visitingMethod+"._READS",
+                    getOrCreateMethodReadSet(m), m+"._READS"));
+            sideEffectsConstraints.add(new SupersetOfConstraint<>(
+                    getOrCreateMethodWriteSet(visitingMethod),visitingMethod+"._WRITES",
+                    getOrCreateMethodWriteSet(m), m+"._WRITES"));
+            return true;
+        }
+        return false;
+    }
+
+    private Set<AccessibleHeapLocation> getOrCreateMethodReadSet(MethodSignature m){
+        if(readSets.containsKey(m)) return readSets.get(m);
+        Set<AccessibleHeapLocation> toBe = new HashSet<>();
+        readSets.put(m,toBe);
+        return toBe;
+    }
+    private Set<AccessibleHeapLocation> getOrCreateMethodWriteSet(MethodSignature m){
+        if(writeSets.containsKey(m)) return writeSets.get(m);
+        Set<AccessibleHeapLocation> toBe = new HashSet<>();
+        writeSets.put(m,toBe);
+        return toBe;
+    }
+
     //--------------------------------------------------------------------
+
+
+    public Map<MethodSignature, Set<AccessibleHeapLocation>> getReadSets() {
+        return Collections.unmodifiableMap(readSets);
+    }
+
+    public Map<MethodSignature, Set<AccessibleHeapLocation>> getWriteSets() {
+        return Collections.unmodifiableMap(writeSets);
+    }
+
+    public Map<MethodSignature, Set<Tuple<PointsToSet, FieldSignature>>> getFieldsRead() {
+        return Collections.unmodifiableMap(fieldsRead);
+    }
+
+    public Map<MethodSignature, Set<Tuple<PointsToSet, FieldSignature>>> getFieldsWritten() {
+        return Collections.unmodifiableMap(fieldsWritten);
+    }
+
+    public Set<GenericConstraint<AccessibleHeapLocation>> getSEConstraints(){
+        return Collections.unmodifiableSet(sideEffectsConstraints);
+    }
 
     public Set<AccessibleHeapLocation> getWritesOf(MethodSignature m){
         Set<AccessibleHeapLocation> res= new HashSet<>();

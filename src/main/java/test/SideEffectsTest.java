@@ -3,6 +3,7 @@ package test;
 import PTAnalysis.AccessibleHeapLocation;
 import PTAnalysis.PointsToAnalysis;
 import PTAnalysis.PointsToSet;
+import SideEffects.SideEffectsTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sootup.core.signatures.FieldSignature;
@@ -45,14 +46,12 @@ public class SideEffectsTest extends Test{
         pathView = SootUpStuff.getViewFromPath(basePath+"/"+parentDir);
         ExpectedSideEffects expectedResults = parseTestFile(filepath,testClassName);
         SootMethod entryMethod=SootUpStuff.getMethodFromView(pathView,"<"+testClassName+": "+entryMethodString+">");
-        PointsToAnalysis analysis = new PointsToAnalysis(pathView);
-        analysis.analise(entryMethod);
-        analysis.getReads();
+        SideEffectsTracker SideEffectsAnalysis = new SideEffectsTracker(pathView,entryMethod);
         Map<MethodSignature, Set<AccessibleHeapLocation>> READS;
         Map<MethodSignature, Set<AccessibleHeapLocation>> WRITES;
         try {
-         READS=analysis.getReads();
-         WRITES=analysis.getWrites();
+         READS=SideEffectsAnalysis.getReads();
+         WRITES=SideEffectsAnalysis.getWrites();
         }
         catch (Exception e){
             System.err.println(e);

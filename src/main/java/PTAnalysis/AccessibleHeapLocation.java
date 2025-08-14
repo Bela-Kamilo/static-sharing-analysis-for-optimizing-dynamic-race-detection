@@ -8,8 +8,9 @@ import java.util.Objects;
 /**
  * Represents a heap location that takes part in a memory access, that is a read or a write.
  * A field of an object instance. ex. 1.SomeField
+ * This class is immutable
  */
-public class AccessibleHeapLocation {
+public final class AccessibleHeapLocation {
     private final int memoryLocation;
     private final FieldSignature field;
     public AccessibleHeapLocation(int memoryLocation, FieldSignature f){

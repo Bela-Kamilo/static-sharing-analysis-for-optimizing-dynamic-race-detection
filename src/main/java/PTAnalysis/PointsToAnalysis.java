@@ -1,20 +1,23 @@
 package PTAnalysis;
 
+import GenericSolver.GenericConstraint;
 import PTAnalysis.ConstraintSolver.Constraint;
 import PTAnalysis.ConstraintSolver.Solver;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.model.SootMethod;
+import sootup.core.signatures.FieldSignature;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.Type;
 import sootup.core.views.View;
 import util.LoggerFactory;
+import util.Tuple;
 
 import java.util.*;
 import java.util.logging.Logger;
 
 /** This class implements a field sensitive Andersen's-like points to analysis
  *  on jimple code. We do not need to deal with dereferencing and such here.
- *  There s a PointsToSet for every reference local, non-null method, method parameter
+ *  There s a PointsToSet for every reference local, non-void method, method parameter
  *  and field (of reference type) possibly held by an instance.
  *  Assignment statements and method invocations generate constraints on the PointsToSets.
  *  Every statement (and method) is visited once
@@ -100,7 +103,17 @@ public class PointsToAnalysis {
         constraintLogger.info("---------");
     }
 
-    public Set<Constraint> getConstraints(){return ConstraintGenerator.getPTAconstraints();}
+    public Set<GenericConstraint<AccessibleHeapLocation>> getSEConstraints(){return ConstraintGenerator.getSEConstraints();}
+
+    public Map<MethodSignature , Set<Tuple<PointsToSet, FieldSignature>>> getFieldsRead(){
+        if(!hasBeenPerformed) throw new IllegalStateException("analise() need first be called to yield results");
+        return ConstraintGenerator.getFieldsRead();
+    }
+
+    public Map<MethodSignature , Set<Tuple<PointsToSet, FieldSignature>>> getFieldsWritten(){
+        if(!hasBeenPerformed) throw new IllegalStateException("analise() need first be called to yield results");
+       return ConstraintGenerator.getFieldsWritten();
+    }
 
     public Map<MethodSignature,Set<AccessibleHeapLocation>>  getReads(){
         if(!hasBeenPerformed) throw new IllegalStateException("analise() need first be called to yield results");
@@ -109,6 +122,14 @@ public class PointsToAnalysis {
     public Map<MethodSignature,Set<AccessibleHeapLocation>>  getWrites(){
         if(!hasBeenPerformed) throw new IllegalStateException("analise() need first be called to yield results");
         return ConstraintGenerator.getWrites();
-}
+    }
+    public Map<MethodSignature , Set<AccessibleHeapLocation>> getReadSets(){
+        return ConstraintGenerator.getReadSets();
+    }
+    public Map<MethodSignature , Set<AccessibleHeapLocation>> getWriteSets(){
+        return ConstraintGenerator.getWriteSets();
+    }
+
+public boolean hasBeenPerformed(){return hasBeenPerformed;}
 
 }

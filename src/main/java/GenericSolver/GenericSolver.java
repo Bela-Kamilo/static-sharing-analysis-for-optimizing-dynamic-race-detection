@@ -1,6 +1,5 @@
-package PTAnalysis.ConstraintSolver.GenericSolver;
+package GenericSolver;
 
-import PTAnalysis.ConstraintSolver.Constraint;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.search.strategy.Search;
@@ -35,8 +34,8 @@ public class GenericSolver<T> {
     private GenericSolver(String problemName){
         this.model = new Model(problemName);
         this.solverLog= new LoggerFactory().createLogger(problemName+" SolverResults");
-        this.elements= new LockedVector<>();
-        this.sets2Vars= new LockedIdentityHashMap<>();
+        this.elements= new LockedVector<T>();
+        this.sets2Vars= new LockedIdentityHashMap<Set<T>,SetVar>();
         //this.vars2Sets= new LockedHashMap<>();
     }
 
@@ -161,6 +160,7 @@ public class GenericSolver<T> {
             Set<T> set = entry.getKey();
             for(Integer i :setVarElements)
                 set.add(elements.get(i));
+            solverLog.info(entry.getValue().getName()+"="+set.toString());
         }
     }
     IntVar totalElementsOfSetVarsOfModel( ){

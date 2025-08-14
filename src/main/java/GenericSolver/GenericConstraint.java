@@ -1,4 +1,4 @@
-package PTAnalysis.ConstraintSolver.GenericSolver;
+package GenericSolver;
 
 public interface GenericConstraint<T> {
 }
