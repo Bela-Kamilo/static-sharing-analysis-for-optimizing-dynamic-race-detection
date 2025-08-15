@@ -1,0 +1,9 @@
+<Read1: void a()>._READS={1.<A: A f>}
+<Read1: void a()>._WRITES={}
+
+
+<A: void <init>()>._READS={}
+<A: void <init>()>._WRITES={}
+
+<java.lang.Object: void <init>()>._READS={}
+<java.lang.Object: void <init>()>._WRITES={}

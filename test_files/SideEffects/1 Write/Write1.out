@@ -1,0 +1,15 @@
+<Write1: void a()>._WRITES={
+	1.<A: int primField1>, 
+	1.<A: java.lang.String primField2>,
+	1.<A: double primField3>
+}
+
+
+<Write1: void a()>._READS={}
+
+
+<A: void <init>()>._READS={}
+<A: void <init>()>._WRITES={}
+
+<java.lang.Object: void <init>()>._READS={}
+<java.lang.Object: void <init>()>._WRITES={}

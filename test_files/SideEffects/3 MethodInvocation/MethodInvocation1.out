@@ -1,0 +1,20 @@
+<MethodInvocation1: void a()>._READS={
+	1.<A: A f>,	
+	2.<A: A f>,
+	3.<A: A f>}
+
+<MethodInvocation1: void a()>._WRITES={}
+
+
+
+<MethodInvocation1: long sub_a(A)>._READS={
+	1.<A: A f>,
+	3.<A: A f>}
+<MethodInvocation1: long sub_a(A)>._WRITES={}
+
+
+<A: void <init>()>._READS={}
+<A: void <init>()>._WRITES={}
+
+<java.lang.Object: void <init>()>._READS={}
+<java.lang.Object: void <init>()>._WRITES={}

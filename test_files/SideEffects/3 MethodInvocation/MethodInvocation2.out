@@ -1,0 +1,20 @@
+<MethodInvocation2: void a()>._WRITES={
+	1.<A: int primField1>,
+	
+	2.<A: int primField1>, 
+	2.<A: java.lang.String primField2>,
+	2.<A: double primField3>
+}
+<MethodInvocation2: void a()>._READS={}
+
+<MethodInvocation2: java.lang.String sub_a(int)>._WRITES={
+	2.<A: int primField1>, 
+	2.<A: java.lang.String primField2>,
+	2.<A: double primField3>
+	}
+	
+<MethodInvocation2: java.lang.String sub_a(int)>._READS={}
+
+<A: void <init>()>._READS={}
+<A: void <init>()>._WRITES={}
+<java.lang.Object: void <init>()>._WRITES={}
