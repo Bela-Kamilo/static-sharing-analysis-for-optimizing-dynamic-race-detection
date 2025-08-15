@@ -14,7 +14,7 @@ import java.util.stream.Stream;
  */
 public abstract class Test {
     private final String testName;
-    protected int testsCount=1;
+    protected int testsCount=0;
     public static final String ANSI_RED = "\u001B[31m";
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";

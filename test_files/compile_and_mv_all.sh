@@ -12,7 +12,7 @@ if [ "$1" = "all" ] || [ "$1" = "pta" ]; then
 fi
 
 if [ "$1" = "all" ] || [ "$1" = "se" ] || [ "$1" = "sideeffects" ] || ([[ "$1" = "side" ]] && [[ "$2" = "effects" ]]); then
-	javac -d SideEffects/1\ WRITE  SideEffects/1\ WRITE/src/*.java
-	javac -d SideEffects/2\ READ  SideEffects/2\ READ/src/*.java
-
+	javac -d SideEffects/1\ Write  SideEffects/1\ Write/src/*.java
+	javac -d SideEffects/2\ Read  SideEffects/2\ Read/src/*.java
+	javac -d SideEffects/3\ MethodInvocation  SideEffects/3\ MethodInvocation/src/*.java
 fi
