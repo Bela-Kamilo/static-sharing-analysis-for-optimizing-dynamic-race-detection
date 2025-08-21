@@ -52,7 +52,6 @@ public class SideEffectsTracker {
             MethodSignature m = entry.getKey();
             Set<Tuple<PointsToSet,FieldSignature>> fieldAccesses = entry.getValue();
             //get field read accesses
-            if(fieldAccesses.isEmpty()) READS.put(m,new HashSet<>());   //empty set
             for(Tuple<PointsToSet,FieldSignature> fieldRead : fieldAccesses){
                 FieldSignature field = fieldRead.getElem2();
                 //for every possible Object Location that may be the base
@@ -74,7 +73,6 @@ public class SideEffectsTracker {
             MethodSignature m = entry.getKey();
             Set<Tuple<PointsToSet,FieldSignature>> fieldAccesses = entry.getValue();
             //get field read accesses
-            if(fieldAccesses.isEmpty()) WRITES.put(m,new HashSet<>());   //empty set
             for(Tuple<PointsToSet,FieldSignature> fieldWrite : entry.getValue()){
                 FieldSignature field = fieldWrite.getElem2();
                 //for every possible Object Location that may be the base
@@ -83,7 +81,7 @@ public class SideEffectsTracker {
                     if ( WRITES.containsKey(m) )
                          writesOfm =WRITES.get(m);
                     else {
-                         writesOfm= new HashSet<AccessibleHeapLocation>();
+                         writesOfm= new HashSet<>();
                         WRITES.put(m, writesOfm);
                     }
                     SE_Constraints.add( new ElementOfConstraint<>(new AccessibleHeapLocation(l,field),  writesOfm , m.toString()+"._WRITES") );
@@ -92,7 +90,9 @@ public class SideEffectsTracker {
         }
 
         //SOLVE THEM
-        new GenericSolver<AccessibleHeapLocation>(SE_Constraints, "SideEffects").solve();
+        String className=entryMethod.toString().substring(1,entryMethod.toString().indexOf(':'));
+        new GenericSolver<AccessibleHeapLocation>(SE_Constraints, className+" SideEffects").solve();
+        return;
     }
 
 

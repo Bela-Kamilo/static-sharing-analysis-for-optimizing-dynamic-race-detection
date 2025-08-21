@@ -11,9 +11,8 @@
 	1.<A: java.lang.String primField2>,
 	1.<A: double primField3>,
 	2.<A: int primField1>, 
-	2.<A: double primField3>,
-	
-	2.<A: java.lang.String primField2>
+	2.<A: java.lang.String primField2>,
+	2.<A: double primField3>
 }
 
 <MethodInvocation3: long sub_a(A)>._WRITES={}

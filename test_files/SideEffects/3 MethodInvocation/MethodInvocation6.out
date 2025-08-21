@@ -4,15 +4,12 @@
 	
 	1.<A: java.lang.String primField2>,
 	2.<A: java.lang.String primField2>,
-
 }
 <MethodInvocation6: void a()>._READS={
 	1.<A: int primField1>, 
 	2.<A: int primField1>, 
 	
-	
-	3.<A: double primField3>
-	
+	3.<A: double primField3>	
 }
 
 <MethodInvocation6: long sub_a(A)>._WRITES={
