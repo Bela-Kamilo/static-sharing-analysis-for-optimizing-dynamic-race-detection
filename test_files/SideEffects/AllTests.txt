@@ -1,0 +1,592 @@
+			Write1
+A x = new A();					  $stack2 = new A;                                  
+x.primField1=10;                                  specialinvoke $stack2.<A: void <init>()>();
+x.primField2="10";                                l1 = $stack2;
+x.primField3=10.0;                                $stack2.<A: int primField1> = 10;
+                                                  $stack2.<A: java.lang.String primField2> = "10";
+                                                  $stack2.<A: double primField3> = 10.0;
+
+-------						  -------
+
+<Write1: void a()>._WRITES={
+	1.<A: int primField1>, 
+	1.<A: java.lang.String primField2>,
+	1.<A: double primField3>
+}
+
+
+<Write1: void a()>._READS={}
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+			Read1
+A x = new A();  //1 allocated			$stack3 = new A;
+A y = x.f;     //1.f read                       specialinvoke $stack3.<A: void <init>()>();
+                                                l2 = $stack3.<A: A f>;
+
+-------
+
+<Read1: void a()>._READS={1.<A: A f>}
+<Read1: void a()>._WRITES={}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			Read2
+boolean condition= true;		  if 1 == 0 goto label1;
+//1 and 2 allocated                         $stack4 = new A;
+A x=(condition) ? new A() : new A();        specialinvoke $stack4.<A: void <init>()>();
+A y =x.f;     //1.f ,2.f read           
+                                            goto label2;
+                                        
+                                          label1:
+                                            $stack4 = new A;
+                                            specialinvoke $stack4.<A: void <init>()>();
+                                        
+                                          label2:
+                                            l3 = $stack4.<A: A f>;
+
+-------
+
+<Read2: void a()>._READS={
+	1.<A: A f>, 
+	2.<A: A f>
+}
+<Read2: void a()>._WRITES={}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			MethodInvocation1
+A x = new A();    //1 allocated			$stack3 = new A;
+sub_a(x);                                       specialinvoke $stack3.<A: void <init>()>();
+x = new A();    //2 allocated                   l1#0 = $stack3;
+A y =x.f;     //2.f read                        virtualinvoke this.<MethodInvocation1: long sub_a(A)>($stack3);
+                                                $stack4 = new A;
+                                                specialinvoke $stack4.<A: void <init>()>();
+                                                l2 = $stack4.<A: A f>;
+public long sub_a(A param1){ //param1={1}
+    A y = param1.f;   //1.f read		<MethodInvocation1: long sub_a(A)>
+    A z = new A().f;  //3.f read                {
+    return 2;                                       l1 := @parameter0: A;
+  }                                                 l2 = l1.<A: A f>;
+                                                    $stack4 = new A;
+                                                    specialinvoke $stack4.<A: void <init>()>();
+                                                    l3 = $stack4.<A: A f>;
+                                                }
+
+
+
+-------
+
+<MethodInvocation1: void a()>._READS={
+	1.<A: A f>,	
+	2.<A: A f>,
+	3.<A: A f>}
+
+<MethodInvocation1: void a()>._WRITES={}
+
+
+
+<MethodInvocation1: long sub_a(A)>._READS={
+	1.<A: A f>,
+	3.<A: A f>}
+<MethodInvocation1: long sub_a(A)>._WRITES={}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			MethodInvocation2
+
+
+...a(){
+
+sub_a(1);					virtualinvoke this.
+						<MethodInvocation2: java.lang.String sub_a(int)>(1);
+A x = new A();                                  $stack2 = new A;
+x.primField1 = 20;  //1.primField1 written      specialinvoke $stack2.<A: void <init>()>();
+                                                l1 = $stack2;
+                                                $stack2.<A: int primField1> = 20;
+
+}
+
+
+
+
+
+public String sub_a(int param1){		<MethodInvocation2: java.lang.String sub_a(int)>{
+    A x = new A();                                  $stack3 = new A;
+    x.primField1=10;    //2.primField1 written      specialinvoke $stack3.<A: void <init>()>();
+    x.primField2="10";  //2.primField2 written      l2 = $stack3;
+    x.primField3=10.0;  //2.primField3 written      $stack3.<A: int primField1> = 10;
+    return null;                                    $stack3.<A: java.lang.String primField2> = "10";
+  }                                                 $stack3.<A: double primField3> = 10.0;
+                                                
+                                                    return null;
+                                                }   
+                                                    
+
+-------
+
+<MethodInvocation2: void a()>._WRITES={
+	1.<A: int primField1>,
+	
+	2.<A: int primField1>, 
+	2.<A: java.lang.String primField2>,
+	2.<A: double primField3>
+}
+<MethodInvocation2: void a()>._READS={}
+
+<MethodInvocation2: java.lang.String sub_a(int)>._WRITES={
+	2.<A: int primField1>, 
+	2.<A: java.lang.String primField2>,
+	2.<A: double primField3>
+	}
+	
+<MethodInvocation2: java.lang.String sub_a(int)>._READS={}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			MethodInvocation3
+...a(){
+
+boolean condition = true;			if 1 == 0 goto label1;
+A x=(condition) ? new A() : new A();              $stack6 = new A;
+//1 and 2 allocated                               specialinvoke $stack6.<A: void <init>()>();
+x.primField1=10;                                                                                                  
+//writes 1.primField1 , 2.primField1              goto label2;
+x.primField2="10";                                                                                                
+//writes 1.primField2 , 2.primField2            label1:
+x.primField3=10.0;                                $stack6 = new A;
+// writes 1.primfield3 , 2.primField3             specialinvoke $stack6.<A: void <init>()>();
+                                                                                                                  
+int x1 =x.primField1;                           label2:
+//reads 1.primField1 , 2.primField1               l2 = $stack6;
+double x3 =x.primField3;                          $stack6.<A: int primField1> = 10;
+// reads 1.primfield3 , 2.primField3              $stack6.<A: java.lang.String primField2> = "10";
+sub_a(x);                                         $stack6.<A: double primField3> = 10.0;
+a();	//recurse                                 l3 = $stack6.<A: int primField1>;
+}                                                 l4 = $stack6.<A: double primField3>;
+                                                  virtualinvoke this.<MethodInvocation3: long sub_a(A)>($stack6);
+                                                  virtualinvoke this.<MethodInvocation3: void a()>();
+
+
+
+public long sub_a(A param1){  //param1 = {1,2}	<MethodInvocation3: long sub_a(A)>{
+  String x2=param1.primField2;                     l1 := @parameter0: A;
+  //reads 1.primField2 , 2.primField2              l2 = l1.<A: java.lang.String primField2>;
+  return 2;                                                                                  
+}                                                  return 2L;
+                                                  } 
+                                                    
+-------
+
+<MethodInvocation3: void a()>._WRITES={
+	1.<A: int primField1>, 
+	1.<A: java.lang.String primField2>,
+	1.<A: double primField3>,
+	2.<A: int primField1>, 
+	2.<A: java.lang.String primField2>,
+	2.<A: double primField3>
+}
+<MethodInvocation3: void a()>._READS={
+	1.<A: int primField1>, 
+	1.<A: java.lang.String primField2>,
+	1.<A: double primField3>,
+	2.<A: int primField1>, 
+	2.<A: double primField3>,
+	2.<A: java.lang.String primField2>
+}
+
+<MethodInvocation3: long sub_a(A)>._WRITES={}
+<MethodInvocation3: long sub_a(A)>._READS={
+	1.<A: java.lang.String primField2>,
+	2.<A: java.lang.String primField2>
+	}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+				MethodInvocation4
+...a(){
+
+boolean condition = true;				if 1 == 0 goto label1;
+A x=(condition) ? new A() : new A();                        $stack6 = new A;
+//1 and 2 allocated                                         specialinvoke $stack6.<A: void <init>()>();
+x.primField1=10;                                        
+//writes 1.primField1 , 2.primField1                        goto label2;
+x.primField2="10";                                      
+//writes 1.primField2 , 2.primField2                      label1:
+x.primField3=10.0;                                          $stack6 = new A;
+// writes 1.primfield3 , 2.primField3                       specialinvoke $stack6.<A: void <init>()>();
+                                                        
+int x1 =x.primField1;                                     label2:
+//reads 1.primField1 , 2.primField1                         l2 = $stack6;
+double x3 =x.primField3;                                    $stack6.<A: int primField1> = 10;
+// reads 1.primfield2 , 2.primField3                        $stack6.<A: java.lang.String primField2> = "10";
+sub_a(x);                                                   $stack6.<A: double primField3> = 10.0;
+}                                                           l3 = $stack6.<A: int primField1>;
+                                                            l4 = $stack6.<A: double primField3>;
+public long sub_a(A param1){  //param1 = {1,2}              virtualinvoke this.<MethodInvocation4: long sub_a(A)>($stack6);
+    String x2=param1.primField2;	
+    //reads 1.primField2 , 2.primField2			
+    a(); //a() and sub_a(A) are equated			<MethodInvocation4: long sub_a(A)>
+    return 2;                                           {
+}                                                           A l1;
+                                                            MethodInvocation4 this;
+                                                            java.lang.String l2;
+                                                        
+                                                        
+                                                            this := @this: MethodInvocation4;
+                                                            l1 := @parameter0: A;
+                                                            l2 = l1.<A: java.lang.String primField2>;
+                                                            virtualinvoke this.<MethodInvocation4: void a()>();
+                                                        
+                                                            return 2L;
+                                                         } 
+
+
+-------
+
+<MethodInvocation4: void a()>._WRITES={
+	1.<A: int primField1>, 
+	1.<A: java.lang.String primField2>,
+	1.<A: double primField3>,
+	2.<A: int primField1>, 
+	2.<A: java.lang.String primField2>,
+	2.<A: double primField3>
+}
+<MethodInvocation4: void a()>._READS={
+	1.<A: int primField1>, 
+	1.<A: java.lang.String primField2>,
+	1.<A: double primField3>,
+	2.<A: int primField1>, 
+	2.<A: double primField3>,	
+	2.<A: java.lang.String primField2>
+}
+
+<MethodInvocation4: long sub_a(A)>._WRITES={
+	1.<A: int primField1>, 
+	1.<A: java.lang.String primField2>,
+	1.<A: double primField3>,
+	2.<A: int primField1>, 
+	2.<A: double primField3>,	
+	2.<A: java.lang.String primField2>
+}
+<MethodInvocation4: long sub_a(A)>._READS={
+	1.<A: int primField1>, 
+	1.<A: java.lang.String primField2>,
+	1.<A: double primField3>,
+	2.<A: int primField1>, 
+	2.<A: double primField3>,	
+	2.<A: java.lang.String primField2>
+}
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+				MethodInvocation5
+
+public void a(){					  if 1 == 0 goto label1;               						  
+boolean condition = true;                                 $stack3 = new A;                                                         
+A x=(condition) ? new A() : new A();                      specialinvoke $stack3.<A: void <init>()>();                              
+//1 and 2 allocated                                                                                                               
+x.primField1=x.primField1;                                goto label2;                                                             
+//reads and writes 1.primField1 , 2.primField1                                                                                    
+sub_a(x);                                               label1:                                                                    
+}                                                         $stack3 = new A;                                                        
+                                                          specialinvoke $stack3.<A: void <init>()>();
+                                                                                                                          
+                                                        label2:
+                                                          l2 = $stack3;
+                                                          $stack4 = $stack3.<A: int primField1>;
+                                                          $stack3.<A: int primField1> = $stack4;
+                                                          virtualinvoke this.
+							<MethodInvocation5: long sub_a(A)>($stack3);
+
+
+
+
+
+
+
+
+
+ 
+                                                                  
+public long sub_a(A param1){  //param1 = {1,2}                 <MethodInvocation5: long sub_a(A)>                                	 
+   param1.primField2=param1.primField2;                        {                                                                          
+   //reads and writes 1.primField2 , 2.primField2                  A l1;                                                                  
+   sub_sub_a(param1);                                              MethodInvocation5 this;                                                
+   return 100;                                                     java.lang.String $stack2;                                              
+}                                                                                                                                         
+                                                               
+                                                                   this := @this: MethodInvocation5;
+                                                                   l1 := @parameter0: A;
+                                                                   $stack2 = l1.<A: java.lang.String primField2>;
+                                                                   l1.<A: java.lang.String primField2> = $stack2;
+                                                                   virtualinvoke this.<MethodInvocation5: void sub_sub_a(A)>(l1);
+                                                               
+                                                                   return 100L;
+                                                               }
+
+
+
+
+public void sub_sub_a(A param1){ // param1={1,2}		<MethodInvocation5: void sub_sub_a(A)>  		
+    param1.primField3=param1.primField3;                        {
+   //reads and writes 1.primfield3 , 2.primField3                   A l1;
+    return;                                                         MethodInvocation5 this;
+}                                                                   double $stack2;
+                                                                
+                                                                
+                                                                    this := @this: MethodInvocation5;
+                                                                    l1 := @parameter0: A;
+                                                                    $stack2 = l1.<A: double primField3>;
+                                                                    l1.<A: double primField3> = $stack2;
+-------
+
+<MethodInvocation5: void a()>._WRITES={
+	1.<A: int primField1>, 
+	1.<A: java.lang.String primField2>,
+	1.<A: double primField3>,
+	2.<A: int primField1>, 
+	2.<A: java.lang.String primField2>,
+	2.<A: double primField3>
+}
+<MethodInvocation5: void a()>._READS={
+	1.<A: int primField1>, 
+	1.<A: java.lang.String primField2>,
+	1.<A: double primField3>,
+	2.<A: int primField1>, 
+	2.<A: double primField3>,	
+	2.<A: java.lang.String primField2>
+}
+
+<MethodInvocation5: long sub_a(A)>._WRITES={
+	 
+	1.<A: java.lang.String primField2>,
+	1.<A: double primField3>,
+	 
+	2.<A: double primField3>,	
+	2.<A: java.lang.String primField2>
+}
+<MethodInvocation5: long sub_a(A)>._READS={
+	 
+	1.<A: java.lang.String primField2>,
+	1.<A: double primField3>,
+	 
+	2.<A: double primField3>,	
+	2.<A: java.lang.String primField2>
+}
+
+<MethodInvocation5: void sub_sub_a(A)>._READS={
+	1.<A: double primField3>,
+	2.<A: double primField3>	
+}
+
+<MethodInvocation5: void sub_sub_a(A)>._WRITES={
+	1.<A: double primField3>,
+	2.<A: double primField3>	
+}
+   
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+					MethodInvocation6
+
+boolean condition = true;					   if 1 == 0 goto label1;
+A x=(condition) ? new A() : new A();                                $stack3 = new A;
+//1 and 2 allocated                                                 specialinvoke $stack3.<A: void <init>()>();
+x.primField1=x.primField1;                                      
+//reads and writes 1.primField1 , 2.primField1                      goto label2;
+sub_a(x);                                                       
+sub_a2();                                                         label1:
+                                                                    $stack3 = new A;
+                                                                    specialinvoke $stack3.<A: void <init>()>();
+                                                                
+                                                                  label2:
+                                                                    l2 = $stack3;
+                                                                    $stack4 = $stack3.<A: int primField1>;
+                                                                    $stack3.<A: int primField1> = $stack4;
+                                                                    virtualinvoke this.<MethodInvocation6: long sub_a(A)>($stack3);
+                                                                    virtualinvoke this.<MethodInvocation6: void sub_a2()>();
+
+
+
+
+public long sub_a(A param1){  //param1 = {1,2}			<MethodInvocation6: long sub_a(A)>                   			
+   param1.primField2= "Zamenhof";                               {
+   //writes 1.primField2 , 2.primField2                             A l1;
+   return 100;                                                      MethodInvocation6 this;
+}                                                               
+                                                                
+                                                                    this := @this: MethodInvocation6;
+                                                                    l1 := @parameter0: A;
+                                                                    l1.<A: java.lang.String primField2> = "Zamenhof";
+                                                                
+                                                                    return 100L;
+
+
+
+
+
+
+
+
+public void sub_a2(){						<MethodInvocation6: void sub_a2()>
+    A x = new A();    //3 allocated                             {
+    double t = x.primField3;                                        A $stack4;
+    // reads  3.primField3                                          MethodInvocation6 this;
+    return;                                                         double l2;
+  }                                                             
+                                                                
+                                                                    this := @this: MethodInvocation6;
+                                                                    $stack4 = new A;
+                                                                    specialinvoke $stack4.<A: void <init>()>();
+                                                                    l2 = $stack4.<A: double primField3>;
+                                                                
+                                                                    return;
+                                                                }
+
+-------
+<MethodInvocation6: void a()>._WRITES={
+	1.<A: int primField1>, 
+	2.<A: int primField1>, 
+	
+	1.<A: java.lang.String primField2>,
+	2.<A: java.lang.String primField2>,
+}
+<MethodInvocation6: void a()>._READS={
+	1.<A: int primField1>, 
+	2.<A: int primField1>, 
+	
+	3.<A: double primField3>	
+}
+
+<MethodInvocation6: long sub_a(A)>._WRITES={
+	 1.<A: java.lang.String primField2>,
+	2.<A: java.lang.String primField2>
+}
+<MethodInvocation6: long sub_a(A)>._READS={}
+
+<MethodInvocation6: void sub_a2()>._READS={3.<A: double primField3>}
+<MethodInvocation6: void sub_a2()>._WRITES={}
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    return;
+}
+
+
+
+
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+  
+  
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
+    
+
+
+
+
+
+
