@@ -26,7 +26,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.List;
 
-/** Visits a statement, generates appropriate constraints.
+/** Visits a statement, generates appropriate points-to and side effect constraints.
  * Holds the constraints themselves
  * Make sure the appropriate visitingMethod has been set before visiting a statement
  * */

@@ -82,55 +82,55 @@ public class A {
 
 ```jimple
 <A: A a(A,int)>
- 27 {
- 28     A $stack6, $stack7, $stack8, l1, l3, l4, l5, this;
- 29     int l2;
- 30 
- 31 
- 32     this := @this: A;
- 33     l1 := @parameter0: A;
- 34     l2 := @parameter1: int;
- 35     $stack6 = new A;
- 36     specialinvoke $stack6.<A: void <init>()>();
- 37     l3 = $stack6;
- 38     $stack7 = new A;
- 39     specialinvoke $stack7.<A: void <init>()>();
- 40     l4 = $stack7;
- 41 
- 42     if l2 != 1 goto label1;
- 43     l5 = $stack6;
- 44 
- 45     goto label2;
- 46 
- 47   label1:
- 48     l5 = $stack7;
- 49 
- 50   label2:
- 51     $stack8 = virtualinvoke l3.<A: A f(A,A)>($stack7, $stack7);
- 52     l5.<A: A x> = $stack8;
- 53 
- 54     return l5;
- 55 }
- 56 
+  {
+      A $stack6, $stack7, $stack8, l1, l3, l4, l5, this;
+      int l2;
+  
+  
+      this := @this: A;
+      l1 := @parameter0: A;
+      l2 := @parameter1: int;
+      $stack6 = new A;
+      specialinvoke $stack6.<A: void <init>()>();
+      l3 = $stack6;
+      $stack7 = new A;
+      specialinvoke $stack7.<A: void <init>()>();
+      l4 = $stack7;
+  
+      if l2 != 1 goto label1;
+      l5 = $stack6;
+  
+      goto label2;
+  
+    label1:
+      l5 = $stack7;
+  
+    label2:
+      $stack8 = virtualinvoke l3.<A: A f(A,A)>($stack7, $stack7);
+      l5.<A: A x> = $stack8;
+  
+      return l5;
+  }
+  
 
 <A: A f(A,A)>
- 58 {
- 59     A $stack4, $stack5, $stack6, l1, l2, l3, this;
- 60 
- 61 
- 62     this := @this: A;
- 63     l1 := @parameter0: A;
- 64     l2 := @parameter1: A;
- 65     $stack4 = new A;
- 66     specialinvoke $stack4.<A: void <init>()>();
- 67     l3 = $stack4;
- 68     $stack5 = new A;
- 69     specialinvoke $stack5.<A: void <init>()>();
- 70     $stack4.<A: A x> = $stack5;
- 71     $stack6 = $stack4.<A: A x>;
- 72 
- 73     return $stack6;
- 74 }
+  {
+      A $stack4, $stack5, $stack6, l1, l2, l3, this;
+  
+  
+      this := @this: A;
+      l1 := @parameter0: A;
+      l2 := @parameter1: A;
+      $stack4 = new A;
+      specialinvoke $stack4.<A: void <init>()>();
+      l3 = $stack4;
+      $stack5 = new A;
+      specialinvoke $stack5.<A: void <init>()>();
+      $stack4.<A: A x> = $stack5;
+      $stack6 = $stack4.<A: A x>;
+  
+      return $stack6;
+  }
 
 ```
 
@@ -191,21 +191,3 @@ see [retrieving a Sootmethod](https://soot-oss.github.io/SootUp/latest/getting-s
 The analysis is performed on [Jimple IR](https://soot-oss.github.io/SootUp/latest/jimple/)
 and so the mapping is from Jimple value holders to (sets of) abstract locations of allocated objects
 
-------
-# SIDE EFFECTS
-We now have a sense of which locals on the stack may contain which objects on the heap.
-
-Using the rules bellow we track which methods read or write which fields of which objects
-
-
-$$\frac{ }{|p=q.f| \mapsto q.f :: Read \ of \ m}[side\text{-}effect\text{-}read\text{-}statement] \newline \newline$$
-
-$$\frac{ }{|p.f=q| \mapsto p.f :: \  Write \ of \ m}[side\text{-}effect\text{-}write\text{-}statement] \newline \newline$$
-
-$$\frac{ }{|m_2(...)| \mapsto  READS(m) \supseteq \ READS(m_2) \ , \ WRITES(m) \supseteq \ WRITES(m_2) }[side\text{-}effect\text{-}invocation\text{-}value] \newline \newline$$
-$$\text{where  m  is  the  enclosing  method}$$
-
------
-$$\frac{q.f :: Read \ of \ m \ \ \ \ \ l_q \in q}{l_q.f \in READS(m)}[side\text{-}effect\text{-}read\text{-}constraint] \newline \newline$$
-
-$$\frac{p.f :: Write \ of \ m \ \ \ \ \ l_p \in p}{l_p.f \in WRITES(m)}[side\text{-}effect\text{-}write\text{-}constraint] \newline \newline$$

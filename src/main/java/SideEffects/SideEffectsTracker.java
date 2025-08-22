@@ -46,7 +46,7 @@ public class SideEffectsTracker {
         Map<MethodSignature, Set<Tuple<PointsToSet, FieldSignature>>> fieldwrites =PTA.getFieldsWritten();
         //CONSTRUCT CONSTRAINTS
         //ugly , ik
-        //                      READS
+        //                      SIDE EFFECT READ CONSTRAINTS
         //for every method
         for(Map.Entry<MethodSignature, Set<Tuple<PointsToSet,FieldSignature>>> entry : fieldreads.entrySet()){
             MethodSignature m = entry.getKey();
@@ -60,14 +60,14 @@ public class SideEffectsTracker {
                     if ( READS.containsKey(m) )
                         readsOfm =READS.get(m);
                     else {
-                        readsOfm= new HashSet<AccessibleHeapLocation>();
+                        readsOfm= new HashSet<>();
                         READS.put(m,readsOfm);
                     }
                     SE_Constraints.add( new ElementOfConstraint<>(new AccessibleHeapLocation(l,field), readsOfm , m.toString()+"._READS") );
                 }
             }
         }
-        //                      WRITES
+        //                      SIDE EFFECT WRITE CONSTRAINTS
         //for every method
         for(Map.Entry<MethodSignature, Set<Tuple<PointsToSet,FieldSignature>>> entry : fieldwrites.entrySet()){
             MethodSignature m = entry.getKey();
@@ -82,7 +82,7 @@ public class SideEffectsTracker {
                          writesOfm =WRITES.get(m);
                     else {
                          writesOfm= new HashSet<>();
-                        WRITES.put(m, writesOfm);
+                         WRITES.put(m, writesOfm);
                     }
                     SE_Constraints.add( new ElementOfConstraint<>(new AccessibleHeapLocation(l,field),  writesOfm , m.toString()+"._WRITES") );
                 }
