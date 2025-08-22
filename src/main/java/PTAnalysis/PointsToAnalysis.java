@@ -96,9 +96,14 @@ public class PointsToAnalysis {
     }
 
     public void PrintConstraintsToLog(){
-        constraintLogger.info("---------\nConstraints:");
+        constraintLogger.info("---------\nPTConstraints:");
         int i=1;
         for (Constraint c : ConstraintGenerator.getPTAconstraints() )
+            constraintLogger.info((i++) + " "+ c);
+        constraintLogger.info("---------");
+        constraintLogger.info("---------\nSEConstraints:");
+        i=1;
+        for (GenericConstraint c : ConstraintGenerator.getSEConstraints() )
             constraintLogger.info((i++) + " "+ c);
         constraintLogger.info("---------");
     }
