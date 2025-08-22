@@ -22,3 +22,11 @@ $$\text{where  m  is  the  enclosing  method}$$
 $$\frac{q.f :: Read \ of \ m \ \ \ \ \ l_q \in q}{l_q.f \in READS(m)}[side\text{-}effect\text{-}read\text{-}constraint] \newline \newline$$
 
 $$\frac{p.f :: Write \ of \ m \ \ \ \ \ l_p \in p}{l_p.f \in WRITES(m)}[side\text{-}effect\text{-}write\text{-}constraint] \newline \newline$$
+## Use
+
+------
+Call ``` Map<MethodSignature,Set<AccessibleHeapLocation>>  getReads()``` </br>
+or ``` Map<MethodSignature,Set<AccessibleHeapLocation>>  getWrites()```
+ 
+
+located in ```SideEffectsTracker.java```
