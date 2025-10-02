@@ -105,7 +105,8 @@ public class GenericSolver<T> {
         SetVar toBe;
                     //default upper bound
         if (allPossibleValues == null) {
-            toBe = model.setVar(setName, new int[] {}, ArrayUtils.array(0, elements.size()-1));
+            int ub = !elements.isEmpty() ? elements.size()-1 : 0;
+            toBe = model.setVar(setName, new int[] {}, ArrayUtils.array(0, ub));
         } else {    //allPossibleValues upper bound
             int[] UBIDs = new int[allPossibleValues.size()];
             int i = 0;
