@@ -3,6 +3,7 @@ package PTAnalysis;
 import GenericSolver.GenericConstraint;
 import PTAnalysis.ConstraintSolver.Constraint;
 import PTAnalysis.ConstraintSolver.Solver;
+import RuleApplicator.RuleApplicatorStmtVisitor;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.model.SootMethod;
 import sootup.core.signatures.FieldSignature;
@@ -23,14 +24,14 @@ import java.util.logging.Logger;
  *  Every statement (and method) is visited once
 */
 public class PointsToAnalysis {
-    ConstraintGenStmtVisitor ConstraintGenerator;
+    RuleApplicatorStmtVisitor ConstraintGenerator;
     Set <MethodSignature> visitedMethods;
     View view;
     private final Logger constraintLogger;
     private boolean hasBeenPerformed=false;
     public PointsToAnalysis(View view){
         constraintLogger= new LoggerFactory().createLogger("ConstraintGeneration");
-        this.ConstraintGenerator = new ConstraintGenStmtVisitor();
+        this.ConstraintGenerator = new RuleApplicatorStmtVisitor();
         this.visitedMethods = new HashSet<>();
         this.view=view;
     }

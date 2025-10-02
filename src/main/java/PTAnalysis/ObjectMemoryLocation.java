@@ -13,7 +13,7 @@ public class ObjectMemoryLocation {
     final private int id;
     final private Map<String,PointsToSet> refFields;
 
-    ObjectMemoryLocation(int lineNumber){
+    public ObjectMemoryLocation(int lineNumber){
         this.id=locationCounter++;
         this.lineNumber=lineNumber;
         this.refFields= new HashMap<>();
