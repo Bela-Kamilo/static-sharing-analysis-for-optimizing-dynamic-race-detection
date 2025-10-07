@@ -19,6 +19,4 @@ fi
 
 if [ "$1" = "all" ] || [ "$1" = "dr" ] || [ "$1" = "datarace" ] || ([[ "$1" = "data" ]] && [[ "$2" = "race" ]]); then
 	javac -d DataRace/1  DataRace/1/src/*.java
-	#javac -d SideEffects/2\ Read  SideEffects/2\ Read/src/*.java
-	#javac -d SideEffects/3\ MethodInvocation  SideEffects/3\ MethodInvocation/src/*.java
 fi
