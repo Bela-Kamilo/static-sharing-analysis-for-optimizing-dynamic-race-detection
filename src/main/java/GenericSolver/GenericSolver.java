@@ -33,7 +33,7 @@ public class GenericSolver<T> {
 
     private GenericSolver(String problemName){
         this.model = new Model(problemName);
-        this.solverLog= new LoggerFactory().createLogger(problemName+" SolverResults");
+        this.solverLog= new LoggerFactory().createLogger("logs/Solver/",problemName+" SolverResults");
         this.elements= new LockedVector<T>();
         this.sets2Vars= new LockedIdentityHashMap<Set<T>,SetVar>();
         //this.vars2Sets= new LockedHashMap<>();

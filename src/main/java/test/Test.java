@@ -19,8 +19,16 @@ public abstract class Test {
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
     protected String nextThingBuffer;
-    protected void pass(String singleTestName){System.out.println("TEST "+testsCount+" "+singleTestName+": "+ANSI_GREEN+"PASS"+ANSI_RESET);}
-    protected void fail(String singleTestName){System.out.println("TEST "+testsCount +" " +singleTestName+": "+ANSI_RED+"FAIL"+ANSI_RESET);}
+    protected void pass(String singleTestName){
+        System.out.println("TEST "+testsCount+" "+singleTestName+": "+ANSI_GREEN+"PASS"+ANSI_RESET);
+        testLog.info("TEST "+testsCount+" "+singleTestName+": "+"PASS");
+        testLog.info("");
+    }
+    protected void fail(String singleTestName){
+        System.out.println("TEST "+testsCount +" " +singleTestName+": "+ANSI_RED+"FAIL"+ANSI_RESET);
+        testLog.info("TEST "+testsCount +" " +singleTestName+": "+"FAIL");
+       testLog.info("");
+    }
     public int getCount(){return testsCount;}
 
     protected final String basePath;
@@ -83,7 +91,7 @@ public abstract class Test {
         this.testName=testName;
         this.basePath=basePath;
         this.entryMethodString=entryMethodString;
-        this.testLog= new LoggerFactory().createLogger(testName);
+        this.testLog= new LoggerFactory().createLogger("logs/Tests/",testName);
         testLog.info(testName+" created");
     }
 

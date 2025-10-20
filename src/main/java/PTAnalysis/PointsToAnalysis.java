@@ -30,7 +30,7 @@ public class PointsToAnalysis {
     private final Logger constraintLogger;
     private boolean hasBeenPerformed=false;
     public PointsToAnalysis(View view){
-        constraintLogger= new LoggerFactory().createLogger("ConstraintGeneration");
+        constraintLogger= new LoggerFactory().createLogger("logs/ConstraintGeneration/","ConstraintGeneration");
         this.ConstraintGenerator = new RuleApplicatorStmtVisitor();
         this.visitedMethods = new HashSet<>();
         this.view=view;

@@ -1,6 +1,8 @@
 package util;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.FileHandler;
@@ -14,11 +16,10 @@ import java.util.logging.Logger;
  */
 public class LoggerFactory {
     static Map<String,Integer> nameCount= new HashMap<>();
-    static final String logdir="logs/";
     public LoggerFactory(){
 
     }
-    public Logger createLogger(String name){
+    public Logger createLogger(String logdir ,String name ){
        int logcount=0;
         if(nameCount.containsKey(name)){
            logcount= nameCount.get(name)+1;
@@ -27,17 +28,18 @@ public class LoggerFactory {
         else
             nameCount.put(name,0);
         Logger logger = Logger.getLogger(name);
-        initLogger(logger,logcount);
+        initLogger(logger, logdir, logcount);
       return logger;
     }
 
-    private void initLogger(Logger logger, int logCount){
+    private void initLogger(Logger logger,String logdir, int logCount){
 
         FileHandler fh;
         String suffix= logCount==0?"":String.valueOf(logCount);
         String name= logger.getName();
         try {
 
+            Files.createDirectories(Paths.get(logdir));
             fh = new FileHandler(logdir+name+suffix+".log");
             logger.addHandler(fh);
             EmptyFormatter formatter = new EmptyFormatter();
