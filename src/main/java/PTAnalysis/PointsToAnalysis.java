@@ -10,7 +10,9 @@ import sootup.core.signatures.FieldSignature;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.Type;
 import sootup.core.views.View;
+import sootup.java.core.views.JavaView;
 import util.LoggerFactory;
+import util.SootUpStuff;
 import util.Tuple;
 
 import java.util.*;
@@ -62,6 +64,7 @@ public class PointsToAnalysis {
     * We go over each method only once
     */
      private void GenerateConstraints(SootMethod entryMethod){
+         SootMethod nextMethod=null;
         //pass entry method
         generateConstraintsForSingleMethod(entryMethod);
         //pass every other method
@@ -70,9 +73,12 @@ public class PointsToAnalysis {
             MethodSignature method = everyOtherMethod.remove();
             if ( Type.isObjectLikeType(method.getDeclClassType()) || visitedMethods.contains(method)) continue;
 
-            Optional<? extends SootMethod> opt = view.getMethod(method);
-            if(!opt.isPresent()) { System.err.println("!Coulnt get SootMethod of "+ method+"!"); continue;}
-            generateConstraintsForSingleMethod(opt.get());
+           // Optional<? extends SootMethod> opt = view.getMethod(method);
+            //if(!opt.isPresent()) { System.err.println("!Coulnt get SootMethod of "+ method+"!"); continue;}
+            nextMethod= SootUpStuff.getMethodFromView((JavaView) view,method);
+            if(nextMethod==null) continue;
+            generateConstraintsForSingleMethod(nextMethod);
+            //generateConstraintsForSingleMethod(opt.get());
             //note every other method to be passed over
             ConstraintGenerator.getMethodsInvoked().stream().
                         filter(m -> !visitedMethods.contains(m)).

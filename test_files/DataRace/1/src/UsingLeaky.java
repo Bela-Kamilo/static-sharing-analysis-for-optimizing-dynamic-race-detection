@@ -4,5 +4,6 @@ public class UsingLeaky {
         Leaky t = new Leaky();  //t={1}
         t.run();//this thread writes 1.unsafe
         String[] x =t.unsafe;   //reads 1.unsafe
+        System.out.println("UsingLeaky has terminated");
     }
 }
