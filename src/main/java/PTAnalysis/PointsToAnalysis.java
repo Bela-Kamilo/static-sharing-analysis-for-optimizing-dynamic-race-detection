@@ -71,6 +71,7 @@ public class PointsToAnalysis {
         Queue<MethodSignature> everyOtherMethod= new LinkedList<>(ConstraintGenerator.getMethodsInvoked());
         while(!everyOtherMethod.isEmpty()){
             MethodSignature method = everyOtherMethod.remove();
+            //if ( visitedMethods.contains(method)) continue;
             if ( Type.isObjectLikeType(method.getDeclClassType()) || visitedMethods.contains(method)) continue;
 
            // Optional<? extends SootMethod> opt = view.getMethod(method);

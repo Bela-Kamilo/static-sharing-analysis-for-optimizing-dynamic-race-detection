@@ -16,8 +16,9 @@ $stack7={1,2,3,4}	%since 3.f changed (which is a subset of it)
 
 
 <Other4: void a(A,int)>.this=[]
-<A: void <init>()>.this=[]
-<A: void <init>()>:this=[]
+<A: void <init>()>.this=[1,2,3,4]
+<A: void <init>()>:this=[1,2,3,4]
 <Other4: void a(A,int)>.1=[]
 <Other4: void a(A,int)>:l1=[]
 <Other4: void a(A,int)>:this=[]
+<java.lang.Object: void <init>()>.this=[1,2,3,4]

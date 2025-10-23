@@ -13,8 +13,9 @@ $stack7={3}
 
 
 <Return5: void a(A,int)>.this=[]
-<A: void <init>()>.this=[]
-<A: void <init>()>:this=[]
+<A: void <init>()>.this=[1,2,3]
+<A: void <init>()>:this=[1,2,3]
 <Return5: void a(A,int)>.1=[]
 <Return5: void a(A,int)>:l1=[]
 <Return5: void a(A,int)>:this=[]
+<java.lang.Object: void <init>()>.this=[1,2,3]

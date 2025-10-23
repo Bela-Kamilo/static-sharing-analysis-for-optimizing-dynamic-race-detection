@@ -176,7 +176,7 @@ public class PTAnalysisTest extends Test {
    }
 
     /**
-     * the testfiles define a use method to prevent variables splitting in jimple
+     * some testfiles define a use method to prevent variables splitting in jimple
      * this method is empty and does nothing, we will not consider it for simplicity
      * @param results results of {@link PTAnalysis.PointsToAnalysis#analise(SootMethod entryMethod) PointsToAnalysis}
      * */

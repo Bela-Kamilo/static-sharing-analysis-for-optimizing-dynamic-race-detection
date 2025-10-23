@@ -12,8 +12,9 @@ l4={2}
 <A: A m1(A,A)>:$stack2={3}	%m1 does that too
 
 <Return1: void a(A,int)>.this=[]
-<A: void <init>()>.this=[]
-<A: void <init>()>:this=[]
+<A: void <init>()>.this=[1,2,3]
+<A: void <init>()>:this=[1,2,3]
 <Return1: void a(A,int)>.1=[]
 <Return1: void a(A,int)>:l1=[]
 <Return1: void a(A,int)>:this=[]
+<java.lang.Object: void <init>()>.this=[1,2,3]

@@ -324,6 +324,7 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
     private boolean sideEffectsInvocationValueRule(Value v){
         if(v instanceof AbstractInvokeExpr){
             MethodSignature m = ((AbstractInvokeExpr) v).getMethodSignature();
+            if(isRunMethod(m)) return false;
             sideEffectsConstraints.add(new SupersetOfConstraint<>(
                     getOrCreateMethodReadSet(visitingMethod),visitingMethod+"._READS",
                     getOrCreateMethodReadSet(m), m+"._READS"));
@@ -333,6 +334,11 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
             return true;
         }
         return false;
+    }
+
+    private boolean isRunMethod(MethodSignature m){
+        String runMethodPattern = ".*void\\s+run\\s*\\(\\s*\\).*";
+        return m.toString().matches(runMethodPattern);
     }
 
     private Set<AccessibleHeapLocation> getOrCreateMethodReadSet(MethodSignature m){
@@ -471,12 +477,16 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
         @Override
         public void caseSpecialInvokeExpr(@Nonnull JSpecialInvokeExpr expr) {
             defaultInvokeExpr(expr);
+            //x.f(a); >> f.this=x
+            PointsToSet superset =getOrCreateMappingOf(expr.getMethodSignature(), THIS_INDEX);
+            PointsToSet subset=getOrCreateMappingOf(expr.getBase());
+            PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
         }
+
 
         @Override
         public void caseVirtualInvokeExpr(@Nonnull JVirtualInvokeExpr expr) {
             defaultInvokeExpr(expr);
-
             //x.f(a); >> f.this=x
             PointsToSet superset =getOrCreateMappingOf(expr.getMethodSignature(), THIS_INDEX);
             PointsToSet subset=getOrCreateMappingOf(expr.getBase());

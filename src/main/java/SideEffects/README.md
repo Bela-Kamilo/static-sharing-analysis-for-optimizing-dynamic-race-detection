@@ -14,7 +14,7 @@ $$\frac{ }{|p=q.f| \mapsto q.f :: Read \ of \ m}[side\text{-}effect\text{-}read\
 $$\frac{ }{|p.f=q| \mapsto p.f :: \  Write \ of \ m}[side\text{-}effect\text{-}write\text{-}statement] \newline \newline$$
 
 $$\frac{ }{|m_2(...)| \mapsto  READS(m) \supseteq \ READS(m_2) \ , \ WRITES(m) \supseteq \ WRITES(m_2) }[side\text{-}effect\text{-}invocation\text{-}value] \newline \newline$$
-$$\text{where  m  is  the  enclosing  method}$$
+$$\text{where  } m \text{ is  the  enclosing  method and }m_2 \text{ is not a run() method}$$
 
 (implemented [here](src/main/java/PTAnalysis/ConstraintGenStmtVisitor.java))
 

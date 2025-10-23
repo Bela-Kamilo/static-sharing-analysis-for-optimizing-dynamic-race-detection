@@ -4,10 +4,10 @@ $stack5 = {1}
 $stack6 = {1}
 l3={1}
 l4={1}
-<A: void <init>()>:this = {}
-<A: void <init>()>.this = {}
+<A: void <init>()>:this = {1}
+<A: void <init>()>.this = {1}
 <Arrays6: void a(A,int)>.this = {}
 <Arrays6: void a(A,int)>:this = {}
 <Arrays6: void a(A,int)>:l1 = {}
 <Arrays6: void a(A,int)>.1 = {}
-
+<java.lang.Object: void <init>()>.this={1}
