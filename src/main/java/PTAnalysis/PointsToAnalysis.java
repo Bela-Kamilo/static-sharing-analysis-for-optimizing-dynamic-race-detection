@@ -31,8 +31,10 @@ public class PointsToAnalysis {
     View view;
     private final Logger constraintLogger;
     private boolean hasBeenPerformed=false;
-    public PointsToAnalysis(View view){
-        constraintLogger= new LoggerFactory().createLogger("logs/ConstraintGeneration/","ConstraintGeneration");
+    private final String name;
+    public PointsToAnalysis(View view, String analysisName){
+        this.name=analysisName;
+        constraintLogger= new LoggerFactory().createLogger("logs/ConstraintGeneration/",name+" ConstraintGeneration");
         this.ConstraintGenerator = new RuleApplicatorStmtVisitor();
         this.visitedMethods = new HashSet<>();
         this.view=view;
@@ -52,7 +54,7 @@ public class PointsToAnalysis {
      */
     public Map<String, PointsToSet> analise(SootMethod entryMethod){
         GenerateConstraints(entryMethod);
-        Solver solver= new Solver(this.ConstraintGenerator.getPTAconstraints());
+        Solver solver= new Solver(this.ConstraintGenerator.getPTAconstraints(),name);
         Map<String,PointsToSet> res= solver.solve();
         hasBeenPerformed=true;
         //SOLVE FOR SIDE EFFECTS
@@ -143,6 +145,8 @@ public class PointsToAnalysis {
         return ConstraintGenerator.getWriteSets();
     }
 
-public boolean hasBeenPerformed(){return hasBeenPerformed;}
+    public boolean hasBeenPerformed(){return hasBeenPerformed;}
+
+    public String getName(){return this.name;}
 
 }

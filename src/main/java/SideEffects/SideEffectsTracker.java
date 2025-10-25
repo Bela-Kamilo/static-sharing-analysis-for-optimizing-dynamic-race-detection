@@ -26,8 +26,9 @@ public class SideEffectsTracker {
     private final HashMap<MethodSignature, Set<AccessibleHeapLocation>> RUN_METHOD_WRITES;
     private final SootMethod entryMethod;
     private boolean runMethodsSECollected;
-    public SideEffectsTracker(View view , SootMethod entryMethod){
-       this(entryMethod, new PointsToAnalysis(view));
+    private final String name;
+    public SideEffectsTracker(View view , SootMethod entryMethod,String name){
+        this(entryMethod, new PointsToAnalysis(view,name));
     }
 
     public SideEffectsTracker(SootMethod entryMethod , PointsToAnalysis PTA){
@@ -38,6 +39,7 @@ public class SideEffectsTracker {
         this.RUN_METHOD_READS= new LinkedHashMap<>();
         this.RUN_METHOD_WRITES= new LinkedHashMap<>();
         this.runMethodsSECollected=false;
+        this.name=PTA.getName();
     }
 
     private void analise(){
@@ -93,8 +95,7 @@ public class SideEffectsTracker {
         }
 
         //SOLVE THEM
-        String className=entryMethod.toString().substring(1,entryMethod.toString().indexOf(':'));
-        new GenericSolver<AccessibleHeapLocation>(SE_Constraints, className+" SideEffects").solve();
+        new GenericSolver<AccessibleHeapLocation>(SE_Constraints, name+" SideEffects").solve();
         return;
     }
 

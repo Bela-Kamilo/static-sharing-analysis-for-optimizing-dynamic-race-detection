@@ -46,7 +46,7 @@ public class SideEffectsTest extends Test{
         pathView = SootUpStuff.getViewFromPath(basePath+"/"+parentDir);
         ExpectedSideEffects expectedResults = parseTestFile(filepath,testClassName);
         SootMethod entryMethod=SootUpStuff.getMethodFromView(pathView,"<"+testClassName+": "+entryMethodString+">");
-        SideEffectsTracker SideEffectsAnalysis = new SideEffectsTracker(pathView,entryMethod);
+        SideEffectsTracker SideEffectsAnalysis = new SideEffectsTracker(pathView,entryMethod,testClassName);
         Map<MethodSignature, Set<AccessibleHeapLocation>> READS;
         Map<MethodSignature, Set<AccessibleHeapLocation>> WRITES;
         try {

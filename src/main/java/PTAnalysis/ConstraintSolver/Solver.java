@@ -27,8 +27,8 @@ public class Solver {
     private final Set<PointsToSet> PTSets;
     private Map<String, PointsToSet> solution;
 
-    public Solver(Set<Constraint> constraints){
-        this.solverLog= new LoggerFactory().createLogger("logs/Solver/","SolverResults");
+    public Solver(Set<Constraint> constraints, String problemName){
+        this.solverLog= new LoggerFactory().createLogger("logs/Solver/",problemName+" PointsTo SolverResults");
         this.PTSets= new HashSet<>();
         this.PTconstraints=constraints;
         AllLocationsArray = IntStream.rangeClosed(1, ObjectMemoryLocation.getLocationCounter()).toArray();

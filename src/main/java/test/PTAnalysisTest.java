@@ -44,7 +44,7 @@ public class PTAnalysisTest extends Test {
         JavaView pathView =SootUpStuff.getViewFromPath(basePath+"/"+parentDir);
         SootMethod entryMethod=SootUpStuff.getMethodFromView(pathView,"<"+testClassName+": "+entryMethodString+">");
 
-        Map<String, PointsToSet> analysisResults = new PointsToAnalysis(pathView).analise(entryMethod);
+        Map<String, PointsToSet> analysisResults = new PointsToAnalysis(pathView,testClassName).analise(entryMethod);
         testLog.info(testClassName+".class ");
         testLog.info("Expected results :");
         expectedResults.forEach((name,intset)->testLog.info(name+"="+intset));
