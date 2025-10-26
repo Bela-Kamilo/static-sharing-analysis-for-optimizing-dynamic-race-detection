@@ -140,6 +140,12 @@ public class SideEffectsTracker {
                 RUN_METHOD_READS.put(mReads.getKey(),mReads.getValue());
         }
         runMethodsSECollected=true;
+
     }
 
+    public static boolean isRunMethod(MethodSignature m){
+        String runMethodPattern = ".*void\\s+run\\s*\\(\\s*\\).*";
+        return m.toString().matches(runMethodPattern);
+
+    }
 }

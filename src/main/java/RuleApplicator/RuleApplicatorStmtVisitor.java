@@ -90,6 +90,10 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
     public Set<Constraint> getPTAconstraints() {
         return PTAconstraints;
     }
+    public static boolean isLocationHolder(Value v){
+        //PTAnalysis is only really interested in refs                                  v i should find a better way
+        return (v.getType() instanceof ReferenceType) && ! v.getType().toString().equals("java.lang.String");
+    }
 
     //<< x.f(a1,a2...an); >> treat as f(x,a1,a2...an) >>  f.params = args and add f in MethodsInvoked
     @Override
@@ -103,7 +107,7 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
         Value rightOp= stmt.getRightOp();
         PointsToSet subset;
         PointsToSet superset;
-        if(!(rightOp.getType() instanceof ReferenceType)) return;
+        if(!(isLocationHolder(rightOp))) return;
 
         if(rightOp instanceof JParameterRef){
             subset=getOrCreateMappingOf(visitingMethod,((JParameterRef) rightOp).getIndex()+1);
@@ -128,7 +132,7 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
     // return-statement rule
     @Override
     public void caseReturnStmt(@Nonnull JReturnStmt stmt) {
-        if( !(stmt.getOp().getType() instanceof ReferenceType) ) return;
+        if( !(isLocationHolder(stmt.getOp())) ) return;
 
         PointsToSet superset =getOrCreateMappingOfMethod(visitingMethod);
         PointsToSet subset=getOrCreateMappingOf(stmt.getOp());
@@ -141,8 +145,8 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
     @Override
     public void caseAssignStmt(@Nonnull JAssignStmt stmt) {
         LValue leftOp = stmt.getLeftOp();
-        Value rightOp = stmt.getRightOp();                          // v find a better way
-        if( !(leftOp.getType() instanceof ReferenceType) || leftOp.getType().toString().equals("java.lang.String")){//PTAnalysis is only really interested in refs
+        Value rightOp = stmt.getRightOp();
+        if( !(isLocationHolder(rightOp))){//PTAnalysis is only really interested in refs
             stmt.getRightOp().accept(new ConstraintGenInvokeVisitor());
             //stmt.getLeftOp().accept(new ConstraintGenInvokeVisitor());    //no point
             sideEffectReadStmtRule(stmt);
@@ -513,7 +517,7 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
              methodsInvoked.add(invokeExpr.getMethodSignature());
             int i=THIS_INDEX+1;
             for(Value arg : invokeExpr.getArgs()) {
-                if (! (arg.getType() instanceof  ReferenceType))
+                if (!(isLocationHolder(arg)))
                     continue;
                 PointsToSet superset =getOrCreateMappingOf(invokeExpr.getMethodSignature(), i);
                 PointsToSet subset=getOrCreateMappingOf(arg);
