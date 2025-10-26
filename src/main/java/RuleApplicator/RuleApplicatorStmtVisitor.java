@@ -517,8 +517,10 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
              methodsInvoked.add(invokeExpr.getMethodSignature());
             int i=THIS_INDEX+1;
             for(Value arg : invokeExpr.getArgs()) {
-                if (!(isLocationHolder(arg)))
+                if (!(isLocationHolder(arg))) {
+                    i++;
                     continue;
+                }
                 PointsToSet superset =getOrCreateMappingOf(invokeExpr.getMethodSignature(), i);
                 PointsToSet subset=getOrCreateMappingOf(arg);
                 PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
