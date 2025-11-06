@@ -11,6 +11,7 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.tools.ArrayUtils;
 import util.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -39,8 +40,10 @@ public class GenericSolver<T> {
         //this.vars2Sets= new LockedHashMap<>();
     }
 
-    public GenericSolver(Collection <GenericConstraint<T>> constraints , String problemName){
+    public GenericSolver(@Nonnull Collection <GenericConstraint<T>> constraints , String problemName){
         this(problemName);
+        if(constraints.isEmpty()) throw new IllegalArgumentException("no constraints provided");
+
         //run through every ElementsOfConstraint to note every possible element (need it for SetVar UB)
         for(GenericConstraint<T> c : constraints){
             if(c instanceof ElementOfConstraint<T>) {
@@ -74,7 +77,8 @@ public class GenericSolver<T> {
     }
 
 
-    private void addConstraint(GenericConstraint<T> c){
+    public void addConstraint(GenericConstraint<T> c){
+        if(c==null) return;
         if(c instanceof ElementOfConstraint<T>){
             int elementIndex =getElementIndex(((ElementOfConstraint<T>) c).getElement());
             SetVar set = getSetVar(((ElementOfConstraint<T>) c).getSet());
@@ -126,15 +130,6 @@ public class GenericSolver<T> {
     }
 
     public void solve(){
-
-        /*
-        org.chocosolver.solver.Solver solver = model.getSolver();
-        solver.setSearch( Search.setVarSearch(new FailureBased<SetVar>(model.retrieveSetVars(),new Date().getTime(),1)
-                ,new SetDomainMin()
-                ,false
-                , model.retrieveSetVars()));
-        */
-
         boolean morethanonesolutions=false;
         try{
             while(model.getSolver().solve()){
@@ -147,8 +142,6 @@ public class GenericSolver<T> {
             // model.getSolver().log().add(LoggerPrintStream(solverLog));  TODO
             model.getSolver().printStatistics();
             LoggerFactory.closeHandlerls(solverLog);
-            //PTSets.forEach(System.out::println);
-            //System.out.println("stop");
         } catch (Exception e) {
             System.err.println(e);
         }

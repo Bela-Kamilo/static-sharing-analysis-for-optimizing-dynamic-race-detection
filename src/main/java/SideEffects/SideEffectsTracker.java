@@ -103,6 +103,7 @@ public class SideEffectsTracker {
 
     public Set< AccessibleHeapLocation> getReadsOf(MethodSignature method){
         if(!PTA.hasBeenPerformed()) analise();
+        Set<AccessibleHeapLocation> readsetOfMethod=READS.get(method);
         return Collections.unmodifiableSet(READS.get(method));
 
     }

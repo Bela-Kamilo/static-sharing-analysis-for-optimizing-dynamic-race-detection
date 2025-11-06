@@ -4,6 +4,7 @@ import GenericSolver.GenericConstraint;
 import PTAnalysis.ConstraintSolver.Constraint;
 import PTAnalysis.ConstraintSolver.Solver;
 import RuleApplicator.RuleApplicatorStmtVisitor;
+import sootup.core.frontend.ResolveException;
 import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.model.SootMethod;
 import sootup.core.signatures.FieldSignature;
@@ -79,7 +80,11 @@ public class PointsToAnalysis {
            // Optional<? extends SootMethod> opt = view.getMethod(method);
             //if(!opt.isPresent()) { System.err.println("!Coulnt get SootMethod of "+ method+"!"); continue;}
             nextMethod= SootUpStuff.getMethodFromView((JavaView) view,method);
-            if(nextMethod==null) continue;
+            if(nextMethod==null) {
+                constraintLogger.info("+++ FAILED TO GET METHOD " + method + "+++");
+                visitedMethods.add(method);
+                continue;
+            }
             generateConstraintsForSingleMethod(nextMethod);
             //generateConstraintsForSingleMethod(opt.get());
             //note every other method to be passed over
@@ -88,21 +93,28 @@ public class PointsToAnalysis {
                         forEach(everyOtherMethod::add);
 
         }
+        constraintLogger.info("FINISHED GENERATING CONSTRAINTS");
         LoggerFactory.closeHandlerls(constraintLogger);
     }
     /** passes a single method, notes other visited methods */
     public void generateConstraintsForSingleMethod(SootMethod method){
-        constraintLogger.info("+++Visiting "+ method+"+++");
-        constraintLogger.info(method.getBody().toString());
-        constraintLogger.info("+++++++++++++++");
-        ConstraintGenerator.setVisitingMethod(method.getSignature());
-        for (Stmt stmt : method.getBody().getStmts()) {
-            stmt.accept( ConstraintGenerator);
+        try {
+            constraintLogger.info("+++Visiting " + method + "+++");
+            constraintLogger.info(method.getBody().toString());
+            constraintLogger.info("+++++++++++++++");
+            ConstraintGenerator.setVisitingMethod(method.getSignature());
+            for (Stmt stmt : method.getBody().getStmts()) {
+                stmt.accept(ConstraintGenerator);
+            }
+            visitedMethods.add(method.getSignature());
+            PrintConstraintsToLog();
+            constraintLogger.info("------------\nMethods invoked:\n" + ConstraintGenerator.getMethodsInvoked());
+            constraintLogger.info("------------");
+        }catch (ResolveException e){    //abstract methods throw an exception when we call getBody()
+                                        //and i dont know how to check if a method is concrete
+            if(!e.toString().contains("not concrete")) throw e;
+            visitedMethods.add(method.getSignature());
         }
-        visitedMethods.add(method.getSignature());
-        PrintConstraintsToLog();
-        constraintLogger.info("------------\nMethods invoked:\n"+ConstraintGenerator.getMethodsInvoked());
-        constraintLogger.info("------------");
     }
 
     public void PrintConstraintsToLog(){

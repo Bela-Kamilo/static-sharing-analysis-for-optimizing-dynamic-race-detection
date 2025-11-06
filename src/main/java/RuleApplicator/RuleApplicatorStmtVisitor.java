@@ -160,6 +160,7 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
 
         newAssignmentStmtRule(stmt);
         copyStmtRule(stmt);
+        castStmtRule(stmt);
         methodAssignmentStmtRule(stmt);
         arraysCopyStmtRule(stmt);
         fieldReadAssignmentStmtRule(stmt);
@@ -208,6 +209,18 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
         return leftOpOK &&rightOpOK ;
     }
 
+    private boolean castStmtRule(JAssignStmt stmt){
+        LValue leftOp= stmt.getLeftOp();
+        Value rightOp= stmt.getRightOp();
+        if(rightOp instanceof JCastExpr){
+            Value castedRightOp =((JCastExpr) rightOp).getOp();
+            PointsToSet superset =getOrCreateMappingOf(leftOp);
+            PointsToSet subset=getOrCreateMappingOf(castedRightOp);
+            PTAconstraints.add(new PTASupersetOfConstraint(superset,  subset));
+            return true;
+        }
+        return false;
+    }
 
    private boolean methodAssignmentStmtRule(JAssignStmt stmt){
         if(stmt.getRightOp() instanceof AbstractInvokeExpr) {
@@ -514,7 +527,7 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
 
 
         private  void defaultInvokeExpr(AbstractInvokeExpr invokeExpr ){
-             methodsInvoked.add(invokeExpr.getMethodSignature());
+            methodsInvoked.add(invokeExpr.getMethodSignature());
             int i=THIS_INDEX+1;
             for(Value arg : invokeExpr.getArgs()) {
                 if (!(isLocationHolder(arg))) {

@@ -38,6 +38,11 @@ public class ObjectMemoryLocation {
      * */
     public boolean existsField(String field){ return refFields.containsKey(field);}
     public Iterable<PointsToSet> getAllFields(){return refFields.values();}
+
+    /**
+     * resets locationCounter
+     * call this method before performing a PTAnalysis
+     */
     public  static void reset(){
-        ObjectMemoryLocation.locationCounter=1;}      //only call when PTAnalysis is over
+        ObjectMemoryLocation.locationCounter=1;}
 }

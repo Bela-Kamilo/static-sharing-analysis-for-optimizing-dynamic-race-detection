@@ -8,6 +8,7 @@ import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.FailureBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
 import util.LoggerFactory;
 
 import java.util.*;
@@ -176,6 +177,80 @@ public class Solver {
         return whydotheyusetheirowndatastructures;
     }
     public static int[] allLocations(){return AllLocationsArray;}
+    public int totalActualElements(){
+        SetVar[] setvars = model.retrieveSetVars();
+        int i=0;
+        for(SetVar v : setvars){
+            i+=v.getCard().getValue();
+        }
+        return i;
+    }
+    //DEBUG METHODS
+    public int totalActualElementsOnlySet(){
+        SetVar[] setvars = model.retrieveSetVars();
+        int i=0;
+        for(SetVar v : setvars){
+            if(!v.isInstantiated()) continue;;
+            i+=v.getCard().getValue();
+        }
+        return i;
+    }
+    public int totalActualElementsWOUTCARD(){
+        SetVar[] setvars = model.retrieveSetVars();
+        int i=0;
+        for(SetVar v : setvars){
+            i+=v.getValue().size();
+        }
+        return i;
+    }
+    public int totalActualElementsUB(){
+        SetVar[] setvars = model.retrieveSetVars();
+        int i=0;
+        for(SetVar v : setvars){
+            i+=v.getUB().size();
+        }
+        return i;
+    }
+    public int totalActualElementsLB(){
+        SetVar[] setvars = model.retrieveSetVars();
+        int i=0;
+        for(SetVar v : setvars){
+            i+=v.getLB().size();
+        }
+        return i;
+    }
+    public int howManyUninstantiated(){
+        int res=0;
+        SetVar[] setvars = model.retrieveSetVars();
+        for(SetVar v : setvars){
+            if(!v.isInstantiated()) res++;
+        }
+        return res;
+    }
+    public Set<Variable> uninstVars(){
+        Set<Variable>res = new HashSet<>();
+        Variable[] vars = model.getVars();
+        for(Variable v : vars){
+            if(!v.isInstantiated()) res.add(v);;
+        }
+        return res;
+    }
 
+    public Set<org.chocosolver.solver.constraints.Constraint> constraintsThatContain(String str){
+        Set<org.chocosolver.solver.constraints.Constraint>res = new HashSet<>();
+        org.chocosolver.solver.constraints.Constraint[] cstrnts = model.getCstrs();
+        for(org.chocosolver.solver.constraints.Constraint c : cstrnts){
+            if(c.toString().contains(str)) res.add(c);
+        }
+        return res;
+    }
+    public Set<Variable>varsThatContain(String str){
+        Set<Variable>res = new HashSet<>();
+        Variable[] vars = model.getVars();
+        for(Variable v : vars){
+            if(v.toString().contains(str)) res.add(v);;
+        }
+        return res;
+    }
 }
 

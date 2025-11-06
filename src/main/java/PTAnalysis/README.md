@@ -9,6 +9,8 @@ $$ \frac{}{\left\| p= new\text{ } A_i() \right\| \mapsto l_i \in p }[new \text{-
 
 $$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q }[copy\text{-}statement] $$
 
+$$\frac{}{\left\| p=\text{(type) }q \right\| \mapsto p \supseteq q }[cast\text{-}statement] $$
+
 $$\text{where } \ p,\ q \text{ non Array Type locals,}$$
 $$ \text{non Array Type array accesses, or static fields}$$
 

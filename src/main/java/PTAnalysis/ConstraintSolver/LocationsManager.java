@@ -90,4 +90,5 @@ public class LocationsManager {
             sum=sum.add(setvars[i].getCard());
         return sum.intVar();
     }
+
 }
