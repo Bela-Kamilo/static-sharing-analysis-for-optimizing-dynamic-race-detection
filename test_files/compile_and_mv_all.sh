@@ -1,4 +1,4 @@
-
+#! /bin/bash
 all=false
 pta=false
 se=false
