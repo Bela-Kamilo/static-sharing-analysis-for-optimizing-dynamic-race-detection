@@ -21,7 +21,7 @@ public class FieldAssignPropagator extends Propagator<SetVar> {
     private final LocationsManager locationsManager;
 
     FieldAssignPropagator(SetVar p , String field, SetVar q, LocationsManager locationsManager){
-        super(new SetVar[]{p,q});
+        super(p,q);
         this.p=p;
         this.q=q;
         this.field=field;
@@ -31,13 +31,15 @@ public class FieldAssignPropagator extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         //get l_ps
-        for(int l_p : p.getLB())
+        for(int l_p : p.getLB()) {
+            SetVar l_pfield = locationsManager.getOrCreateField(l_p, field);
             //get l_qs
-            for( int l_q : q.getLB()){
+            for (int l_q : q.getLB()) {
                 //l_q in l_p.f
-                SetVar l_pfield=locationsManager.getOrCreateField(l_p, field);
-                l_pfield.force(l_q,this);
+                l_pfield.force(l_q, this);
             }
+
+        }
     }
 
 
