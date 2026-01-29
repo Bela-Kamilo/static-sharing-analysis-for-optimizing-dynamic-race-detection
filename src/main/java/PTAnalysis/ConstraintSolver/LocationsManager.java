@@ -9,6 +9,7 @@ import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.FailureBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
 
 import java.util.*;
 
@@ -20,7 +21,8 @@ public class LocationsManager {
     private final HashMap<Integer, ObjectMemoryLocation> locationsMap;
     private final Model model;
     final int totalLocations;
-
+    int call_counter=0;
+    private IntVar cardinalityOfAll=null;
     LocationsManager(Model m){
         this.model=m;
         locationsMap= new HashMap<>();
@@ -50,11 +52,12 @@ public class LocationsManager {
         ObjectMemoryLocation l = locationsMap.get(locationId);
 
         if (!l.existsField(field)) {
+            call_counter++;
             SetVar l_field = model.setVar(locationId + "." + field, new int[]{}, Solver.allLocations());
             PointsToSet fieldPTSet = new PointsToSet(locationId + "."+field);
             fieldPTSet.constraintSolverSet=l_field;
             l.setField(field, fieldPTSet);
-            updateSearch();
+            updateSearch(l_field);
             return l_field;
         }
         return (SetVar) locationsMap.get(locationId).getField(field).constraintSolverSet;
@@ -71,8 +74,8 @@ public class LocationsManager {
         return allfields;
     }
 
-    private  void updateSearch(){
-            model.setObjective(Model.MINIMIZE, totalElementsOfSetVarsOfModel());
+    private  void updateSearch(SetVar newSetVar){
+            model.setObjective(Model.MINIMIZE, totalElementsOfSetVarsOfModel3(newSetVar));
             model.getSolver().
                     setSearch(
                             Search.setVarSearch(new FailureBased<SetVar>(model.retrieveSetVars(), new Date().getTime(), 1),
@@ -81,14 +84,49 @@ public class LocationsManager {
                                     model.retrieveSetVars()));
     }
 
-     private IntVar totalElementsOfSetVarsOfModel(){
+     private IntVar totalElementsOfSetVarsOfModel2(){
+        IntVar[] cardOfEachSetVaExceptTheFirst = new IntVar[model.getNbSetVar()-1];
+        SetVar[] setvars =model.retrieveSetVars();
+        if(setvars.length ==0){System.out.println("!No setVars in model "+model+"!"); return model.intVar(0,0);}
+        for(int i=1; i< model.getNbSetVar();i++){
+            cardOfEachSetVaExceptTheFirst[i-1]=setvars[i].getCard();
+        }
+        IntVar ret = setvars[0].getCard().add(cardOfEachSetVaExceptTheFirst).intVar();
+        return ret;
+    }
+    IntVar totalElementsOfSetVarsOfModel_ORIGINAL( ){
         SetVar[] setvars =model.retrieveSetVars();
         if(setvars.length ==0){System.out.println("!No setVars in model "+model+"!"); return model.intVar(0,0);}
         ArExpression sum= setvars[0].getCard();
         if(setvars.length ==1) return sum.intVar();
         for(int i =1;i< setvars.length;i++)
             sum=sum.add(setvars[i].getCard());
-        return sum.intVar();
+        IntVar intVarSum = sum.intVar();        //this creates A LOT of IntVars and is a memory leak
+        return intVarSum;
+    }
+    IntVar totalElementsOfSetVarsOfModel3(SetVar newSetVar ){
+        Variable obj =model.getObjective();
+        if(! (obj instanceof IntVar)) throw new RuntimeException("!Error! the model's objective should be to minimize the total elements");
+        return ((IntVar) obj).add(newSetVar.getCard()).intVar();
     }
 
+    IntVar totalElementsOfSetVarsOfModel_FIX( ){
+        SetVar[] setvars =model.retrieveSetVars();
+        if(cardinalityOfAll!=null){     //cardinality of all + last added setvar
+            return cardinalityOfAll.add(setvars[model.getNbSetVar()-1].getCard()).intVar();
+        }
+        if(setvars.length ==0){System.out.println("!No setVars in model "+model+"!"); return model.intVar(0,0);}
+        ArExpression sum= setvars[0].getCard();
+        if(setvars.length ==1) return sum.intVar();
+        for(int i =1;i< setvars.length;i++) {
+            sum = sum.add(setvars[i].getCard());
+        }
+        cardinalityOfAll=sum.intVar();
+        return cardinalityOfAll;
+    }
+    private void unnasociateTmpIntVars(){
+        //for(IntVar v : tempIntVars)
+        //    model.unassociates(v);
+        //model.getObjective()
+    }
 }

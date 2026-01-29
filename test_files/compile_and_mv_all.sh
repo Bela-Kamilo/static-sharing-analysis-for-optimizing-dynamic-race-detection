@@ -4,7 +4,7 @@ pta=false
 se=false
 dr=false
 
-if  [ $# -eq 0 ] || [ "$1" = "all" ] ; then 
+if  ([ $# -eq 0 ] || [ "$1" = "all" ]) && [ "$1" != "none" ] ; then 
 all=true 
 fi
 
@@ -42,3 +42,5 @@ fi
 if $all || $dr ; then
 	javac -d DataRace/1  DataRace/1/src/*.java
 fi
+
+javac -d PTAnalysis/tmp  PTAnalysis/tmp/src/*.java

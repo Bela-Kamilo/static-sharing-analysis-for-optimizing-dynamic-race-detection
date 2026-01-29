@@ -91,7 +91,7 @@ public class Solver {
                     model.post(fieldAssign);
                     break;
                 case FIELDLESS:
-                    model.subsetEq(new SetVar[]{modelSubSet,modelSuperSet}).post();
+                    model.subsetEq(modelSubSet,modelSuperSet).post();
                     break;
             }
            return;
@@ -121,6 +121,20 @@ public class Solver {
         for(int i =1;i< setvars.length;i++)
             sum=sum.add(setvars[i].getCard());
         return sum.intVar();
+    }
+    private IntVar totalElementsOfSetVarsOfModel2() {
+        IntVar[] cardOfEachSetVaExceptTheFirst = new IntVar[model.getNbSetVar() - 1];
+        SetVar[] setvars = model.retrieveSetVars();
+        if (setvars.length == 0) {
+            System.out.println("!No setVars in model " + model + "!");
+            return model.intVar(0, 0);
+        }
+        int i = 0;
+        for (SetVar v : setvars) {
+            if (i++ == 0) continue;
+            cardOfEachSetVaExceptTheFirst[i - 2] = v.getCard();
+        }
+        return setvars[0].getCard().add(cardOfEachSetVaExceptTheFirst).intVar();
     }
 
     /** produces a solution w/ respect to the model's constraints */
@@ -177,6 +191,9 @@ public class Solver {
         return whydotheyusetheirowndatastructures;
     }
     public static int[] allLocations(){return AllLocationsArray;}
+
+
+    //DEBUG METHODS
     public int totalActualElements(){
         SetVar[] setvars = model.retrieveSetVars();
         int i=0;
@@ -185,7 +202,6 @@ public class Solver {
         }
         return i;
     }
-    //DEBUG METHODS
     public int totalActualElementsOnlySet(){
         SetVar[] setvars = model.retrieveSetVars();
         int i=0;
@@ -227,6 +243,22 @@ public class Solver {
         }
         return res;
     }
+    public Set<Variable> intVarsWNoPropagators(){
+        Set<Variable> ret = new TreeSet<>();
+        for(Variable v : model.retrieveIntVars(false))
+            if (v.getNbProps() == 0)
+                ret.add(v);
+        return ret;
+    }
+
+    public Set<Variable> setVarsWNoPropagators(){
+        Set<Variable> ret = new TreeSet<>();
+        for(Variable v : model.retrieveSetVars())
+            if (v.getNbProps() == 0)
+                ret.add(v);
+        return ret;
+    }
+
     public Set<Variable> uninstVars(){
         Set<Variable>res = new HashSet<>();
         Variable[] vars = model.getVars();
