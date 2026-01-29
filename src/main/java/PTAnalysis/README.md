@@ -3,8 +3,7 @@
 _______________________
 Using the rules bellow , a Points To Set is created and monitored for each variable, parameter, non void method and instance field
 
-<br/>
-
+\
 $$ \frac{}{\left\| p= new\text{ } A_i() \right\| \mapsto l_i \in p }[new \text{-}assignment\text{-} statement] $$
 
 $$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q }[copy\text{-}statement] $$
@@ -21,14 +20,26 @@ $$\text {where }  p_j \text { are } m \text{'s parameters}$$
 $$\frac{}{\left\| q= i.m(a_1 ... a_n) \right\| \mapsto q \supseteq m}[method \text{-} assignment\text{-}statement] $$
 
 $$\frac{}{\left\| return \  p \right\| \mapsto m \supseteq p }[return\text{-}statement ]$$
+
 $$ \text {where } m \text { is the enclosing method }  \newline $$
-</br>
 
+\
+$$ \text{ an abstract method call could possibly execute any one of its implementations} $$
+$$ \text{ therefore, abstract methods are additionally treated as such :} $$
 
+$$\frac{}{ impl_j(m).this \supseteq m.this}[abstract\text{-}this\text{-}global] $$
+$$ \text{where } m \text{ is an abstract method}$$ 
+$$ \text{and } impl_j(m) \text{ is any of its implementations}$$
+\
+$$\frac{}{ impl_j(m).p_i \supseteq m.p_i}[abstract\text{-}params\text{-}global] $$
+$$ \text{where } m.p_i \text{ is } m \text{'s i-th parameter}$$
+\
+$$\frac{}{ m \supseteq impl_j(m)}[abstract\text{-}return\text{-}global] $$
+\
 $$arrays \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i]...[j] \ as \ if
 \ it \ were \ ar[i] $$
 $$as \ if \ it \ were \ ar[j] \ mapped \ to \ a \   single \ points \ to   \ set$$  
-$$We \ equate \ arrays \ on \ assignments \ between \ them \ $$
+$$we \ equate \ arrays \ on \ assignments \ between \ them \ $$
 $$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q\  ,\  q \supseteq p }[array\text{-}copy\text{-}statement] $$
 
 
