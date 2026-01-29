@@ -27,75 +27,37 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.List;
 
-/** Visits a statement, generates appropriate points-to and side effect constraints.
- * Holds the constraints themselves
+/**Implements statement and value rules for points-to and side effect analyses.
+ * Visits a statement, generates appropriate points-to and side effect constraints.
  * Make sure the appropriate visitingMethod has been set before visiting a statement
  * */
 public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
-
-    //PTA data structures
-    private final Map<Value, PointsToSet> varsToLocationsMap;
-    private final Map<MethodSignature, PointsToSet> returnedLocationsMap;
-    private final Map<MethodSignature, Vector<PointsToSet>> parametersLocationsMap;
-    private final Set<Constraint> PTAconstraints;
-    private final int THIS_INDEX=0;
-    //Side Effects data structures
-    private final Set<GenericConstraint<AccessibleHeapLocation>> sideEffectsConstraints;
-    private final Map<MethodSignature,Set<AccessibleHeapLocation>> readSets;
-    private final Map<MethodSignature,Set<AccessibleHeapLocation>> writeSets;
-
-    private final Map<MethodSignature, Set<Tuple<PointsToSet,FieldSignature >>> fieldsRead;
-    private final Map<MethodSignature, Set<Tuple<PointsToSet,FieldSignature>>> fieldsWritten;
-
-
+    private final ConstraintManager constraintManager;
     private final Set<MethodSignature> methodsInvoked; //method invocations which will be visited after
     private MethodSignature visitingMethod=null;
 
-   public RuleApplicatorStmtVisitor(){
-        this.PTAconstraints = new HashSet<>();
-        this.parametersLocationsMap= new HashMap<>();
-        this.returnedLocationsMap = new HashMap<>();
-        this.methodsInvoked= new HashSet<>();
-        this.fieldsRead= new HashMap<>();
-        this.fieldsWritten= new HashMap<>();
-        this.varsToLocationsMap = new TreeMap<>(new Comparator<Value>() {       // we want to differentiate between same name locals
-            @Override                                                           //of different methods
-            public int compare(Value o1, Value o2) {
-                if(o1==o2) return 0;
-                if(o1 instanceof JStaticFieldRef && o2 instanceof JStaticFieldRef)//static field values however are different for the same field
-                    return ((JStaticFieldRef) o1).getFieldSignature().compareTo(((JStaticFieldRef) o2).getFieldSignature());
-                int r =o1.toString().compareTo(o2.toString());
-                return r==0? 1 : r;
-            }
-        });
-        this.sideEffectsConstraints= new HashSet<>();
-        this.readSets= new HashMap<>();
-        this.writeSets= new HashMap<>();
+   public RuleApplicatorStmtVisitor(ConstraintManager constraintManager){
+       this.constraintManager=constraintManager;
+       this.methodsInvoked= new HashSet<>();
     }
 
     public void setVisitingMethod(MethodSignature method){
         visitingMethod=method;
-        this.fieldsRead.put(method, new HashSet<>());
-        this.fieldsWritten.put(method, new HashSet<>());
-    }
+        constraintManager.initFieldsReadAndWritten(method);
 
-    public Map<Value, PointsToSet> getVarsToLocationsMap() {
-        return varsToLocationsMap;
     }
 
     public Set<MethodSignature> getMethodsInvoked() {
         return methodsInvoked;
     }
 
-    public Set<Constraint> getPTAconstraints() {
-        return PTAconstraints;
-    }
+
     public static boolean isLocationHolder(Value v){
         //PTAnalysis is only really interested in refs                                  v i should find a better way
         return (v.getType() instanceof ReferenceType) && ! v.getType().toString().equals("java.lang.String");
     }
 
-    //<< x.f(a1,a2...an); >> treat as f(x,a1,a2...an) >>  f.params = args and add f in MethodsInvoked
+    //<< x.f(a1,a2...an); >> treat as  f.this=x , f.params = args and add f in MethodsInvoked
     @Override
     public void caseInvokeStmt(@Nonnull JInvokeStmt stmt) {
         stmt.getInvokeExpr().accept(new ConstraintGenInvokeVisitor() );
@@ -110,18 +72,18 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
         if(!(isLocationHolder(rightOp))) return;
 
         if(rightOp instanceof JParameterRef){
-            subset=getOrCreateMappingOf(visitingMethod,((JParameterRef) rightOp).getIndex()+1);
-            superset=getOrCreateMappingOf(leftOp);
-            PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
+            subset=constraintManager.getOrCreateMappingOf(visitingMethod,((JParameterRef) rightOp).getIndex()+1);
+            superset=constraintManager.getOrCreateMappingOf(leftOp, visitingMethod);
+            constraintManager.addPTA(new PTASupersetOfConstraint(superset, subset));
             return;
         }
 
         if(rightOp instanceof JThisRef){
             //this := @this: Type;     =>   let 'this' as a Local be a superset of all the instances calling this method
             //                              it s ok as long as this as a Local doesnt get assigned (which is illegal anyways)
-            subset=getOrCreateMappingOf(visitingMethod,THIS_INDEX);
-            superset=getOrCreateMappingOf(leftOp);      //left op is 'this'; should be visitingMethod.this
-            PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
+            subset=constraintManager.getOrCreateMappingOf(visitingMethod,constraintManager.getTHIS_INDEX());
+            superset=constraintManager.getOrCreateMappingOf(leftOp, visitingMethod);      //left op is 'this'; should be visitingMethod.this
+            constraintManager.addPTA(new PTASupersetOfConstraint(superset, subset));
             return;
         }
 
@@ -134,9 +96,9 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
     public void caseReturnStmt(@Nonnull JReturnStmt stmt) {
         if( !(isLocationHolder(stmt.getOp())) ) return;
 
-        PointsToSet superset =getOrCreateMappingOfMethod(visitingMethod);
-        PointsToSet subset=getOrCreateMappingOf(stmt.getOp());
-        PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
+        PointsToSet superset =constraintManager.getOrCreateMappingOfMethod(visitingMethod);
+        PointsToSet subset=constraintManager.getOrCreateMappingOf(stmt.getOp(), visitingMethod);
+        constraintManager.addPTA(new PTASupersetOfConstraint(superset, subset));
     }
     @Override
     public void caseRetStmt(@Nonnull JRetStmt stmt){System.out.println("VISITED A RET STATEMENT(?)");}
@@ -178,7 +140,8 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
     private boolean newAssignmentStmtRule(JAssignStmt stmt){
         if(stmt.getRightOp() instanceof JNewExpr) {
             ObjectMemoryLocation l = new ObjectMemoryLocation(stmt.getPositionInfo().getStmtPosition().getFirstLine());
-            PTAconstraints.add(new PTAElementOfConstraint(l,getOrCreateMappingOf(stmt.getLeftOp())));
+            PointsToSet set =constraintManager.getOrCreateMappingOf(stmt.getLeftOp(), visitingMethod);
+            constraintManager.addPTA(new PTAElementOfConstraint(l, set));
             return true;
         }
         return false;
@@ -187,9 +150,9 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
         LValue leftOp= stmt.getLeftOp();
         Value rightOp= stmt.getRightOp();
         if(copyRuleApplies(leftOp , rightOp)){
-            PointsToSet superset =getOrCreateMappingOf(leftOp);
-            PointsToSet subset=getOrCreateMappingOf(rightOp);
-            PTAconstraints.add(new PTASupersetOfConstraint(superset,  subset));
+            PointsToSet superset =constraintManager.getOrCreateMappingOf(leftOp, visitingMethod);
+            PointsToSet subset=constraintManager.getOrCreateMappingOf(rightOp, visitingMethod);
+            constraintManager.addPTA(new PTASupersetOfConstraint(superset,  subset));
             return true;
         }
         return false;
@@ -214,9 +177,9 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
         Value rightOp= stmt.getRightOp();
         if(rightOp instanceof JCastExpr){
             Value castedRightOp =((JCastExpr) rightOp).getOp();
-            PointsToSet superset =getOrCreateMappingOf(leftOp);
-            PointsToSet subset=getOrCreateMappingOf(castedRightOp);
-            PTAconstraints.add(new PTASupersetOfConstraint(superset,  subset));
+            PointsToSet superset =constraintManager.getOrCreateMappingOf(leftOp, visitingMethod);
+            PointsToSet subset=constraintManager.getOrCreateMappingOf(castedRightOp, visitingMethod);
+            constraintManager.addPTA(new PTASupersetOfConstraint(superset,  subset));
             return true;
         }
         return false;
@@ -228,9 +191,9 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
             LValue leftOp = stmt.getLeftOp();
             rightOp.accept(new ConstraintGenInvokeVisitor());
 
-            PointsToSet superset =getOrCreateMappingOf(leftOp);
-            PointsToSet subset=getOrCreateMappingOf(rightOp);
-            PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
+            PointsToSet superset =constraintManager.getOrCreateMappingOf(leftOp, visitingMethod);
+            PointsToSet subset=constraintManager.getOrCreateMappingOf(rightOp, visitingMethod);
+            constraintManager.addPTA(new PTASupersetOfConstraint(superset, subset));
             return true;
         }
         return false;
@@ -252,10 +215,10 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
         LValue lvalue = stmt.getLeftOp();
         Value rvalue=stmt.getRightOp();
         if(lvalue.getType() instanceof ArrayType && rvalue.getType() instanceof  ArrayType){
-            PointsToSet rvalueSet= getOrCreateMappingOf(rvalue);
-            PointsToSet lvalueSet= getOrCreateMappingOf(lvalue);
-            PTAconstraints.add(new PTASupersetOfConstraint(lvalueSet,rvalueSet));
-            PTAconstraints.add(new PTASupersetOfConstraint(rvalueSet,lvalueSet));
+            PointsToSet rvalueSet= constraintManager.getOrCreateMappingOf(rvalue, visitingMethod);
+            PointsToSet lvalueSet= constraintManager.getOrCreateMappingOf(lvalue, visitingMethod);
+            constraintManager.addPTA(new PTASupersetOfConstraint(lvalueSet,rvalueSet));
+            constraintManager.addPTA(new PTASupersetOfConstraint(rvalueSet,lvalueSet));
             return true;
         }
         return false;
@@ -278,9 +241,9 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
             rightOp.accept(fieldValueVisitor);
             String subsetField=fieldValueVisitor.getResult();
             if(subsetField == null) throw new RuntimeException("Field-Read-Assignment-Statement rule applied on no field assignment");
-            PointsToSet superset =getOrCreateMappingOf(leftOp);
-            PointsToSet subset=getOrCreateMappingOf(rightOp);
-            PTAconstraints.add(new PTASupersetOfConstraint(superset,  subset, subsetField));
+            PointsToSet superset =constraintManager.getOrCreateMappingOf(leftOp, visitingMethod);
+            PointsToSet subset=constraintManager.getOrCreateMappingOf(rightOp, visitingMethod);
+            constraintManager.addPTA(new PTASupersetOfConstraint(superset,  subset, subsetField));
             return true;
         }
         return false;
@@ -303,191 +266,17 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
             leftOp.accept(fieldValueVisitor);
             String superSetField=fieldValueVisitor.getResult();
             if(superSetField == null) throw new RuntimeException("Field-Assign-Assignment-Statement rule applied on no field assignment");
-            PointsToSet superset =getOrCreateMappingOf(leftOp);
-            PointsToSet subset=getOrCreateMappingOf(rightOp);
-            PTAconstraints.add(new PTASupersetOfConstraint(superset,superSetField,  subset));
+            PointsToSet superset =constraintManager.getOrCreateMappingOf(leftOp, visitingMethod);
+            PointsToSet subset=constraintManager.getOrCreateMappingOf(rightOp, visitingMethod);
+            constraintManager.addPTA(new PTASupersetOfConstraint(superset,superSetField,  subset));
             return true;
         }
         return false;
     }
 
-    /*              SIDE EFFECTS RULES
-    ------------------------------------------------------------------------
-     */
-    private boolean sideEffectReadStmtRule(JAssignStmt stmt){
-       Value rightOp=stmt.getRightOp();
 
-        if(rightOp instanceof JInstanceFieldRef){
-           FieldSignature field = ((JInstanceFieldRef) rightOp).getFieldSignature();
-           PointsToSet baseSet = getOrCreateMappingOf(((JInstanceFieldRef) rightOp).getBase());
-           fieldsRead.get(visitingMethod).add(new Tuple<>(baseSet,field));
-           return true;
-        }
-        return false;
-    }
-
-    private boolean sideEffectWriteStmtRule(JAssignStmt stmt){
-        LValue leftOp=stmt.getLeftOp();
-
-        if(leftOp instanceof JInstanceFieldRef){
-            FieldSignature field  = ((JInstanceFieldRef) leftOp).getFieldSignature();
-            PointsToSet baseSet = getOrCreateMappingOf(((JInstanceFieldRef) leftOp).getBase());
-            fieldsWritten.get(visitingMethod).add(new Tuple<>(baseSet,field));
-            return true;
-        }
-        return false;
-    }
-
-    private boolean sideEffectsInvocationValueRule(Value v){
-        if(v instanceof AbstractInvokeExpr){
-            MethodSignature m = ((AbstractInvokeExpr) v).getMethodSignature();
-            if(isRunMethod(m)) return false;
-            sideEffectsConstraints.add(new SupersetOfConstraint<>(
-                    getOrCreateMethodReadSet(visitingMethod),visitingMethod+"._READS",
-                    getOrCreateMethodReadSet(m), m+"._READS"));
-            sideEffectsConstraints.add(new SupersetOfConstraint<>(
-                    getOrCreateMethodWriteSet(visitingMethod),visitingMethod+"._WRITES",
-                    getOrCreateMethodWriteSet(m), m+"._WRITES"));
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isRunMethod(MethodSignature m){
-        String runMethodPattern = ".*void\\s+run\\s*\\(\\s*\\).*";
-        return m.toString().matches(runMethodPattern);
-    }
-
-    private Set<AccessibleHeapLocation> getOrCreateMethodReadSet(MethodSignature m){
-        if(readSets.containsKey(m)) return readSets.get(m);
-        Set<AccessibleHeapLocation> toBe = new HashSet<>();
-        readSets.put(m,toBe);
-        return toBe;
-    }
-    private Set<AccessibleHeapLocation> getOrCreateMethodWriteSet(MethodSignature m){
-        if(writeSets.containsKey(m)) return writeSets.get(m);
-        Set<AccessibleHeapLocation> toBe = new HashSet<>();
-        writeSets.put(m,toBe);
-        return toBe;
-    }
-
-    //--------------------------------------------------------------------
-
-
-    public Map<MethodSignature, Set<AccessibleHeapLocation>> getReadSets() {
-        return Collections.unmodifiableMap(readSets);
-    }
-
-    public Map<MethodSignature, Set<AccessibleHeapLocation>> getWriteSets() {
-        return Collections.unmodifiableMap(writeSets);
-    }
-
-    public Map<MethodSignature, Set<Tuple<PointsToSet, FieldSignature>>> getFieldsRead() {
-        return Collections.unmodifiableMap(fieldsRead);
-    }
-
-    public Map<MethodSignature, Set<Tuple<PointsToSet, FieldSignature>>> getFieldsWritten() {
-        return Collections.unmodifiableMap(fieldsWritten);
-    }
-
-    public Set<GenericConstraint<AccessibleHeapLocation>> getSEConstraints(){
-        return Collections.unmodifiableSet(sideEffectsConstraints);
-    }
-
-    public Set<AccessibleHeapLocation> getWritesOf(MethodSignature m){
-        Set<AccessibleHeapLocation> res= new HashSet<>();
-
-        Set<Tuple<PointsToSet,FieldSignature>> PTSetsAndFields =fieldsWritten.get(m);
-        for(Tuple<PointsToSet,FieldSignature> PTSetAndField : PTSetsAndFields)
-            for(int i : PTSetAndField.getElem1())
-                res.add(new AccessibleHeapLocation(i,PTSetAndField.getElem2()));
-
-        return res;
-    }
-
-    public Set<AccessibleHeapLocation> getReadsOf(MethodSignature m){
-        Set<AccessibleHeapLocation> res= new HashSet<>();
-
-        Set<Tuple<PointsToSet,FieldSignature>> PTSetsAndFields =fieldsRead.get(m);
-        for(Tuple<PointsToSet,FieldSignature> PTSetAndField : PTSetsAndFields)
-            for(int i : PTSetAndField.getElem1())
-                res.add(new AccessibleHeapLocation(i,PTSetAndField.getElem2()));
-
-        return res;
-    }
-
-    // maybe store this in the future so we dont recompute it each time we call getWrites or getReads
-
-    public Map<MethodSignature,Set<AccessibleHeapLocation>> getWrites(){
-        Map<MethodSignature, Set<AccessibleHeapLocation>> res= new HashMap<>();
-        fieldsWritten.forEach((method,_)->{res.put(method,getWritesOf(method));});
-
-        return res;
-    }
-
-    public Map<MethodSignature,Set<AccessibleHeapLocation>> getReads(){
-        Map<MethodSignature, Set<AccessibleHeapLocation>> res= new HashMap<>();
-        fieldsRead.forEach((method,_)->{res.put(method,getReadsOf(method));});
-
-        return res;
-    }
-    /** value -> PTSet
-     * A mapping of a value to its PTSet*/
-    private PointsToSet getOrCreateMappingOf(Value v){
-        if(v instanceof AbstractInvokeExpr){
-            return getOrCreateMappingOfMethod( ( (AbstractInvokeExpr) v).getMethodSignature());
-        }
-        Value v2;
-        if(v instanceof JInstanceFieldRef) v2= ((JInstanceFieldRef) v).getBase();
-        else if(v instanceof JArrayRef) v2= ((JArrayRef) v).getBase() ;
-        else v2=v;
-        if(varsToLocationsMap.containsKey(v2))
-            return varsToLocationsMap.get(v2);
-        String name = v2 instanceof JStaticFieldRef ? v2.toString() : visitingMethod +":"+v2;  //what else might be visible from outside visitingMethod?
-        PointsToSet set = new PointsToSet(name);
-        varsToLocationsMap.put(v2, set);
-        return set;
-    }
-
-    /** method-> PTSet    returned locations
-     * A mapping of a method to a PTSet of its possibly returned locations
-     * */
-    private PointsToSet getOrCreateMappingOfMethod(MethodSignature method){
-        if(returnedLocationsMap.containsKey(method))
-            return returnedLocationsMap.get(method);
-        PointsToSet set = new PointsToSet(method.toString());
-        returnedLocationsMap.put(method, set);
-        return set;
-    }
-
-    /** method -> parametersPTSet
-     * A mapping of a method to PTSets of its parameters
-     * */
-    private PointsToSet getOrCreateMappingOf(MethodSignature method,int paramOrdinal){
-
-        try {
-            if (parametersLocationsMap.containsKey(method))
-                return parametersLocationsMap.get(method).get(paramOrdinal);
-        } catch (Exception e) {
-            System.err.println("!failed to get "+method+" 's parameter"+paramOrdinal);
-        }
-
-        Vector<PointsToSet> paramVector= new Vector<>();
-        paramVector.add(new PointsToSet(method+".this"));
-        List<Type> types = method.getParameterTypes();
-        for(int i=1; i< types.size()+1;i++) {
-            if(types.get(i-1) instanceof ReferenceType)
-                paramVector.add(new PointsToSet(method + "." + i));
-            else
-                paramVector.add(null);
-        }
-        parametersLocationsMap.put(method, paramVector);
-        return paramVector.get(paramOrdinal);
-    }
-
-
-    /** Visits a value, generates constraints for method invocations
-     * method-invocation-value rule is implemented here
+    /**
+     * Implements method-invocation-value rule
      * */
      class ConstraintGenInvokeVisitor extends AbstractValueVisitor{
 
@@ -495,9 +284,9 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
         public void caseSpecialInvokeExpr(@Nonnull JSpecialInvokeExpr expr) {
             defaultInvokeExpr(expr);
             //x.f(a); >> f.this=x
-            PointsToSet superset =getOrCreateMappingOf(expr.getMethodSignature(), THIS_INDEX);
-            PointsToSet subset=getOrCreateMappingOf(expr.getBase());
-            PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
+            PointsToSet superset =constraintManager.getOrCreateMappingOf(expr.getMethodSignature(), constraintManager.getTHIS_INDEX());
+            PointsToSet subset=constraintManager.getOrCreateMappingOf(expr.getBase(), visitingMethod);
+            constraintManager.addPTA(new PTASupersetOfConstraint(superset, subset));
         }
 
 
@@ -505,9 +294,9 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
         public void caseVirtualInvokeExpr(@Nonnull JVirtualInvokeExpr expr) {
             defaultInvokeExpr(expr);
             //x.f(a); >> f.this=x
-            PointsToSet superset =getOrCreateMappingOf(expr.getMethodSignature(), THIS_INDEX);
-            PointsToSet subset=getOrCreateMappingOf(expr.getBase());
-            PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
+            PointsToSet superset =constraintManager.getOrCreateMappingOf(expr.getMethodSignature(), constraintManager.getTHIS_INDEX());
+            PointsToSet subset=constraintManager.getOrCreateMappingOf(expr.getBase(), visitingMethod);
+            constraintManager.addPTA(new PTASupersetOfConstraint(superset, subset));
         }
 
         @Override
@@ -528,19 +317,65 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
 
         private  void defaultInvokeExpr(AbstractInvokeExpr invokeExpr ){
             methodsInvoked.add(invokeExpr.getMethodSignature());
-            int i=THIS_INDEX+1;
+            int i=constraintManager.getTHIS_INDEX()+1;
             for(Value arg : invokeExpr.getArgs()) {
                 if (!(isLocationHolder(arg))) {
                     i++;
                     continue;
                 }
-                PointsToSet superset =getOrCreateMappingOf(invokeExpr.getMethodSignature(), i);
-                PointsToSet subset=getOrCreateMappingOf(arg);
-                PTAconstraints.add(new PTASupersetOfConstraint(superset, subset));
+                PointsToSet superset =constraintManager.getOrCreateMappingOf(invokeExpr.getMethodSignature(), i);
+                PointsToSet subset=constraintManager.getOrCreateMappingOf(arg, visitingMethod);
+                constraintManager.addPTA(new PTASupersetOfConstraint(superset, subset));
                 i++;
             }
         }
+    }
 
+/*              SIDE EFFECTS RULES
+------------------------------------------------------------------------
+*/
+    private boolean sideEffectReadStmtRule(JAssignStmt stmt){
+        Value rightOp=stmt.getRightOp();
+
+        if(rightOp instanceof JInstanceFieldRef){
+            FieldSignature field = ((JInstanceFieldRef) rightOp).getFieldSignature();
+            PointsToSet baseSet = constraintManager.getOrCreateMappingOf(((JInstanceFieldRef) rightOp).getBase(), visitingMethod);
+            constraintManager.methodReads(visitingMethod,baseSet,field);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean sideEffectWriteStmtRule(JAssignStmt stmt){
+        LValue leftOp=stmt.getLeftOp();
+
+        if(leftOp instanceof JInstanceFieldRef){
+            FieldSignature field  = ((JInstanceFieldRef) leftOp).getFieldSignature();
+            PointsToSet baseSet = constraintManager.getOrCreateMappingOf(((JInstanceFieldRef) leftOp).getBase(), visitingMethod);
+            constraintManager.methodWrites(visitingMethod,baseSet,field);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean sideEffectsInvocationValueRule(Value v){
+        if(v instanceof AbstractInvokeExpr){
+            MethodSignature m = ((AbstractInvokeExpr) v).getMethodSignature();
+            if(isRunMethod(m)) return false;
+            constraintManager.addSE(new SupersetOfConstraint<>(
+                    constraintManager.getOrCreateMethodReadSet(visitingMethod),visitingMethod+"._READS",
+                    constraintManager.getOrCreateMethodReadSet(m), m+"._READS"));
+            constraintManager.addSE(new SupersetOfConstraint<>(
+                    constraintManager.getOrCreateMethodWriteSet(visitingMethod),visitingMethod+"._WRITES",
+                    constraintManager.getOrCreateMethodWriteSet(m), m+"._WRITES"));
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isRunMethod(MethodSignature m){
+        String runMethodPattern = ".*void\\s+run\\s*\\(\\s*\\).*";
+        return m.toString().matches(runMethodPattern);
     }
 
 }
