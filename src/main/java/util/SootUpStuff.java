@@ -1,13 +1,10 @@
 package util;
 
+import sootup.core.model.SootClass;
 import sootup.core.model.SootMethod;
 import sootup.core.model.SourceType;
 import sootup.core.signatures.MethodSignature;
-import sootup.core.signatures.PackageName;
-import sootup.core.types.ClassType;
-import sootup.core.types.PrimitiveType;
-import sootup.core.types.Type;
-import sootup.core.types.VoidType;
+import sootup.core.typehierarchy.TypeHierarchy;
 import sootup.core.views.View;
 import sootup.java.bytecode.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.bytecode.inputlocation.JrtFileSystemAnalysisInputLocation;
@@ -16,7 +13,6 @@ import sootup.java.core.types.JavaClassType;
 import sootup.java.core.views.JavaView;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public final class SootUpStuff {
     private static final JavaView jrtView =new JavaView(new JrtFileSystemAnalysisInputLocation(SourceType.Application));    //doesnt work
@@ -65,9 +61,42 @@ public final class SootUpStuff {
     public static MethodSignature methodSignatureFromString(String path ,String methodSignatureString) {
         return methodSignatureFromString(getViewFromPath(path),methodSignatureString);
     }
+
+
+    public static Set<SootMethod> gatherImplementationsOf( SootMethod abstractMethod, View view){
+        Set<SootMethod> res = new HashSet<>();
+        if(abstractMethod.isConcrete()) {
+            res.add(abstractMethod);
+            return res;
+        }
+        SootClass classOfAbstractMethod = view.getClass(abstractMethod.getDeclaringClassType()).orElseThrow();
+        //find all subclasses of the abstract method's class
+        for(SootClass classInView : view.getClasses() ){
+            if(isSubclass(classInView,classOfAbstractMethod,view.getTypeHierarchy())) {
+                Optional<? extends SootMethod> opt=classInView.
+                        getMethod(abstractMethod.getSignature().getSubSignature());
+
+                if(opt.isEmpty()) continue;
+                SootMethod implementation= opt.get();
+                res.add(implementation);
+            }
+        }
+        return res;
+    }
+
+    public static boolean isSubclass(SootClass subClass, SootClass superClass, TypeHierarchy hierarchy) {
+        return hierarchy.isSubtype(superClass.getType(), subClass.getType());
+    }
+     /*   //if subclass directly extends superClass
+
+        //or if some subClass'superclass directly exntends SuperClass
+        subClass.
+        return  false;
+    }*/
+
         /**
          * @param methodSignatureString  in the format of <DECLARING_CLASS: TYPE NAME(PARAM_TYPES)>
-         *
+         *  reimplementation of JavaIdentifierFactory.parseMethodSignature -> refactor me out
          */
     public static MethodSignature methodSignatureFromString(JavaView view ,String methodSignatureString){
         String declaringClassPattern="(?<=<)([A-Z][a-zA-Z\\d]*)(?=:)";  //<NAME: but only NAME
