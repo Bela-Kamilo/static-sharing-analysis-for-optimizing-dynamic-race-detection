@@ -95,6 +95,7 @@ public class SideEffectsTracker {
         }
 
         //SOLVE THEM
+        if(SE_Constraints.isEmpty()) return;
         new GenericSolver<AccessibleHeapLocation>(SE_Constraints, name+" SideEffects").solve();
         return;
     }
@@ -104,11 +105,14 @@ public class SideEffectsTracker {
     public Set< AccessibleHeapLocation> getReadsOf(MethodSignature method){
         if(!PTA.hasBeenPerformed()) analise();
         Set<AccessibleHeapLocation> readsetOfMethod=READS.get(method);
+        if(readsetOfMethod==null) return null;
         return Collections.unmodifiableSet(READS.get(method));
 
     }
     public Set<AccessibleHeapLocation> getWritesOf(MethodSignature method){
         if(!PTA.hasBeenPerformed()) analise();
+        Set<AccessibleHeapLocation> writesetOfMethod=READS.get(method);
+        if(writesetOfMethod==null) return null;
         return Collections.unmodifiableSet(WRITES.get(method));
     }
     public Map<MethodSignature, Set<AccessibleHeapLocation>>  getReads(){
