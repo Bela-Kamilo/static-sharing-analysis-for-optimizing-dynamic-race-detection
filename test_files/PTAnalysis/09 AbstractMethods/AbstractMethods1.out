@@ -1,0 +1,28 @@
+$stack4={1}
+l3={1}
+
+<ConcreteSingleImpl: ConcreteSingleImpl method()>.this=[1]
+<ConcreteSingleImpl: ConcreteSingleImpl method()>:this=[1]
+<ConcreteSingleImpl: ConcreteSingleImpl method()>:$stack1=[2]
+
+1.<ConcreteSingleImpl: ConcreteSingleImpl field>={2}
+<ConcreteSingleImpl: ConcreteSingleImpl method()>:$stack2=[2]
+<ConcreteSingleImpl: ConcreteSingleImpl method()>={2}
+
+% <AbstractSingleImpl: ConcreteSingleImpl method()>:this=[1] % FAIL! abstract methods have no body
+%								and thus no actual this
+<AbstractSingleImpl: ConcreteSingleImpl method()>.this=[1]	% a conceptual this however,
+%								 is used in abstract-this-global rule
+
+
+<AbstractSingleImpl: ConcreteSingleImpl method()>={2}
+
+<AbstractMethods1: void a(A,int)>.this=[]
+<ConcreteSingleImpl: void <init>()>.this=[1,2]
+<ConcreteSingleImpl: void <init>()>:this=[1,2]
+<AbstractSingleImpl: void <init>()>.this=[1,2]	%abstract classes DO have constructors 
+<AbstractSingleImpl: void <init>()>:this=[1,2]
+<AbstractMethods1: void a(A,int)>.1=[]
+<AbstractMethods1: void a(A,int)>:l1=[]
+<AbstractMethods1: void a(A,int)>:this=[]
+<java.lang.Object: void <init>()>.this=[1,2]
