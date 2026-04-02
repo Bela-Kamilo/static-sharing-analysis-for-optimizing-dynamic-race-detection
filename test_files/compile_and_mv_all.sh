@@ -21,16 +21,17 @@ dr=true
 fi
 
 if $all || $pta; then
-	javac -d PTAnalysis/1\ New  PTAnalysis/1\ New/src/*.java	
+	javac -d PTAnalysis/01\ New  PTAnalysis/01\ New/src/*.java	
 	#^ compile all .java files in "1 New/src" and place them to "1 New"
-	javac -d PTAnalysis/2\ Copy  PTAnalysis/2\ Copy/src/*.java
-	javac -d PTAnalysis/3\ Arrays  PTAnalysis/3\ Arrays/src/*.java
-	javac -d PTAnalysis/4\ MethodInvocation  PTAnalysis/4\ MethodInvocation/src/*.java
-	javac -d PTAnalysis/5\ Return  PTAnalysis/5\ Return/src/*.java
-	javac -d PTAnalysis/6\ MethodAssignment  PTAnalysis/6\ MethodAssignment/src/*.java
-	javac -d PTAnalysis/7\ FieldAssign  PTAnalysis/7\ FieldAssign/src/*.java
-	javac -d PTAnalysis/8\ FieldRead  PTAnalysis/8\ FieldRead/src/*.java
-	javac -d PTAnalysis/9\ Other  PTAnalysis/9\ Other/src/*.java
+	javac -d PTAnalysis/02\ Copy  PTAnalysis/02\ Copy/src/*.java
+	javac -d PTAnalysis/03\ Arrays  PTAnalysis/03\ Arrays/src/*.java
+	javac -d PTAnalysis/04\ MethodInvocation  PTAnalysis/04\ MethodInvocation/src/*.java
+	javac -d PTAnalysis/05\ Return  PTAnalysis/05\ Return/src/*.java
+	javac -d PTAnalysis/06\ MethodAssignment  PTAnalysis/06\ MethodAssignment/src/*.java
+	javac -d PTAnalysis/07\ FieldAssign  PTAnalysis/07\ FieldAssign/src/*.java
+	javac -d PTAnalysis/08\ FieldRead  PTAnalysis/08\ FieldRead/src/*.java
+	javac -d PTAnalysis/09\ AbstractMethods  PTAnalysis/09\ AbstractMethods/src/*.java
+	javac -d PTAnalysis/10\ Other  PTAnalysis/10\ Other/src/*.java
 fi
 
 if $all || $se; then
