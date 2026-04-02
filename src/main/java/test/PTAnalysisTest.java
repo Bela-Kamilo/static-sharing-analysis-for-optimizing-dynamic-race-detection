@@ -191,6 +191,5 @@ public class PTAnalysisTest extends Test {
     @Override
     public boolean isTestClassName(String classname) {
         return classname.matches("[A-Za-z]*[0-9]+\\.class");
-                //classname.split("\\.")[1].equals("class")  &&!classname.equals("A.class");
     }
 }
