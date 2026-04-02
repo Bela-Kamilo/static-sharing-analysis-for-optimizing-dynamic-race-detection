@@ -67,8 +67,14 @@ public class SideEffectsTest extends Test{
            fail(testClassName);
     }
 
+    @Override
+    public boolean isTestClassName(String classname) {
+        return classname.split("\\.")[1].equals("class")
+                && !classname.equals("A.class");
+    }
 
-     public ExpectedSideEffects parseTestFile(String filepath,String testclassName) {
+
+    public ExpectedSideEffects parseTestFile(String filepath,String testclassName) {
          ExpectedSideEffects results = new ExpectedSideEffects();
          String signaturePattern = "<.*>";
          String readsOrWritesPattern = "\\._(READS|WRITES)";

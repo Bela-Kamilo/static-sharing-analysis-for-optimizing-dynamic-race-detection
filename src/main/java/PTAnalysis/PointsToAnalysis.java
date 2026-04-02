@@ -137,7 +137,6 @@ public class PointsToAnalysis {
             constraintLogger.info("v       implementation "+ i++ +" of "+method+"    v");
             //The abstract method rules should apply to all methods in the view
             //but we only need those in our possible execution path
-           // /*
             RuleApplicatorGlobal absMethRules = new RuleApplicatorGlobal(constraintManager);
             //impl(m).this )= m.this
             absMethRules.abstractThisGlobalRule(method,implementation);
@@ -145,7 +144,7 @@ public class PointsToAnalysis {
             absMethRules.abstractParamGlobalRule(method,implementation);
             //m.return )= impl(m).return     <- contravariant like
             absMethRules.abstractReturnGlobalRule(method,implementation);
-            // */
+
             generateConstraintsForSingleMethod(implementation);
         }
         visitedMethods.add(method.getSignature());

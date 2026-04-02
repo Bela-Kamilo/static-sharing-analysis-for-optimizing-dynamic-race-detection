@@ -60,6 +60,8 @@ public class PTAnalysisTest extends Test {
 
    }
 
+
+
     public Map<String, Set<Integer>> parseTestFile(String filepath,String testclassName) {
         Map<String,Set<Integer>> res= new HashMap<>();
 
@@ -186,5 +188,9 @@ public class PTAnalysisTest extends Test {
            if(entry.getKey().contains("use"))
                results.remove(entry.getKey(),entry.getValue());
    }
-
+    @Override
+    public boolean isTestClassName(String classname) {
+        return classname.matches("[A-Za-z]*[0-9]+\\.class");
+                //classname.split("\\.")[1].equals("class")  &&!classname.equals("A.class");
+    }
 }

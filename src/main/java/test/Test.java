@@ -19,6 +19,10 @@ public abstract class Test {
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
     protected String nextThingBuffer;
+    protected final String basePath;
+    protected String entryMethodString ;
+    protected final Logger testLog;
+
     protected void pass(String singleTestName){
         System.out.println("TEST "+testsCount+" "+singleTestName+": "+ANSI_GREEN+"PASS"+ANSI_RESET);
         testLog.info("TEST "+testsCount+" "+singleTestName+": "+"PASS");
@@ -31,9 +35,6 @@ public abstract class Test {
     }
     public int getCount(){return testsCount;}
 
-    protected final String basePath;
-    protected String entryMethodString ;
-    protected final Logger testLog;
 
     /**
      * Calls singleTest for each class file (except A.class) in depth 2 from basePath
@@ -48,9 +49,7 @@ public abstract class Test {
                 File[] filesOfDir = new File(directory.getPath()).listFiles();
                 Arrays.sort(filesOfDir);
                 Stream<File> testfiles=Arrays.stream(filesOfDir).filter(file->(file.isFile()
-                        && file.getName().split("\\.")[1].equals("class")
-                        &&!file.getName().equals("A.class")));
-
+                        && isTestClassName(file.getName())));
                 testfiles.forEach(file->{
                     singleTest(directory.getName() ,file.getName().split("\\.")[0]);
                     testsCount++;
@@ -94,5 +93,10 @@ public abstract class Test {
         this.testLog= new LoggerFactory().createLogger("logs/Tests/",testName);
         testLog.info(testName+" created");
     }
+    /**
+     * @return true for class files that are intended for tests to be run on them
+     */
+    public abstract boolean isTestClassName(String classname);
+
 
 }
