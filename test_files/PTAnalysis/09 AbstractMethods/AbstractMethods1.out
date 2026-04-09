@@ -5,7 +5,7 @@ l3={1}
 <ConcreteSingleImpl: ConcreteSingleImpl method()>:this=[1]
 <ConcreteSingleImpl: ConcreteSingleImpl method()>:$stack1=[2]
 
-1.<ConcreteSingleImpl: ConcreteSingleImpl field>={2}
+1.<ConcreteSingleImpl field>={2}
 <ConcreteSingleImpl: ConcreteSingleImpl method()>:$stack2=[2]
 <ConcreteSingleImpl: ConcreteSingleImpl method()>={2}
 

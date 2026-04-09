@@ -64,7 +64,13 @@ public final class SootUpStuff {
 
 
     public static Set<SootMethod> gatherImplementationsOf( SootMethod abstractMethod, View view){
-        Set<SootMethod> res = new HashSet<>();
+        Set<SootMethod> res = new TreeSet<>(new Comparator<SootMethod>() {  //implementations appearing in the same order
+                                                                            // every time helps with testing
+            @Override
+            public int compare(SootMethod o1, SootMethod o2) {
+                return o1.toString().compareTo(o2.toString());
+            }
+        });
         if(abstractMethod.isConcrete()) {
             res.add(abstractMethod);
             return res;

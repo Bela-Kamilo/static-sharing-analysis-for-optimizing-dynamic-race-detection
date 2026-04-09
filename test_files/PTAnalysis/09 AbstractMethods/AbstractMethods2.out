@@ -11,9 +11,9 @@ l3={1}
 <ConcreteTripleImplC: A method()>:this=[1]
 
 
-<ConcreteTripleImplA: A method()>:$stack1=[3]	%method visiting order matters here !
-<ConcreteTripleImplB: A method()>:$stack1=[4]
-<ConcreteTripleImplC: A method()>:$stack1=[2]
+<ConcreteTripleImplA: A method()>:$stack1=[2]	%method visiting order matters here !
+<ConcreteTripleImplB: A method()>:$stack1=[3]
+<ConcreteTripleImplC: A method()>:$stack1=[4]
 
 <AbstractTripleImpl: A method()>.this=[1]	% conceptual this
 
@@ -39,6 +39,6 @@ l3={1}
 <java.lang.Object: void <init>()>.this=[1,2,3,4]
 
 <AbstractTripleImpl: A method()>=[2,3,4] 		%conceptual return created by abs-ret rule
-<ConcreteTripleImplA: A method()>=[3] 
-<ConcreteTripleImplB: A method()>=[4]
-<ConcreteTripleImplC: A method()>=[2]
+<ConcreteTripleImplA: A method()>=[2] 
+<ConcreteTripleImplB: A method()>=[3]
+<ConcreteTripleImplC: A method()>=[4]

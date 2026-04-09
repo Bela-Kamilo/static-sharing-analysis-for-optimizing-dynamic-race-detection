@@ -230,7 +230,7 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
             AbstractValueVisitor<String> fieldValueVisitor =new AbstractValueVisitor<>() {
                 @Override
                 public void caseInstanceFieldRef(@Nonnull JInstanceFieldRef ref) {
-                    setResult( ref.getFieldSignature().toString());
+                    setResult( "<"+ref.getFieldSignature().getSubSignature()+">");
                 }
 
                 @Override
@@ -255,7 +255,7 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
             AbstractValueVisitor<String> fieldValueVisitor =new AbstractValueVisitor<>() {
                 @Override
                 public void caseInstanceFieldRef(@Nonnull JInstanceFieldRef ref) {
-                    setResult( ref.getFieldSignature().toString());
+                    setResult( "<"+ref.getFieldSignature().getSubSignature()+">");
                 }
 
                 @Override
