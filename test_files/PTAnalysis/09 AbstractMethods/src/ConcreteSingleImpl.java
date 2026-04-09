@@ -1,3 +1,4 @@
+
 public class ConcreteSingleImpl extends AbstractSingleImpl {
   //@Override
   public ConcreteSingleImpl method(){ //this={1}

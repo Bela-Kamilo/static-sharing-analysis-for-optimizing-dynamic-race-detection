@@ -1,3 +1,4 @@
+
 public class ConcreteTripleImplB extends AbstractTripleImpl {
   //@Override
   public A method(){ //this={1}
