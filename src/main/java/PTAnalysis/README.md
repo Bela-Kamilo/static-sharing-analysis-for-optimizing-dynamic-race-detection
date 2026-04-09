@@ -190,9 +190,9 @@ We get such results :
 <A: A a(A,int)> = {1, 2}
 <A: A f(A,A)>:l2 = {2}
 <A: A f(A,A)>.2 = {2}
-3.<A: A x> = {4}                % location 3 may hold location4 in its x field
-1.<A: A x> = {4}
-2.<A: A x> = {4}
+3.<A x> = {4}                % location 3 may hold location4 in its x field
+1.<A x> = {4}
+2.<A x> = {4}
 ````
 ## Use
 
