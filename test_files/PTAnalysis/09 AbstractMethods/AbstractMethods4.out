@@ -1,0 +1,39 @@
+$stack4={1}
+l3={1}
+
+<ConcreteTripleImplA: A method()>.this=[1,3]
+<ConcreteTripleImplA: A method()>:this=[1,3]
+
+<ConcreteTripleImplB: A method()>.this=[2,3]
+<ConcreteTripleImplB: A method()>:this=[2,3]
+
+<ConcreteTripleImplC: A method()>.this=[3]
+<ConcreteTripleImplC: A method()>:this=[3]
+
+
+<AbstractTripleImpl: void doNothing()>.this=[3]		% conceptual this
+
+
+<AbstractMethods4: void a(A,int)>.this=[]
+
+<ConcreteTripleImplA: void <init>()>.this=[1]
+<ConcreteTripleImplA: void <init>()>:this=[1]
+<ConcreteTripleImplB: void <init>()>.this=[2]		
+<ConcreteTripleImplB: void <init>()>:this=[2]
+<ConcreteTripleImplC: void <init>()>.this=[3]
+<ConcreteTripleImplC: void <init>()>:this=[3]
+
+
+<AbstractTripleImpl: void <init>()>.this=[1]	%abstract classes DO have constructors 
+<AbstractTripleImpl: void <init>()>:this=[1]
+<AbstractMethods2: void a(A,int)>.1=[]
+<AbstractMethods2: void a(A,int)>:l1=[]
+<AbstractMethods2: void a(A,int)>:this=[]
+
+
+<java.lang.Object: void <init>()>.this=[1,2,3]
+
+<AbstractTripleImpl: void doNothing()>=[] 		%conceptual return created by abs-ret rule
+<ConcreteTripleImplA: void doNothing()>=[] 
+<ConcreteTripleImplB: void doNothing()>=[]
+<ConcreteTripleImplC: void doNothing()>=[]

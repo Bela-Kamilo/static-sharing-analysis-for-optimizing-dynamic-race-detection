@@ -1,9 +1,9 @@
 $stack4={1}
 l3={1}
 
-<ConcreteSingleImpl: ConcreteSingleImpl method()>.this=[1]
-<ConcreteSingleImpl: ConcreteSingleImpl method()>:this=[1]
-<ConcreteSingleImpl: ConcreteSingleImpl method()>:$stack1=[2]
+<ConcreteSingleImpl: ConcreteSingleImpl method(java.lang.String)>.this=[1]
+<ConcreteSingleImpl: ConcreteSingleImpl method(java.lang.String)>:this=[1]
+<ConcreteSingleImpl: ConcreteSingleImpl method(java.lang.String)>:$stack1=[2]
 
 1.<ConcreteSingleImpl field>={2}
 <ConcreteSingleImpl: ConcreteSingleImpl method()>:$stack2=[2]
@@ -11,11 +11,11 @@ l3={1}
 
 % <AbstractSingleImpl: ConcreteSingleImpl method()>:this=[1] % FAIL! abstract methods have no body
 %								and thus no actual this
-<AbstractSingleImpl: ConcreteSingleImpl method()>.this=[1]	% a conceptual this however,
+<AbstractSingleImpl: ConcreteSingleImpl method(java.lang.String)>.this=[1]	% a conceptual this however,
 %								 is used in abstract-this-global rule
 
 
-<AbstractSingleImpl: ConcreteSingleImpl method()>={2}
+<AbstractSingleImpl: ConcreteSingleImpl method(java.lang.String)>={2}
 
 <AbstractMethods1: void a(A,int)>.this=[]
 <ConcreteSingleImpl: void <init>()>.this=[1,2]
