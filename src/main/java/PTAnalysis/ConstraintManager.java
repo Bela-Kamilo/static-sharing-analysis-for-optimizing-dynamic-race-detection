@@ -61,7 +61,7 @@ public class ConstraintManager {
     //--------------------------------------------------------------------
 
     public void addPTA(Constraint c){
-        this.PTAconstraints.add(c);
+          this.PTAconstraints.add(c);
     }
 
     public void addSE(GenericConstraint<AccessibleHeapLocation> c){
@@ -106,6 +106,8 @@ public class ConstraintManager {
 
     /** method -> parametersPTSet
      * A mapping of a method to PTSets of its parameters
+     * m.this index is 0
+     * parameters index start from 1
      * */
     public PointsToSet getOrCreateMappingOf(MethodSignature method,int paramOrdinal){
 

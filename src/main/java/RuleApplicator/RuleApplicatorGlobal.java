@@ -30,10 +30,10 @@ public class RuleApplicatorGlobal {
         if(!implOfM.isConcrete()) return;
         for(int i =0;i< m.getParameterCount();i++) {
             Type paramType=m.getParameterType(i);
-            if((paramType instanceof ReferenceType) && !paramType.toString().equals("java.lang.String")) continue;
+            if(!(paramType instanceof ReferenceType) || paramType.toString().equals("java.lang.String")) continue;
 
-            PointsToSet m_p_i = constraintManager.getOrCreateMappingOf(m.getSignature(),i);
-            PointsToSet impl_p_i = constraintManager.getOrCreateMappingOf(implOfM.getSignature(), i);
+            PointsToSet m_p_i = constraintManager.getOrCreateMappingOf(m.getSignature(),i+1);
+            PointsToSet impl_p_i = constraintManager.getOrCreateMappingOf(implOfM.getSignature(), i+1);
             constraintManager.addPTA(new PTASupersetOfConstraint(impl_p_i, m_p_i));
         }
     }
