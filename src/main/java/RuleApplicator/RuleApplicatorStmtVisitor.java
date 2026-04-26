@@ -41,6 +41,9 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
        this.methodsInvoked= new HashSet<>();
     }
 
+    /**
+     * @throws IllegalStateException if a method has been already visited
+     */
     public void setVisitingMethod(MethodSignature method){
         visitingMethod=method;
         constraintManager.initFieldsReadAndWritten(method);

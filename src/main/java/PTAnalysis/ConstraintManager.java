@@ -148,7 +148,11 @@ public class ConstraintManager {
         writesOfm.add(new Tuple<>(set,field));
     }
 
+    /**
+     * @throws IllegalStateException if it has already been called with the same {@param method}
+     */
     public void initFieldsReadAndWritten(MethodSignature method){
+       ;
         if(fieldsRead.containsKey(method))
             throw new IllegalStateException("Initialization of fields read by "+method+" has already happened");
         if(fieldsWritten.containsKey(method))

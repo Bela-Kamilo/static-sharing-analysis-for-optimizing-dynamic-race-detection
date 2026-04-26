@@ -4,7 +4,7 @@ public class AbstractMethods1 {
     AbstractSingleImpl x = new ConcreteSingleImpl();  //x={1}
     x.method("ekzemplo");
   }
-  void method(){  //duplicate, not really called
+  void method(String s){  //duplicate, not really called
   /*this.field= new ConcreteSingleImpl();   //1.field={2}
     return this.field;    // ConcreteSingleImpl:method={2}
                           // AbstractSingleImple:method={2}

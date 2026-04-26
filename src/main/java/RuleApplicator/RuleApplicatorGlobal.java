@@ -28,7 +28,7 @@ public class RuleApplicatorGlobal {
     public void abstractParamGlobalRule(SootMethod m, SootMethod implOfM){
         if(! m.isAbstract()) return;
         if(!implOfM.isConcrete()) return;
-        for(int i =1;i<= m.getParameterCount();i++) {
+        for(int i =0;i< m.getParameterCount();i++) {
             Type paramType=m.getParameterType(i);
             if((paramType instanceof ReferenceType) && !paramType.toString().equals("java.lang.String")) continue;
 

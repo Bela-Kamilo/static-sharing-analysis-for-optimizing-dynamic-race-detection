@@ -7,4 +7,7 @@ public class ConcreteTripleImplC extends AbstractTripleImpl {
   //@Override
   //used in AbstractMethods4
   public void doNothing(){}
+  //@Override
+  //used in AbstractMethods5
+  public  void doNothing(A one, int x , char y, A four){}
 }

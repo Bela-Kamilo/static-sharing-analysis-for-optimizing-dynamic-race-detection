@@ -1,5 +1,5 @@
 public class AbstractMethods4 {
-
+//abstract-this-global rule
 	public void a(A d, int c){
     ConcreteTripleImplA A = new ConcreteTripleImplA(); //A={1}
     ConcreteTripleImplB B = new ConcreteTripleImplB();  //B={2}

@@ -100,7 +100,9 @@ public class PointsToAnalysis {
         constraintLogger.info("FINISHED GENERATING CONSTRAINTS");
         LoggerFactory.closeHandlerls(constraintLogger);
     }
-    /** passes over a single method, notes other visited methods */
+    /** passes over a single method, notes other visited methods
+     * @throws IllegalStateException if a method has been already visited
+     *  */
     public void generateConstraintsForSingleMethod(SootMethod method){
         //try {
             constraintLogger.info("+++Visiting " + method + "+++");
@@ -145,7 +147,8 @@ public class PointsToAnalysis {
             //m.return )= impl(m).return     <- contravariant like
             absMethRules.abstractReturnGlobalRule(method,implementation);
 
-            generateConstraintsForSingleMethod(implementation);
+            if(!visitedMethods.contains(implementation.getSignature()))
+                generateConstraintsForSingleMethod(implementation);
         }
         visitedMethods.add(method.getSignature());
         return;
