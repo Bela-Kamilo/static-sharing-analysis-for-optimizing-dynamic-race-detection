@@ -69,7 +69,7 @@ public class PointsToAnalysis {
         return res;
     }
 
-    /** passes all methods reachable from entryMethod.
+    /** passes all methods reachable from entryMethod (except jrt packages)
     * We go over each method only once
     */
      private void GenerateConstraints(SootMethod entryMethod){
@@ -80,8 +80,7 @@ public class PointsToAnalysis {
         Queue<MethodSignature> everyOtherMethod= new LinkedList<>(ConstraintGenerator.getMethodsInvoked());
         while(!everyOtherMethod.isEmpty()){
             MethodSignature method = everyOtherMethod.remove();
-            //if ( method.getClassSmthn.isLibraryClass()) continue;
-            if ( Type.isObjectLikeType(method.getDeclClassType()) || visitedMethods.contains(method)) continue;
+            if ( visitedMethods.contains(method)) continue;
 
            // Optional<? extends SootMethod> opt = view.getMethod(method);
             //if(!opt.isPresent()) { System.err.println("!Coulnt get SootMethod of "+ method+"!"); continue;}
@@ -104,7 +103,6 @@ public class PointsToAnalysis {
      * @throws IllegalStateException if a method has been already visited
      *  */
     public void generateConstraintsForSingleMethod(SootMethod method){
-        //try {
             constraintLogger.info("+++Visiting " + method + "+++");
             if(method.isAbstract()){
                 generateConstrantsForAbsMethod(method);
@@ -127,7 +125,7 @@ public class PointsToAnalysis {
             //visitedMethods.add(method.getSignature());
        // }
     }
-    //supposing an abstrat method is called, we assume it can be any one of its implementations
+    //supposing an abstract method is called, we assume it can be any one of its implementations
     //so we will visit them all
     public void generateConstrantsForAbsMethod(SootMethod method){
         if(method.isConcrete()) return;

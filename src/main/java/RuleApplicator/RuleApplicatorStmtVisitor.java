@@ -319,7 +319,8 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
 
 
         private  void defaultInvokeExpr(AbstractInvokeExpr invokeExpr ){
-            methodsInvoked.add(invokeExpr.getMethodSignature());
+            if(!invokeExpr.getMethodSignature().getDeclClassType().isBuiltInClass())    //ignoring java packages
+                methodsInvoked.add(invokeExpr.getMethodSignature());
             int i=constraintManager.getTHIS_INDEX()+1;
             for(Value arg : invokeExpr.getArgs()) {
                 if (!(isLocationHolder(arg))) {
