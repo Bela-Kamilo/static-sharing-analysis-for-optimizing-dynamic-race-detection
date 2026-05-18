@@ -9,7 +9,6 @@ import sootup.core.jimple.common.stmt.Stmt;
 import sootup.core.model.SootMethod;
 import sootup.core.signatures.FieldSignature;
 import sootup.core.signatures.MethodSignature;
-import sootup.core.types.Type;
 import sootup.core.views.View;
 import sootup.java.core.views.JavaView;
 import util.LoggerFactory;
@@ -82,14 +81,15 @@ public class PointsToAnalysis {
             MethodSignature method = everyOtherMethod.remove();
             if ( visitedMethods.contains(method)) continue;
 
-           // Optional<? extends SootMethod> opt = view.getMethod(method);
-            //if(!opt.isPresent()) { System.err.println("!Coulnt get SootMethod of "+ method+"!"); continue;}
             nextMethod= SootUpStuff.getMethodFromView((JavaView) view,method);
             if(nextMethod==null) {
-                constraintLogger.info("+++ FAILED TO GET METHOD " + method + "+++");
+                System.err.println("! FAILED TO GET METHOD " + method + "!");
                 visitedMethods.add(method);
                 continue;
-            }
+            }                   //WE NEED TO EQUATE THESE 2 WITH NEW CONSTRAINTS
+            if(!nextMethod.getSignature().equals(method) && visitedMethods.contains(nextMethod.getSignature()))
+                //this happens when a method of a superclass is called form a subclass instance
+                continue;
             generateConstraintsForSingleMethod(nextMethod);
             //note every other method to be passed over
             ConstraintGenerator.getMethodsInvoked().stream().
@@ -105,7 +105,7 @@ public class PointsToAnalysis {
     public void generateConstraintsForSingleMethod(SootMethod method){
             constraintLogger.info("+++Visiting " + method + "+++");
             if(method.isAbstract()){
-                generateConstrantsForAbsMethod(method);
+                generateConstraintsForAbsMethod(method);
                 return;
             }
             constraintLogger.info(method.getBody().toString());
@@ -118,16 +118,10 @@ public class PointsToAnalysis {
             PrintConstraintsToLog();
             constraintLogger.info("------------\nMethods invoked:\n" + ConstraintGenerator.getMethodsInvoked());
             constraintLogger.info("------------");
-        //}catch (ResolveException e){    //abstract methods throw an exception when we call getBody()
-          //  if(! method.isAbstract())
-          //      throw e;
-            //
-            //visitedMethods.add(method.getSignature());
-       // }
     }
     //supposing an abstract method is called, we assume it can be any one of its implementations
     //so we will visit them all
-    public void generateConstrantsForAbsMethod(SootMethod method){
+    public void generateConstraintsForAbsMethod(SootMethod method){
         if(method.isConcrete()) return;
         constraintLogger.info(method +" is abstract, visiting implementations");
         constraintLogger.info("+++++++++++++++");

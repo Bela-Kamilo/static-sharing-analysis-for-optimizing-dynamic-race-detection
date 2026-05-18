@@ -4,10 +4,13 @@ import sootup.core.model.SootClass;
 import sootup.core.model.SootMethod;
 import sootup.core.model.SourceType;
 import sootup.core.signatures.MethodSignature;
+import sootup.core.signatures.MethodSubSignature;
 import sootup.core.typehierarchy.TypeHierarchy;
+import sootup.core.types.ClassType;
 import sootup.core.views.View;
 import sootup.java.bytecode.inputlocation.JavaClassPathAnalysisInputLocation;
 import sootup.java.bytecode.inputlocation.JrtFileSystemAnalysisInputLocation;
+import sootup.java.core.JavaSootClass;
 import sootup.java.core.JavaSootMethod;
 import sootup.java.core.types.JavaClassType;
 import sootup.java.core.views.JavaView;
@@ -37,22 +40,50 @@ public final class SootUpStuff {
      *
      * @param view
      * @param m
-     * @return SootMethod of m if it is in view or the view of the JRE
+     * @return SootMethod of m if it is in view
      */
+    //WATCH OUT. IF GIVEN A METHOD DEFINED IN A SUPERCLASS THIS WILL RETURN THE SOOTMETHOD OF THE SUPERCLASS
+    // WHICHJ WILLCAUSE AN ERROR WHEN THAT ACTUAL METHOD IS TO BE VISITED (AND INITED)
     public static SootMethod getMethodFromView(JavaView view, MethodSignature m){
         Optional<JavaSootMethod> opt;
-        Optional<JavaSootMethod> jrtOpt;
+        //Optional<JavaSootMethod> jrtOpt;
+        //jrtOpt= jrtView.getMethod(m);
         opt= view.getMethod(m);
-        if(opt.isEmpty()) {     //maybe m is a JRT Class method
-            jrtOpt= jrtView.getMethod(m);
-            if(jrtOpt.isEmpty()) {
-                System.err.println("!Error! couldn't get method "+m.toString());
+        if(opt.isEmpty()) {     //m could be defined in a superclass
+            ClassType callerClassType = m.getDeclClassType();
+            Optional<JavaSootClass> callerClass = view.getClass(callerClassType);
+            if(callerClass.isEmpty())
+                throw new RuntimeException("couldn't get caller class of "+m);
+            SootMethod mSootMethod = getMethodDefinedInParentClass(view,callerClass.get(),m.getSubSignature());
+            if(mSootMethod == null){
+                System.err.println("!ERROR couldnt get method "+m+" !");
                 return null;
             }
-            return jrtOpt.get();
+            return mSootMethod;
         }
         return opt.get();
     }
+
+    public static SootMethod getMethodDefinedInParentClass(JavaView view,JavaSootClass callerClass, MethodSubSignature m){
+        Optional<JavaSootMethod> opt = callerClass.getMethod(m);
+        //opt is empty if m is defined in super class
+        if(opt.isPresent()) return opt.get();
+       //get callerClass's super class
+        Optional<JavaClassType> optSuperClass= callerClass.getSuperclass();
+        if(optSuperClass.isEmpty())
+            return null;
+        //get super class' SootClass
+        Optional<JavaSootClass> optSuperClassSootClass= view.getClass(optSuperClass.get());
+        if(optSuperClassSootClass.isEmpty())
+            return null;
+        //try to get m
+        JavaSootClass superClass= optSuperClassSootClass.get();
+        Optional<JavaSootMethod> result = superClass.getMethod(m);
+        if(result.isPresent()) return result.get();
+        //repeat
+        return getMethodDefinedInParentClass(view,superClass,m);
+    }
+
     /**
      * @param path path to the class file of the declaring class
      * @param methodSignatureString in the format of <DECLARING_CLASS: TYPE NAME(PARAMS)>
