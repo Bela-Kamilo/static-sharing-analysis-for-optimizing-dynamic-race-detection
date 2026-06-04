@@ -29,9 +29,9 @@ import static util.SootUpStuff.gatherImplementationsOf;
 */
 public class PointsToAnalysis {
     private final ConstraintManager constraintManager;
-    private final RuleApplicatorStmtVisitor ConstraintGenerator;
+    private final RuleApplicatorStmtVisitor constraintGeneratorStmt;
     private final Set <MethodSignature> visitedMethods;
-    private final HashMap<MethodSignature, Set<SootMethod>> abstractMethods2Implementations;
+    private final RuleApplicatorGlobal constraintGeneratorGlobal;
     private final View view;
     private final Logger constraintLogger;
     private boolean hasBeenPerformed=false;
@@ -40,10 +40,11 @@ public class PointsToAnalysis {
         this.constraintManager = new ConstraintManager();
         this.name=analysisName;
         constraintLogger= new LoggerFactory().createLogger("logs/ConstraintGeneration/",name+" ConstraintGeneration");
-        this.ConstraintGenerator = new RuleApplicatorStmtVisitor(constraintManager);
-        this.visitedMethods = new HashSet<>();
         this.view=view;
-        this.abstractMethods2Implementations = new HashMap<>();
+        this.constraintGeneratorStmt = new RuleApplicatorStmtVisitor(constraintManager,(JavaView)view);
+        this.visitedMethods = new HashSet<>();
+        //this.abstractMethods2Implementations = new HashMap<>();
+        this.constraintGeneratorGlobal = new RuleApplicatorGlobal(constraintManager);
     }
 
     /** performs the analysis on reachable code from entryMethod
@@ -76,7 +77,7 @@ public class PointsToAnalysis {
         //pass entry method
         generateConstraintsForSingleMethod(entryMethod);
         //pass every other method
-        Queue<MethodSignature> everyOtherMethod= new LinkedList<>(ConstraintGenerator.getMethodsInvoked());
+        Queue<MethodSignature> everyOtherMethod= new LinkedList<>(constraintGeneratorStmt.getMethodsInvoked());
         while(!everyOtherMethod.isEmpty()){
             MethodSignature method = everyOtherMethod.remove();
             if ( visitedMethods.contains(method)) continue;
@@ -86,13 +87,18 @@ public class PointsToAnalysis {
                 System.err.println("! FAILED TO GET METHOD " + method + "!");
                 visitedMethods.add(method);
                 continue;
-            }                   //WE NEED TO EQUATE THESE 2 WITH NEW CONSTRAINTS
-            if(!nextMethod.getSignature().equals(method) && visitedMethods.contains(nextMethod.getSignature()))
-                //this happens when a method of a superclass is called form a subclass instance
+            }  //method is inherited and seems like another method of nextMethod
+            if(!nextMethod.getSignature().equals(method) ) {
+        //        constraintGeneratorGlobal.inheritedMethodsRule(nextMethod, method);
+            }
+            if(visitedMethods.contains(nextMethod.getSignature())) {
+                visitedMethods.add(method);
                 continue;
+            }
+
             generateConstraintsForSingleMethod(nextMethod);
             //note every other method to be passed over
-            ConstraintGenerator.getMethodsInvoked().stream().
+            constraintGeneratorStmt.getMethodsInvoked().stream().
                         filter(m -> !visitedMethods.contains(m)).
                         forEach(everyOtherMethod::add);
         }
@@ -110,13 +116,13 @@ public class PointsToAnalysis {
             }
             constraintLogger.info(method.getBody().toString());
             constraintLogger.info("+++++++++++++++");
-            ConstraintGenerator.setVisitingMethod(method.getSignature());
+            constraintGeneratorStmt.setVisitingMethod(method.getSignature());
             for (Stmt stmt : method.getBody().getStmts()) {
-                stmt.accept(ConstraintGenerator);
+                stmt.accept(constraintGeneratorStmt);
             }
             visitedMethods.add(method.getSignature());
             PrintConstraintsToLog();
-            constraintLogger.info("------------\nMethods invoked:\n" + ConstraintGenerator.getMethodsInvoked());
+            constraintLogger.info("------------\nMethods invoked:\n" + constraintGeneratorStmt.getMethodsInvoked());
             constraintLogger.info("------------");
     }
     //supposing an abstract method is called, we assume it can be any one of its implementations
@@ -131,13 +137,13 @@ public class PointsToAnalysis {
             constraintLogger.info("v       implementation "+ i++ +" of "+method+"    v");
             //The abstract method rules should apply to all methods in the view
             //but we only need those in our possible execution path
-            RuleApplicatorGlobal absMethRules = new RuleApplicatorGlobal(constraintManager);
+
             //impl(m).this )= m.this
-            absMethRules.abstractThisGlobalRule(method,implementation);
+            constraintGeneratorGlobal.abstractThisGlobalRule(method,implementation);
             //impl(m).params= m.params
-            absMethRules.abstractParamGlobalRule(method,implementation);
+            constraintGeneratorGlobal.abstractParamGlobalRule(method,implementation);
             //m.return )= impl(m).return     <- contravariant like
-            absMethRules.abstractReturnGlobalRule(method,implementation);
+            constraintGeneratorGlobal.abstractReturnGlobalRule(method,implementation);
 
             if(!visitedMethods.contains(implementation.getSignature()))
                 generateConstraintsForSingleMethod(implementation);

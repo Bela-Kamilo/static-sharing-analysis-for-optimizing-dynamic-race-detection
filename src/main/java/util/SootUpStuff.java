@@ -56,8 +56,7 @@ public final class SootUpStuff {
                 throw new RuntimeException("couldn't get caller class of "+m);
             SootMethod mSootMethod = getMethodDefinedInParentClass(view,callerClass.get(),m.getSubSignature());
             if(mSootMethod == null){
-                System.err.println("!ERROR couldnt get method "+m+" !");
-                return null;
+                throw new RuntimeException("!ERROR couldnt get method "+m+" !");
             }
             return mSootMethod;
         }
@@ -83,7 +82,16 @@ public final class SootUpStuff {
         //repeat
         return getMethodDefinedInParentClass(view,superClass,m);
     }
-
+    /**
+     * @return {@param s} if the method is indeed defined in {@param s}'s declaring class
+     * ot if the declaring class is a built in class
+     * otherwise, if the method is defined in some super class the MethodSignature
+     * of the method in the superclass is returned
+     */
+    public static MethodSignature sourceMethodSignature(JavaView view, MethodSignature s){
+        if(s.getDeclClassType().isBuiltInClass()) return s;
+        return getMethodFromView(view,s).getSignature();
+    }
     /**
      * @param path path to the class file of the declaring class
      * @param methodSignatureString in the format of <DECLARING_CLASS: TYPE NAME(PARAMS)>
@@ -124,12 +132,7 @@ public final class SootUpStuff {
     public static boolean isSubclass(SootClass subClass, SootClass superClass, TypeHierarchy hierarchy) {
         return hierarchy.isSubtype(superClass.getType(), subClass.getType());
     }
-     /*   //if subclass directly extends superClass
 
-        //or if some subClass'superclass directly exntends SuperClass
-        subClass.
-        return  false;
-    }*/
 
         /**
          * @param methodSignatureString  in the format of <DECLARING_CLASS: TYPE NAME(PARAM_TYPES)>

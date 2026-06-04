@@ -21,6 +21,9 @@ import sootup.core.signatures.MethodSignature;
 import sootup.core.types.ArrayType;
 import sootup.core.types.ReferenceType;
 import sootup.core.types.Type;
+import sootup.core.views.View;
+import sootup.java.core.views.JavaView;
+import util.SootUpStuff;
 import util.Tuple;
 
 import javax.annotation.Nonnull;
@@ -32,11 +35,13 @@ import java.util.List;
  * Make sure the appropriate visitingMethod has been set before visiting a statement
  * */
 public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
+    private final JavaView view;
     private final ConstraintManager constraintManager;
     private final Set<MethodSignature> methodsInvoked; //method invocations which will be visited after
     private MethodSignature visitingMethod=null;
 
-   public RuleApplicatorStmtVisitor(ConstraintManager constraintManager){
+   public RuleApplicatorStmtVisitor(ConstraintManager constraintManager, JavaView view){
+       this.view=view;
        this.constraintManager=constraintManager;
        this.methodsInvoked= new HashSet<>();
     }
@@ -286,8 +291,9 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
         @Override
         public void caseSpecialInvokeExpr(@Nonnull JSpecialInvokeExpr expr) {
             defaultInvokeExpr(expr);
+            MethodSignature methodInvoked= SootUpStuff.sourceMethodSignature(view ,expr.getMethodSignature());
             //x.f(a); >> f.this=x
-            PointsToSet superset =constraintManager.getOrCreateMappingOf(expr.getMethodSignature(), constraintManager.getTHIS_INDEX());
+            PointsToSet superset =constraintManager.getOrCreateMappingOf(methodInvoked, constraintManager.getTHIS_INDEX());
             PointsToSet subset=constraintManager.getOrCreateMappingOf(expr.getBase(), visitingMethod);
             constraintManager.addPTA(new PTASupersetOfConstraint(superset, subset));
         }
@@ -296,8 +302,9 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
         @Override
         public void caseVirtualInvokeExpr(@Nonnull JVirtualInvokeExpr expr) {
             defaultInvokeExpr(expr);
+            MethodSignature methodInvoked= SootUpStuff.sourceMethodSignature(view ,expr.getMethodSignature());
             //x.f(a); >> f.this=x
-            PointsToSet superset =constraintManager.getOrCreateMappingOf(expr.getMethodSignature(), constraintManager.getTHIS_INDEX());
+            PointsToSet superset =constraintManager.getOrCreateMappingOf(methodInvoked, constraintManager.getTHIS_INDEX());
             PointsToSet subset=constraintManager.getOrCreateMappingOf(expr.getBase(), visitingMethod);
             constraintManager.addPTA(new PTASupersetOfConstraint(superset, subset));
         }
@@ -319,15 +326,16 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
 
 
         private  void defaultInvokeExpr(AbstractInvokeExpr invokeExpr ){
+            MethodSignature methodInvoked= SootUpStuff.sourceMethodSignature(view ,invokeExpr.getMethodSignature());
             if(!invokeExpr.getMethodSignature().getDeclClassType().isBuiltInClass())    //ignoring java packages
-                methodsInvoked.add(invokeExpr.getMethodSignature());
+                methodsInvoked.add(methodInvoked);
             int i=constraintManager.getTHIS_INDEX()+1;
             for(Value arg : invokeExpr.getArgs()) {
                 if (!(isLocationHolder(arg))) {
                     i++;
                     continue;
                 }
-                PointsToSet superset =constraintManager.getOrCreateMappingOf(invokeExpr.getMethodSignature(), i);
+                PointsToSet superset =constraintManager.getOrCreateMappingOf(methodInvoked, i);
                 PointsToSet subset=constraintManager.getOrCreateMappingOf(arg, visitingMethod);
                 constraintManager.addPTA(new PTASupersetOfConstraint(superset, subset));
                 i++;
@@ -364,7 +372,7 @@ public class RuleApplicatorStmtVisitor extends AbstractStmtVisitor {
 
     private boolean sideEffectsInvocationValueRule(Value v){
         if(v instanceof AbstractInvokeExpr){
-            MethodSignature m = ((AbstractInvokeExpr) v).getMethodSignature();
+            MethodSignature m = SootUpStuff.sourceMethodSignature(view,((AbstractInvokeExpr) v).getMethodSignature());
             if(isRunMethod(m)) return false;
             constraintManager.addSE(new SupersetOfConstraint<>(
                     constraintManager.getOrCreateMethodReadSet(visitingMethod),visitingMethod+"._READS",
