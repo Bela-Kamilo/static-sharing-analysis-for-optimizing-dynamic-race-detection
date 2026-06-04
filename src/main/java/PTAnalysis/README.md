@@ -10,40 +10,40 @@ $$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q }[copy\text{-}statement] $
 
 $$\frac{}{\left\| p=\text{(type) }q \right\| \mapsto p \supseteq q }[cast\text{-}statement] $$
 
-$$\text{where } \ p,\ q \text{ non Array Type locals,}$$
-$$ \text{non Array Type array accesses, or static fields}$$
+$$\small{where } \ p,\ q \small{ non\ Array\ Type\ locals,}$$
+$$ \small{non\ Array\ Type\ array\ accesses\, or\ static\ fields}$$
 
 $$\frac{}{\left\| i.m(a_1 ... a_n) \right\| \mapsto m.this \supseteq i,\ p_j \supseteq a_j }[method \text{-} invocation \text{-}value ] $$
 
-$$\text {where }  p_j \text { are } m \text{'s parameters}$$
+$$\small {where }  p_j \text { are } m \text{'s parameters}$$
 
 $$\frac{}{\left\| q= i.m(a_1 ... a_n) \right\| \mapsto q \supseteq m}[method \text{-} assignment\text{-}statement] $$
 
 $$\frac{}{\left\| return \  p \right\| \mapsto m \supseteq p }[return\text{-}statement ]$$
 
-$$ \text {where } m \text { is the enclosing method }  \newline $$
+$$ \small {where\ } m \small { is\ the\ enclosing\ method }  \newline $$
 
 \
-$$ \text{ an abstract method call could possibly execute any one of its implementations} $$
-$$ \text{ therefore, abstract methods are additionally treated as such :} $$
+$$ \small { an\ abstract\ method\ call\ could\ possibly\ execute\ any\ one\ of\ its\ implementations} $$
+$$ \small {therefore, abstract methods are additionally treated as such :} $$
 
 $$\frac{}{ impl_j(m).this \supseteq m.this}[abstract\text{-}this\text{-}global] $$
-$$ \text{where } m \text{ is an abstract method}$$ 
-$$ \text{and } impl_j(m) \text{ is any of its implementations}$$
+$$ \small {where\ } m \small{ is an abstract method}$$ 
+$$ \small{and\ } impl_j(m) \small{ is\ any\ of\ its\ implementations}$$
 \
 $$\frac{}{ impl_j(m).p_i \supseteq m.p_i}[abstract\text{-}params\text{-}global] $$
-$$ \text{where } m.p_i \text{ is } m \text{'s i-th parameter}$$
+$$ \small{where\ } m.p_i \small{ is\ } m \small{'s\ i{-}th\ parameter}$$
 \
 $$\frac{}{ m \supseteq impl_j(m)}[abstract\text{-}return\text{-}global] $$
 \
 $$arrays \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i]...[j] \ as \ if
 \ it \ were \ ar[i] $$
 $$as \ if \ it \ were \ ar[j] \ mapped \ to \ a \   single \ points \ to   \ set$$  
-$$we \ equate \ arrays \ on \ assignments \ between \ them \ $$
+$$\small we \ equate \ arrays \ on \ assignments \ between \ them \ $$
 $$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q\  ,\  q \supseteq p }[array\text{-}copy\text{-}statement] $$
 
 
-$$\text {where }  p \text { and } q \text{ are both Array type }$$
+$$\small {where }  p \text { and } q \text{ are both Array type }$$
 _______________________
 $$\frac{p \supseteq q \ \ \ \ \ l_x \in q}{l_x \in p}[superset] $$
 $$\newline\newline\newline$$
