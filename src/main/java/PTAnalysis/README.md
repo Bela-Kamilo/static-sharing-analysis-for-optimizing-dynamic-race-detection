@@ -24,17 +24,17 @@ $$\frac{}{\left\| return \  p \right\| \mapsto m \supseteq p }[return\text{-}sta
 $$ \small {where\ } m \small { is\ the\ enclosing\ method }  \newline $$
 
 \
-$$ \small { an\ abstract\ method\ call\ could\ possibly\ execute\ any\ one\ of\ its\ implementations} $$
-$$ \small {therefore, abstract methods are additionally treated as such :} $$
+$$ \small an\ abstract\ method\ call\ could\ possibly\ execute\ any\ one\ of\ its\ implementations\ $$
+$$ \small therefore,\ abstract\ methods\ are\ additionally\ treated\ as\ such : $$
 
 $$\frac{}{ impl_j(m).this \supseteq m.this}[abstract\text{-}this\text{-}global] $$
-$$ \small {where\ } m \small{ is an abstract method}$$ 
+$$ \small {where\ } m \small{\ is\ an\ abstract\ method}$$ 
 $$ \small{and\ } impl_j(m) \small{ is\ any\ of\ its\ implementations}$$
+\
+$$\frac{}{ m \supseteq impl_j(m)}[abstract\text{-}return\text{-}global] $$
 \
 $$\frac{}{ impl_j(m).p_i \supseteq m.p_i}[abstract\text{-}params\text{-}global] $$
 $$ \small{where\ } m.p_i \small{ is\ } m \small{'s\ i{-}th\ parameter}$$
-\
-$$\frac{}{ m \supseteq impl_j(m)}[abstract\text{-}return\text{-}global] $$
 \
 $$arrays \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i]...[j] \ as \ if
 \ it \ were \ ar[i] $$
