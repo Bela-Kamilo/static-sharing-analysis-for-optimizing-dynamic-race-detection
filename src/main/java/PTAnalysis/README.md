@@ -35,16 +35,15 @@ $$\frac{}{ m \supseteq impl_j(m)}[abstract\text{-}return\text{-}global] $$
 \
 $$\frac{}{ impl_j(m).p_i \supseteq m.p_i}[abstract\text{-}params\text{-}global] $$
 $$ \small{where\ } m.p_i \small{ is\ } m \small{'s\ i{-}th\ parameter}$$
-
-
-
+\
+\
 \
 $$arrays \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i]...[j] \ as \ if
 \ it \ were \ ar[i] $$
 $$as \ if \ it \ were \ ar[j] \ mapped \ to \ a \   single \ points \ to   \ set$$  
 
-
-
+\
+\
 $$\small we \ equate \ arrays \ on \ assignments \ between \ them \ $$
 $$\frac{}{\left\| p= q \right\| \mapsto p \supseteq q\  ,\  q \supseteq p }[array\text{-}copy\text{-}statement] $$
 
