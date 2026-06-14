@@ -6,4 +6,6 @@ public class ConcreteSingleImpl extends AbstractSingleImpl {
     return this.field;    //ConcreteSingleImple:method()={2}
                           //will also result in AbstractSingleImpl:method()={2}
   }
+  public void doNothing(){};
+  public A methodReturns(){return new A();}
 }

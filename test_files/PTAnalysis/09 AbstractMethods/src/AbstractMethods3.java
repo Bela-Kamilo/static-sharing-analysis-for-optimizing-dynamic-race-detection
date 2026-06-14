@@ -1,9 +1,15 @@
-
 public class AbstractMethods3 {
-
+//abstract-this-global rule  
 	public void a(A d, int c){
-    AbstractTripleImplField x = new ConcreteTripleImplFieldA();  //x={1}
-    x.method(); //the 3 implementations of AbstractTripleImpl will make 1.field={2,3,4}
-  }
-  void method(){/*this.field= new A;*/ } //duplicate, not really called
+    ConcreteTripleImplA A = new ConcreteTripleImplA(); //A={1}
+    ConcreteTripleImplB B = new ConcreteTripleImplB();  //B={2}
+    AbstractTripleImpl x = new ConcreteTripleImplC();  //x={3}
+    A.doNothing(); //A.this(={1}
+    B.doNothing(); //B.this(={2}
+    x.doNothing(); //Abstract.this={3}
+                //A.this={1,3}
+                //B.this={2,3}
+                //C.this={3}
+    }    
+    void doNothing() {} //duplicate, not really called
 }

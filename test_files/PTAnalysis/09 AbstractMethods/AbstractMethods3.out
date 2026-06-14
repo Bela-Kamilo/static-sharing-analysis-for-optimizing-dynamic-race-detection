@@ -1,45 +1,44 @@
-$stack4={1}
+l1={}
+$stack6={1}
 l3={1}
-
-<ConcreteTripleImplFieldA: void method()>.this=[1]
-<ConcreteTripleImplFieldA: void method()>:this=[1]
-
-<ConcreteTripleImplFieldB: void method()>.this=[1]
-<ConcreteTripleImplFieldB: void method()>:this=[1]
-
-<ConcreteTripleImplFieldC: void method()>.this=[1]
-<ConcreteTripleImplFieldC: void method()>:this=[1]
+$stack7={2}
+l4={2}
+$stack8={3}
+l5={3}
+<AbstractMethods3: void a(A,int)>.1=[]
+<AbstractMethods3: void a(A,int)>:this=[]
 
 
-<ConcreteTripleImplFieldA: void method()>:$stack1=[2]	%method visiting order matters here !
-<ConcreteTripleImplFieldB: void method()>:$stack1=[3]
-<ConcreteTripleImplFieldC: void method()>:$stack1=[4]
+<ConcreteTripleImplA: void doNothing()>.this=[1,3]
+<ConcreteTripleImplA: void doNothing()>:this=[1,3]
 
-<AbstractTripleImplField: void method()>.this=[1]	% conceptual this
+<ConcreteTripleImplB: void doNothing()>.this=[2,3]
+<ConcreteTripleImplB: void doNothing()>:this=[2,3]
+
+<ConcreteTripleImplC: void doNothing()>.this=[3]
+<ConcreteTripleImplC: void doNothing()>:this=[3]
+
+
+<AbstractTripleImpl: void doNothing()>.this=[3]		% conceptual this
 
 
 <AbstractMethods3: void a(A,int)>.this=[]
 
-<ConcreteTripleImplFieldA: void <init>()>.this=[1]
-<ConcreteTripleImplFieldA: void <init>()>:this=[1]
-%<ConcreteTripleImplFieldB: void <init>()>.this=[2]		only implA is inited ofc
-%<ConcreteTripleImplFieldB: void <init>()>:this=[2]
-%<ConcreteTripleImplFieldC: void <init>()>.this=[3]
-%<ConcreteTripleImplFieldC: void <init>()>:this=[3]
+<ConcreteTripleImplA: void <init>()>.this=[1]
+<ConcreteTripleImplA: void <init>()>:this=[1]
+<ConcreteTripleImplB: void <init>()>.this=[2]		
+<ConcreteTripleImplB: void <init>()>:this=[2]
+<ConcreteTripleImplC: void <init>()>.this=[3]
+<ConcreteTripleImplC: void <init>()>:this=[3]
 
 
-<AbstractTripleImplField: void <init>()>.this=[1]	%abstract classes DO have constructors 
-<AbstractTripleImplField: void <init>()>:this=[1]
-<AbstractMethods3: void a(A,int)>.1=[]
-<AbstractMethods3: void a(A,int)>:l1=[]
-<AbstractMethods3: void a(A,int)>:this=[]
+<AbstractTripleImpl: void <init>()>.this=[1,2,3]	%abstract classes DO have constructors 
+<AbstractTripleImpl: void <init>()>:this=[1,2,3]	%all implementation constructors call them
 
-<A: void <init>()>.this=[2,3,4]
-<A: void <init>()>:this=[2,3,4]
-<java.lang.Object: void <init>()>.this=[1,2,3,4]
 
-1.<A field>=[2,3,4]
-<ConcreteTripleImplFieldA: void method()>=[] 
-<ConcreteTripleImplFieldB: void method()>=[]
-<ConcreteTripleImplFieldC: void method()>=[]
-<AbstractTripleImplField: void method()>=[]
+<java.lang.Object: void <init>()>.this=[1,2,3]
+
+<AbstractTripleImpl: void doNothing()>=[] 		%conceptual return created by abs-ret rule
+<ConcreteTripleImplA: void doNothing()>=[] 
+<ConcreteTripleImplB: void doNothing()>=[]
+<ConcreteTripleImplC: void doNothing()>=[]

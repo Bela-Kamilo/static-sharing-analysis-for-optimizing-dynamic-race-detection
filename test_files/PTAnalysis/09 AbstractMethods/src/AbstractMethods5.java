@@ -1,17 +1,16 @@
 public class AbstractMethods5 {
-//Abstract parameters rule
+//Abstract-return-global rule
 	public void a(A d, int c){
-    ConcreteTripleImplA A = new ConcreteTripleImplA(); //A={1}
-    ConcreteTripleImplB B = new ConcreteTripleImplB();  //B={2}
-    AbstractTripleImpl x = new ConcreteTripleImplC();  //x={3}
-    A four = new A();  //four={4}  
-    A five = new A();  //five={5} 
-    A.doNothing(four, 1 ,'c',five); //A.this(={1}  A.1(={4} A.4(={5}
-    B.doNothing(five, 2 ,'d',four); //B.this(={2}  B.1(={5} B.4(={4}
-    x.doNothing(new A(), 3, 'e', new A()); //Abstract.this={3}
-                //A.this={1,3} A.1={4,6} A.4={5,7}
-                //B.this={2,3} B.1={5,6} B.4={4,7}
-                //C.this={3}  C.1={6} C.4={7}
-    }    
-    void doNothing() {} //duplicate, not really called
+    AbstractTripleImpl x = new ConcreteTripleImplA();  //x={1}
+    x.method(); //the 3 implementations of AbstractTripleImpl will make
+                //AbstractTripleImpl:method={2,3,4}
+                //ConcreteA:method={2}
+                //ConcreteB:method={3}
+                //ConcreteC:method={4}
+                //but also
+                //ConcreteA:method.this={1}
+                //ConcreteB:method={1}  <- this is impossible to ever be true however
+                //ConcreteC:method={1}  <- this too
+  }
+  A method(){ return new A(); } //duplicate, not really called
 }

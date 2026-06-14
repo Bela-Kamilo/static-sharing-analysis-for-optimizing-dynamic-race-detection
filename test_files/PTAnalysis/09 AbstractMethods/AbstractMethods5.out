@@ -1,67 +1,44 @@
-l1={}
-$stack8={1}
+$stack4={1}
 l3={1}
-$stack9={2}
-l4={2}
-$stack10={3}
-l5={3}
-$stack11={4}
-l6={4}
-$stack12={5}
-l7={5}
-$stack13={6}
-$stack14={7}
 
-<AbstractMethods5: void a(A,int)>.1=[]
-<AbstractMethods5: void a(A,int)>:this=[]
+<ConcreteTripleImplA: A method()>.this=[1]
+<ConcreteTripleImplA: A method()>:this=[1]
+
+<ConcreteTripleImplB: A method()>.this=[1]
+<ConcreteTripleImplB: A method()>:this=[1]
+
+<ConcreteTripleImplC: A method()>.this=[1]
+<ConcreteTripleImplC: A method()>:this=[1]
+
+
+<ConcreteTripleImplA: A method()>:$stack1=[2]	%method visiting order matters here !
+<ConcreteTripleImplB: A method()>:$stack1=[3]
+<ConcreteTripleImplC: A method()>:$stack1=[4]
+
+<AbstractTripleImpl: A method()>.this=[1]	% conceptual this
+
+
 <AbstractMethods5: void a(A,int)>.this=[]
-
-<ConcreteTripleImplA: void doNothing(A,int,char,A)>.this=[1,3]
-<ConcreteTripleImplA: void doNothing(A,int,char,A)>:this=[1,3]
-<ConcreteTripleImplA: void doNothing(A,int,char,A)>.1=[4,6]
-<ConcreteTripleImplA: void doNothing(A,int,char,A)>:l1=[4,6]
-<ConcreteTripleImplA: void doNothing(A,int,char,A)>.4=[5,7]
-<ConcreteTripleImplA: void doNothing(A,int,char,A)>:l4=[5,7]
-
-<ConcreteTripleImplB: void doNothing(A,int,char,A)>.this=[2,3]
-<ConcreteTripleImplB: void doNothing(A,int,char,A)>:this=[2,3]
-<ConcreteTripleImplB: void doNothing(A,int,char,A)>.1=[5,6]
-<ConcreteTripleImplB: void doNothing(A,int,char,A)>:l1=[5,6]
-<ConcreteTripleImplB: void doNothing(A,int,char,A)>.4=[4,7]
-<ConcreteTripleImplB: void doNothing(A,int,char,A)>:l4=[4,7]
-
-
-<ConcreteTripleImplC: void doNothing(A,int,char,A)>.this=[3]
-<ConcreteTripleImplC: void doNothing(A,int,char,A)>:this=[3]
-<ConcreteTripleImplC: void doNothing(A,int,char,A)>.1=[6]
-<ConcreteTripleImplC: void doNothing(A,int,char,A)>:l1=[6]
-<ConcreteTripleImplC: void doNothing(A,int,char,A)>.4=[7]
-<ConcreteTripleImplC: void doNothing(A,int,char,A)>:l4=[7]
-
-
-
-<AbstractTripleImpl: void doNothing(A,int,char,A)>.this=[3]		% conceptual this
-<AbstractTripleImpl: void doNothing(A,int,char,A)>.1=[6]		% conceptual parameters
-<AbstractTripleImpl: void doNothing(A,int,char,A)>.4=[7]
-
 
 <ConcreteTripleImplA: void <init>()>.this=[1]
 <ConcreteTripleImplA: void <init>()>:this=[1]
-<ConcreteTripleImplB: void <init>()>.this=[2]		
-<ConcreteTripleImplB: void <init>()>:this=[2]
-<ConcreteTripleImplC: void <init>()>.this=[3]
-<ConcreteTripleImplC: void <init>()>:this=[3]
+%<ConcreteTripleImplB: void <init>()>.this=[2]		only implA is inited ofc
+%<ConcreteTripleImplB: void <init>()>:this=[2]
+%<ConcreteTripleImplC: void <init>()>.this=[3]
+%<ConcreteTripleImplC: void <init>()>:this=[3]
 
 
-<AbstractTripleImpl: void <init>()>.this=[1,2,3]	%abstract classes DO have constructors 
-<AbstractTripleImpl: void <init>()>:this=[1,2,3]	%all implementation constructors call them
+<AbstractTripleImpl: void <init>()>.this=[1]	%abstract classes DO have constructors 
+<AbstractTripleImpl: void <init>()>:this=[1]
+<AbstractMethods5: void a(A,int)>.1=[]
+<AbstractMethods5: void a(A,int)>:l1=[]
+<AbstractMethods5: void a(A,int)>:this=[]
 
+<A: void <init>()>.this=[2,3,4]
+<A: void <init>()>:this=[2,3,4]
+<java.lang.Object: void <init>()>.this=[1,2,3,4]
 
-<java.lang.Object: void <init>()>.this=[1,2,3,4,5,6,7]
-<A: void <init>()>.this=[4,5,6,7]
-<A: void <init>()>:this=[4,5,6,7]
-
-<AbstractTripleImpl: void doNothing(A,int,char,A)>=[] 	%conceptual return created by abs-ret rule
-<ConcreteTripleImplA: void doNothing(A,int,char,A)>=[] 
-<ConcreteTripleImplB: void doNothing(A,int,char,A)>=[]
-<ConcreteTripleImplC: void doNothing(A,int,char,A)>=[]
+<AbstractTripleImpl: A method()>=[2,3,4] 		%conceptual return created by abs-ret rule
+<ConcreteTripleImplA: A method()>=[2] 
+<ConcreteTripleImplB: A method()>=[3]
+<ConcreteTripleImplC: A method()>=[4]

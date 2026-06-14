@@ -1,13 +1,11 @@
 public class AbstractMethods1 {
-
+//Abstract-this-global rule
 	public void a(A d, int c){
     AbstractSingleImpl x = new ConcreteSingleImpl();  //x={1}
-    x.method("ekzemplo");
+    x.doNothing();
   }
-  void method(String s){  //duplicate, not really called
-  /*this.field= new ConcreteSingleImpl();   //1.field={2}
-    return this.field;    // ConcreteSingleImpl:method={2}
-                          // AbstractSingleImple:method={2}
-  */
+  void doNothing(){  //duplicate, not really called
+                          //Concr:method.this={1}
+                          //Abs:method.this={1}
   } 
 }                   

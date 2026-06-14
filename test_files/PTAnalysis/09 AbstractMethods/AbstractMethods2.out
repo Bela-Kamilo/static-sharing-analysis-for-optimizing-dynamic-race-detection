@@ -1,32 +1,21 @@
 $stack4={1}
 l3={1}
 
-<ConcreteTripleImplA: A method()>.this=[1]
-<ConcreteTripleImplA: A method()>:this=[1]
+<ConcreteTripleImplA: void doNothing()>.this=[1]
+<ConcreteTripleImplA: void doNothing()>:this=[1]
 
-<ConcreteTripleImplB: A method()>.this=[1]
-<ConcreteTripleImplB: A method()>:this=[1]
+<ConcreteTripleImplB: void doNothing()>.this=[1]
+<ConcreteTripleImplB: void doNothing()>:this=[1]
 
-<ConcreteTripleImplC: A method()>.this=[1]
-<ConcreteTripleImplC: A method()>:this=[1]
+<ConcreteTripleImplC: void doNothing()>.this=[1]
+<ConcreteTripleImplC: void doNothing()>:this=[1]
 
-
-<ConcreteTripleImplA: A method()>:$stack1=[2]	%method visiting order matters here !
-<ConcreteTripleImplB: A method()>:$stack1=[3]
-<ConcreteTripleImplC: A method()>:$stack1=[4]
-
-<AbstractTripleImpl: A method()>.this=[1]	% conceptual this
-
+<AbstractTripleImpl: void doNothing()>.this=[1]	% conceptual this
 
 <AbstractMethods2: void a(A,int)>.this=[]
 
 <ConcreteTripleImplA: void <init>()>.this=[1]
 <ConcreteTripleImplA: void <init>()>:this=[1]
-%<ConcreteTripleImplB: void <init>()>.this=[2]		only implA is inited ofc
-%<ConcreteTripleImplB: void <init>()>:this=[2]
-%<ConcreteTripleImplC: void <init>()>.this=[3]
-%<ConcreteTripleImplC: void <init>()>:this=[3]
-
 
 <AbstractTripleImpl: void <init>()>.this=[1]	%abstract classes DO have constructors 
 <AbstractTripleImpl: void <init>()>:this=[1]
@@ -34,11 +23,9 @@ l3={1}
 <AbstractMethods2: void a(A,int)>:l1=[]
 <AbstractMethods2: void a(A,int)>:this=[]
 
-<A: void <init>()>.this=[2,3,4]
-<A: void <init>()>:this=[2,3,4]
-<java.lang.Object: void <init>()>.this=[1,2,3,4]
+<java.lang.Object: void <init>()>.this=[1]
 
-<AbstractTripleImpl: A method()>=[2,3,4] 		%conceptual return created by abs-ret rule
-<ConcreteTripleImplA: A method()>=[2] 
-<ConcreteTripleImplB: A method()>=[3]
-<ConcreteTripleImplC: A method()>=[4]
+<AbstractTripleImpl: void doNothing()>=[] 		%conceptual return created by abs-ret rule
+<ConcreteTripleImplA: void doNothing()>=[] 
+<ConcreteTripleImplB: void doNothing()>=[]
+<ConcreteTripleImplC: void doNothing()>=[]

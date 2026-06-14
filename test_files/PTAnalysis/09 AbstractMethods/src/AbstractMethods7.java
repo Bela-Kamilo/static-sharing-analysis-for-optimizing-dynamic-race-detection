@@ -1,15 +1,16 @@
-public class AbstractMethods4 {
-//Abstract-return-global rule
+public class AbstractMethods7 {
 //Abstract-this-global rule
+//Abstract-return-global rule
+//writting to abs class field
 	public void a(A d, int c){
     AbstractSingleImpl x = new ConcreteSingleImpl();  //x={1}
-    x.methodReturns();
+    x.method("ekzemplo");
   }
-  void methodReturns(String s){  //duplicate, not really called
+  void method(String s){  //duplicate, not really called
                           //Concr:method.this={1}
                           //Abs:method.this={1}
-  /*
-    return new A();    // ConcreteSingleImpl:method={2}
+  /*this.field= new A();  //1.field={2}
+    return this.field;    // ConcreteSingleImpl:method={2}
                           // AbstractSingleImple:method={2}
   */
   } 
