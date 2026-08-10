@@ -1,9 +1,10 @@
 package test;
 
-import util.LoggerFactory;
+import util.Logging.LeveledLogger;
+import util.Logging.LogDetailLevel;
+import util.Logging.LoggerFactory;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -21,17 +22,24 @@ public abstract class Test {
     protected String nextThingBuffer;
     protected final String basePath;
     protected String entryMethodString ;
-    protected final Logger testLog;
+    protected final LeveledLogger testLog;
+
+    public Test(String basePath, String entryMethodString, String testName, LogDetailLevel logDetailLevel){
+        this.testName=testName;
+        this.basePath=basePath;
+        this.entryMethodString=entryMethodString;
+        this.testLog= new LoggerFactory().createLogger("logs/Tests/",testName,logDetailLevel);
+    }
 
     protected void pass(String singleTestName){
         System.out.println("TEST "+testsCount+" "+singleTestName+": "+ANSI_GREEN+"PASS"+ANSI_RESET);
-        testLog.info("TEST "+testsCount+" "+singleTestName+": "+"PASS");
-        testLog.info("");
+        testLog.info("TEST "+testsCount+" "+singleTestName+": "+"PASS",LogDetailLevel.LOW);
+        testLog.info("",LogDetailLevel.LOW);
     }
     protected void fail(String singleTestName){
         System.out.println("TEST "+testsCount +" " +singleTestName+": "+ANSI_RED+"FAIL"+ANSI_RESET);
-        testLog.info("TEST "+testsCount +" " +singleTestName+": "+"FAIL");
-       testLog.info("");
+        testLog.info("TEST "+testsCount +" " +singleTestName+": "+"FAIL",LogDetailLevel.LOW);
+       testLog.info("",LogDetailLevel.LOW);
     }
     public int getCount(){return testsCount;}
 
@@ -59,7 +67,7 @@ public abstract class Test {
                 ;
             }
         }
-        LoggerFactory.closeHandlerls(testLog);
+        testLog.closeHandlers();
         System.out.println("See logs for details");
     }
     abstract protected void singleTest(String parentDir, String testClassName);
@@ -86,13 +94,7 @@ public abstract class Test {
         return thing;
     }
 
-    public Test(String basePath, String entryMethodString, String testName){
-        this.testName=testName;
-        this.basePath=basePath;
-        this.entryMethodString=entryMethodString;
-        this.testLog= new LoggerFactory().createLogger("logs/Tests/",testName);
-        testLog.info(testName+" created");
-    }
+
     /**
      * @return true for class files that are intended for tests to be run on them
      */

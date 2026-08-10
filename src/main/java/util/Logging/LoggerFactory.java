@@ -1,13 +1,12 @@
-package util;
+package util.Logging;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * Loggers created here create logs in <code>LoggerFactory.logdir</code>
@@ -19,7 +18,7 @@ public class LoggerFactory {
     public LoggerFactory(){
 
     }
-    public Logger createLogger(String logdir ,String name ){
+    public LeveledLogger createLogger(String logdir ,String name, LogDetailLevel lvl ){
        int logcount=0;
         if(nameCount.containsKey(name)){
            logcount= nameCount.get(name)+1;
@@ -29,7 +28,7 @@ public class LoggerFactory {
             nameCount.put(name,0);
         Logger logger = Logger.getLogger(name);
         initLogger(logger, logdir, logcount);
-      return logger;
+      return new LeveledLogger(logger,lvl);
     }
 
     private void initLogger(Logger logger,String logdir, int logCount){
@@ -42,19 +41,19 @@ public class LoggerFactory {
             Files.createDirectories(Paths.get(logdir));
             fh = new FileHandler(logdir+name+suffix+".log");
             logger.addHandler(fh);
-            EmptyFormatter formatter = new EmptyFormatter();
+            Formatter formatter = new java.util.logging.Formatter() {
+                @Override
+                public String format(LogRecord record){ return record.getMessage()+"\n";}
+            };
+            //EmptyFormatter formatter = new EmptyFormatter();
             fh.setFormatter(formatter);
 
         } catch (SecurityException | IOException e) {
             e.printStackTrace();
         }
         logger.setUseParentHandlers(false);
-        logger.info(name+" created");
+        logger.info(name+" created "+ new Date());
 
-    }
-    public static void closeHandlerls(Logger logger){
-        for(Handler h: logger.getHandlers())
-            h.close();
     }
 
 }

@@ -9,7 +9,9 @@ import org.chocosolver.solver.search.strategy.selectors.variables.FailureBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
-import util.LoggerFactory;
+import util.Logging.LeveledLogger;
+import util.Logging.LogDetailLevel;
+import util.Logging.LoggerFactory;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -24,12 +26,12 @@ public class Solver {
     private final Set<Constraint> PTconstraints;
     private static int[] AllLocationsArray =null;
     private final LocationsManager locationsManager;
-    private final Logger solverLog;
+    private final LeveledLogger solverLog;
     private final Set<PointsToSet> PTSets;
     private Map<String, PointsToSet> solution;
 
-    public Solver(Set<Constraint> constraints, String problemName){
-        this.solverLog= new LoggerFactory().createLogger("logs/Solver/",problemName+" PointsTo SolverResults");
+    public Solver(Set<Constraint> constraints, String problemName, LogDetailLevel logDetailLevel){
+        this.solverLog= new LoggerFactory().createLogger("logs/Solver/",problemName+" PointsTo SolverResults",logDetailLevel);
         this.PTSets= new HashSet<>();
         this.PTconstraints=constraints;
         AllLocationsArray = IntStream.rangeClosed(1, ObjectMemoryLocation.getLocationCounter()).toArray();
@@ -42,7 +44,6 @@ public class Solver {
                ,new SetDomainMin()
                ,false
                , model.retrieveSetVars()));
-
    }
    /** Constructs the choco-solver representation */
     public void createModelConstraints(){
@@ -115,7 +116,7 @@ public class Solver {
 
      IntVar totalElementsOfSetVarsOfModel( ){
         SetVar[] setvars =model.retrieveSetVars();
-        if(setvars.length ==0){solverLog.info("!No setVars in model "+model+"!"); return model.intVar(0,0);}
+        if(setvars.length ==0){solverLog.info("!No setVars in model "+model+"!",LogDetailLevel.LOW); return model.intVar(0,0);}
         ArExpression sum= setvars[0].getCard();
         if(setvars.length ==1) return sum.intVar();
         for(int i =1;i< setvars.length;i++)
@@ -142,7 +143,7 @@ public class Solver {
       boolean morethanonesolutions=false;
       try{
           while(model.getSolver().solve()){
-              solverLog.info("+++solution found+++");
+              solverLog.info("+++solution found+++",LogDetailLevel.LOW);
               exportSolution();
               if(morethanonesolutions) throw new RuntimeException("There exist more than one solutions for "+model.getName()+"model");
               morethanonesolutions =true;
@@ -150,7 +151,7 @@ public class Solver {
           model.getSolver().log().remove(System.out);
          // model.getSolver().log().add(LoggerPrintStream(solverLog));  TODO
           model.getSolver().printStatistics();
-          LoggerFactory.closeHandlerls(solverLog);
+          solverLog.closeHandlers();
           //PTSets.forEach(System.out::println);
           //System.out.println("stop");
       } catch (Exception e) {
@@ -171,7 +172,7 @@ public class Solver {
         PTSets.addAll(locationsManager.getFieldSets());
         PTSets.forEach((set)->{
             conformPTSet2InnerSetVar(set);
-            solverLog.info(set.getVarName()+" = "+ set);
+            solverLog.info(set.getVarName()+" = "+ set,LogDetailLevel.LOW);
             solution.put(set.getVarName(),set);
         });
     }

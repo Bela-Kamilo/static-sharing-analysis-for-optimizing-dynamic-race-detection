@@ -10,6 +10,7 @@ import sootup.core.signatures.FieldSignature;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.types.PrimitiveType;
 import sootup.java.core.views.JavaView;
+import util.Logging.LogDetailLevel;
 import util.SootUpStuff;
 
 import sootup.core.model.SootMethod;
@@ -31,7 +32,7 @@ public class SideEffectsTest extends Test{
     private JavaView pathView;
     //private enum MemOp={READ,WRITE};
     public SideEffectsTest(){
-        super("test_files/SideEffects","void a()","Side Effects Test");
+        super("test_files/SideEffects","void a()","Side Effects Test", LogDetailLevel.HIGH);
     }
 
     public static void main(String[] args){
@@ -46,7 +47,7 @@ public class SideEffectsTest extends Test{
         pathView = SootUpStuff.getViewFromPath(basePath+"/"+parentDir);
         ExpectedSideEffects expectedResults = parseTestFile(filepath,testClassName);
         SootMethod entryMethod=SootUpStuff.getMethodFromView(pathView,"<"+testClassName+": "+entryMethodString+">");
-        SideEffectsTracker SideEffectsAnalysis = new SideEffectsTracker(pathView,entryMethod,testClassName);
+        SideEffectsTracker SideEffectsAnalysis = new SideEffectsTracker(pathView,entryMethod,testClassName, LogDetailLevel.HIGH);
         Map<MethodSignature, Set<AccessibleHeapLocation>> READS;
         Map<MethodSignature, Set<AccessibleHeapLocation>> WRITES;
         try {
@@ -133,37 +134,41 @@ public class SideEffectsTest extends Test{
      private void logResults(Map<MethodSignature,Set<AccessibleHeapLocation>> READS, Map<MethodSignature,Set<AccessibleHeapLocation>> WRITES,
                              Map<MethodSignature,Set<AccessibleHeapLocation>> expectedREADS, Map<MethodSignature,Set<AccessibleHeapLocation>> expectedWRITES,
                              String testClassName){
-         testLog.info("------"+testClassName+".class ------");
-         testLog.info("Expected results :");
-         testLog.info("");
-         testLog.info("     READS:");
-         testLog.info("");
+         testLog.info("------"+testClassName+".class ------",LogDetailLevel.LOW);
+         testLog.info("Expected results :",LogDetailLevel.LOW);
+         testLog.info("",LogDetailLevel.LOW);
+         testLog.info("     READS:",LogDetailLevel.LOW);
+         testLog.info("",LogDetailLevel.LOW);
          for(var entry :expectedREADS.entrySet())
              testLog.info(entry.getKey() + " ->\n" +
                      entry.getValue().toString().replace("[","[\t").replace(",",",\n\t")
-                     +"\n");
-         testLog.info("      WRITES:");
-         testLog.info("");
+                     +"\n"
+                     ,LogDetailLevel.LOW);
+         testLog.info("      WRITES:",LogDetailLevel.LOW);
+         testLog.info("",LogDetailLevel.LOW);
          for(var entry :expectedWRITES.entrySet())
              testLog.info(entry.getKey() + " ->\n" +
                      entry.getValue().toString().replace("[","[\t").replace(",",",\n\t")
-                     +"\n");
+                     +"\n"
+                     ,LogDetailLevel.LOW);
 
-         testLog.info("");
-         testLog.info("Actual results :");
-         testLog.info("");
-         testLog.info("     READS:");
-         testLog.info("");
+         testLog.info("",LogDetailLevel.LOW);
+         testLog.info("Actual results :",LogDetailLevel.LOW);
+         testLog.info("",LogDetailLevel.LOW);
+         testLog.info("     READS:",LogDetailLevel.LOW);
+         testLog.info("",LogDetailLevel.LOW);
          for(var entry :READS.entrySet())
              testLog.info(entry.getKey() + " ->\n" +
                      entry.getValue().toString().replace("[","[\t").replace(",",",\n\t")
-                     +"\n");
-         testLog.info("      WRITES:");
-         testLog.info("");
+                     +"\n"
+                     ,LogDetailLevel.LOW);
+         testLog.info("      WRITES:",LogDetailLevel.LOW);
+         testLog.info("",LogDetailLevel.LOW);
          for(var entry :WRITES.entrySet())
              testLog.info(entry.getKey() + " ->\n" +
                      entry.getValue().toString().replace("[","[\t").replace(",",",\n\t")
-                     +"\n");
+                     +"\n"
+                     ,LogDetailLevel.LOW);
     }
 }
 

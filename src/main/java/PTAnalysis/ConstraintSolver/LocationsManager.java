@@ -128,5 +128,7 @@ public class LocationsManager {
         //for(IntVar v : tempIntVars)
         //    model.unassociates(v);
         //model.getObjective()
+        //model.intVarArray()
+       // new IntVar()
     }
 }

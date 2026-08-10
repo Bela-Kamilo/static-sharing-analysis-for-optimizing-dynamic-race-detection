@@ -11,12 +11,13 @@ import sootup.core.signatures.FieldSignature;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.views.View;
 import sootup.java.core.views.JavaView;
-import util.LoggerFactory;
+import util.Logging.LeveledLogger;
+import util.Logging.LogDetailLevel;
+import util.Logging.LoggerFactory;
 import util.SootUpStuff;
 import util.Tuple;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 import static util.SootUpStuff.gatherImplementationsOf;
 
@@ -33,13 +34,18 @@ public class PointsToAnalysis {
     private final Set <MethodSignature> visitedMethods;
     private final RuleApplicatorGlobal constraintGeneratorGlobal;
     private final View view;
-    private final Logger constraintLogger;
+    private final LeveledLogger constraintLogger;
     private boolean hasBeenPerformed=false;
     private final String name;
-    public PointsToAnalysis(View view, String analysisName){
+    private final LogDetailLevel logDetailLevel;
+
+    //public PointsToAnalysis(View view, String analysisName){this(view, analysisName,LogDetailLevel.LOW);}
+
+    public PointsToAnalysis(View view, String analysisName, LogDetailLevel logDetailLevel){
+        this.logDetailLevel=logDetailLevel;
         this.constraintManager = new ConstraintManager();
         this.name=analysisName;
-        constraintLogger= new LoggerFactory().createLogger("logs/ConstraintGeneration/",name+" ConstraintGeneration");
+        constraintLogger= new LoggerFactory().createLogger("logs/ConstraintGeneration/",name+" ConstraintGeneration", logDetailLevel);
         this.view=view;
         this.constraintGeneratorStmt = new RuleApplicatorStmtVisitor(constraintManager,(JavaView)view);
         this.visitedMethods = new HashSet<>();
@@ -61,7 +67,7 @@ public class PointsToAnalysis {
      */
     public Map<String, PointsToSet> analise(SootMethod entryMethod){
         GenerateConstraints(entryMethod);
-        Solver solver= new Solver(constraintManager.getPTAconstraints(),name);
+        Solver solver= new Solver(constraintManager.getPTAconstraints(),name,logDetailLevel);
         Map<String,PointsToSet> res= solver.solve();
         hasBeenPerformed=true;
         //SOLVE FOR SIDE EFFECTS
@@ -102,39 +108,39 @@ public class PointsToAnalysis {
                         filter(m -> !visitedMethods.contains(m)).
                         forEach(everyOtherMethod::add);
         }
-        constraintLogger.info("FINISHED GENERATING CONSTRAINTS");
-        LoggerFactory.closeHandlerls(constraintLogger);
+        constraintLogger.info("FINISHED GENERATING CONSTRAINTS",LogDetailLevel.LOW);
+        constraintLogger.closeHandlers();
     }
     /** passes over a single method, notes other visited methods
      * @throws IllegalStateException if a method has been already visited
      *  */
     public void generateConstraintsForSingleMethod(SootMethod method){
-            constraintLogger.info("+++Visiting " + method + "+++");
+            constraintLogger.info("+++Visiting " + method + "+++",LogDetailLevel.LOW);
             if(method.isAbstract()){
                 generateConstraintsForAbsMethod(method);
                 return;
             }
-            constraintLogger.info(method.getBody().toString());
-            constraintLogger.info("+++++++++++++++");
+            constraintLogger.info(method.getBody().toString(),LogDetailLevel.MEDIUM);
+            constraintLogger.info("+++++++++++++++",LogDetailLevel.LOW);
             constraintGeneratorStmt.setVisitingMethod(method.getSignature());
             for (Stmt stmt : method.getBody().getStmts()) {
                 stmt.accept(constraintGeneratorStmt);
             }
             visitedMethods.add(method.getSignature());
             PrintConstraintsToLog();
-            constraintLogger.info("------------\nMethods invoked:\n" + constraintGeneratorStmt.getMethodsInvoked());
-            constraintLogger.info("------------");
+            constraintLogger.info("------------\nMethods invoked:\n" + constraintGeneratorStmt.getMethodsInvoked(),LogDetailLevel.MEDIUM);
+            constraintLogger.info("------------",LogDetailLevel.MEDIUM);
     }
     //supposing an abstract method is called, we assume it can be any one of its implementations
     //so we will visit them all
     public void generateConstraintsForAbsMethod(SootMethod method){
         if(method.isConcrete()) return;
-        constraintLogger.info(method +" is abstract, visiting implementations");
-        constraintLogger.info("+++++++++++++++");
+        constraintLogger.info(method +" is abstract, visiting implementations",LogDetailLevel.LOW);
+        constraintLogger.info("+++++++++++++++",LogDetailLevel.LOW);
         Set<SootMethod> methodImplementations = gatherImplementationsOf(method, view);
         int i=1;
         for(SootMethod implementation : methodImplementations){
-            constraintLogger.info("v       implementation "+ i++ +" of "+method+"    v");
+            constraintLogger.info("v       implementation "+ i++ +" of "+method+"    v",LogDetailLevel.LOW);
             //The abstract method rules should apply to all methods in the view
             //but we only need those in our possible execution path
 
@@ -153,16 +159,16 @@ public class PointsToAnalysis {
     }
 
     public void PrintConstraintsToLog(){
-        constraintLogger.info("---------\nPTConstraints:");
+        constraintLogger.info("---------\nPTConstraints:",LogDetailLevel.HIGH);
         int i=1;
         for (Constraint c : constraintManager.getPTAconstraints() )
-            constraintLogger.info((i++) + " "+ c);
-        constraintLogger.info("---------");
-        constraintLogger.info("---------\nSEConstraints:");
+            constraintLogger.info((i++) + " "+ c,LogDetailLevel.HIGH);
+        constraintLogger.info("---------",LogDetailLevel.HIGH);
+        constraintLogger.info("---------\nSEConstraints:",LogDetailLevel.HIGH);
         i=1;
         for (GenericConstraint<?> c : constraintManager.getSEConstraints() )
-            constraintLogger.info((i++) + " "+ c);
-        constraintLogger.info("---------");
+            constraintLogger.info((i++) + " "+ c,LogDetailLevel.HIGH);
+        constraintLogger.info("---------",LogDetailLevel.HIGH);
     }
 
     public Set<GenericConstraint<AccessibleHeapLocation>> getSEConstraints(){return constraintManager.getSEConstraints();}
@@ -195,5 +201,5 @@ public class PointsToAnalysis {
     public boolean hasBeenPerformed(){return hasBeenPerformed;}
 
     public String getName(){return this.name;}
-
+    public LogDetailLevel getLogDetailLevel(){return this.logDetailLevel;}
 }

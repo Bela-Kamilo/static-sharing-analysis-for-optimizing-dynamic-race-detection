@@ -41,7 +41,7 @@ $$ \small{where\ } m.p_i \small{ is\ } m \small{'s\ i{-}th\ parameter}$$
 $$arrays \ elements\ are \ lumped \ together, \ that \ is \ we \ treat \  ar[i]...[j] \ as \ if
 \ it \ were \ ar[i] $$
 $$as \ if \ it \ were \ ar[j] \ mapped \ to \ a \   single \ points \ to   \ set$$  
-
+\
 \
 \
 $$\small we \ equate \ arrays \ on \ assignments \ between \ them \ $$

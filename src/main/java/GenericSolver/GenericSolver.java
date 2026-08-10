@@ -9,11 +9,12 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.tools.ArrayUtils;
-import util.LoggerFactory;
+import util.Logging.LeveledLogger;
+import util.Logging.LogDetailLevel;
+import util.Logging.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.logging.Logger;
 
 //possibly generalise more so that every set could have diff type
 // TODO make it extendable for custom constraints
@@ -26,22 +27,29 @@ import java.util.logging.Logger;
  */
 public class GenericSolver<T> {
     private final Model model;
-    private final Logger solverLog;
+    private final LeveledLogger solverLog;
     private final LockedVector<T> elements;
     //might remove the locked classes idk
     private final LockedIdentityHashMap<Set<T>, SetVar> sets2Vars;
     //private final LockedHashMap<SetVar, Set<T>> vars2Sets;
 
-    private GenericSolver(String problemName){
+    private GenericSolver(String problemName, LogDetailLevel loggerDetailLevel){
         this.model = new Model(problemName);
-        this.solverLog= new LoggerFactory().createLogger("logs/Solver/",problemName+" SolverResults");
+        this.solverLog= new LoggerFactory().createLogger("logs/Solver/",problemName+" SolverResults",loggerDetailLevel);
         this.elements= new LockedVector<T>();
         this.sets2Vars= new LockedIdentityHashMap<Set<T>,SetVar>();
         //this.vars2Sets= new LockedHashMap<>();
+        //model.scalar()
+       // model.sum("name",(IntVar[])model.getVars());
+    }
+/*
+    public GenericSolver(@Nonnull Collection <GenericConstraint<T>> constraints , String problemName){
+        this(constraints,problemName,LogDetailLevel.LOW);
     }
 
-    public GenericSolver(@Nonnull Collection <GenericConstraint<T>> constraints , String problemName){
-        this(problemName);
+ */
+    public GenericSolver(@Nonnull Collection <GenericConstraint<T>> constraints , String problemName,LogDetailLevel logDetailLevel){
+        this(problemName,logDetailLevel);
         if(constraints.isEmpty()) throw new IllegalArgumentException("no constraints provided");
 
         //run through every ElementsOfConstraint to note every possible element (need it for SetVar UB)
@@ -133,7 +141,7 @@ public class GenericSolver<T> {
         boolean morethanonesolutions=false;
         try{
             while(model.getSolver().solve()){
-                solverLog.info("+++solution found+++");
+                solverLog.info("+++solution found+++",LogDetailLevel.LOW);
                 if(morethanonesolutions) throw new RuntimeException("There exist more than one solutions for "+model.getName()+"model");
                 exportSolution();
                 morethanonesolutions =true;
@@ -141,7 +149,7 @@ public class GenericSolver<T> {
             model.getSolver().log().remove(System.out);
             // model.getSolver().log().add(LoggerPrintStream(solverLog));  TODO
             model.getSolver().printStatistics();
-            LoggerFactory.closeHandlerls(solverLog);
+            solverLog.closeHandlers();
         } catch (Exception e) {
             System.err.println(e);
         }
@@ -154,12 +162,12 @@ public class GenericSolver<T> {
             Set<T> set = entry.getKey();
             for(Integer i :setVarElements)
                 set.add(elements.get(i));
-            solverLog.info(entry.getValue().getName()+"="+set.toString());
+            solverLog.info(entry.getValue().getName()+"="+set.toString(),LogDetailLevel.LOW);
         }
     }
     IntVar totalElementsOfSetVarsOfModel( ){
         SetVar[] setvars =model.retrieveSetVars();
-        if(setvars.length ==0){solverLog.info("!No setVars in model "+model+"!"); return model.intVar(0,0);}
+        if(setvars.length ==0){solverLog.info("!No setVars in model "+model+"!",LogDetailLevel.LOW); return model.intVar(0,0);}
         ArExpression sum= setvars[0].getCard();
         if(setvars.length ==1) return sum.intVar();
         for(int i =1;i< setvars.length;i++)

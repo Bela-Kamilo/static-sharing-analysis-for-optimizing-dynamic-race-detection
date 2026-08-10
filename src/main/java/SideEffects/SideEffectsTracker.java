@@ -10,6 +10,7 @@ import sootup.core.model.SootMethod;
 import sootup.core.signatures.FieldSignature;
 import sootup.core.signatures.MethodSignature;
 import sootup.core.views.View;
+import util.Logging.LogDetailLevel;
 import util.Tuple;
 
 import java.util.*;
@@ -27,11 +28,14 @@ public class SideEffectsTracker {
     private final SootMethod entryMethod;
     private boolean runMethodsSECollected;
     private final String name;
-    public SideEffectsTracker(View view , SootMethod entryMethod,String name){
-        this(entryMethod, new PointsToAnalysis(view,name));
+    private final LogDetailLevel logDetailLevel;
+
+    public SideEffectsTracker(View view , SootMethod entryMethod, String name, LogDetailLevel logDetailLevel){
+        this(entryMethod, new PointsToAnalysis(view,name,logDetailLevel));
     }
 
     public SideEffectsTracker(SootMethod entryMethod , PointsToAnalysis PTA){
+        this.logDetailLevel=PTA.getLogDetailLevel();
         this.PTA = PTA;
         this.READS= new HashMap<>();
         this.WRITES = new HashMap<>();
@@ -96,7 +100,7 @@ public class SideEffectsTracker {
 
         //SOLVE THEM
         if(SE_Constraints.isEmpty()) return;
-        new GenericSolver<AccessibleHeapLocation>(SE_Constraints, name+" SideEffects").solve();
+        new GenericSolver<AccessibleHeapLocation>(SE_Constraints, name+" SideEffects",logDetailLevel).solve();
         return;
     }
 

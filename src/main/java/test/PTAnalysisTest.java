@@ -3,20 +3,15 @@ package test;
 import PTAnalysis.PointsToAnalysis;
 //import analysis.my_analysis;
 import PTAnalysis.PointsToSet;
-import util.EmptyFormatter;
 import sootup.core.model.SootMethod;
 import sootup.java.core.views.JavaView;
-import util.LoggerFactory;
+import util.Logging.LogDetailLevel;
 import util.SootUpStuff;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 /**
  * Test files for this class need be in such a format :
@@ -33,7 +28,7 @@ public class PTAnalysisTest extends Test {
     }
 
     public PTAnalysisTest(){
-        super("test_files/PTAnalysis","void a(A,int)","Points To Analysis Test");
+        super("test_files/PTAnalysis","void a(A,int)","Points To Analysis Test", LogDetailLevel.HIGH);
 
     }
 
@@ -44,16 +39,16 @@ public class PTAnalysisTest extends Test {
         JavaView pathView =SootUpStuff.getViewFromPath(basePath+"/"+parentDir);
         SootMethod entryMethod=SootUpStuff.getMethodFromView(pathView,"<"+testClassName+": "+entryMethodString+">");
 
-        Map<String, PointsToSet> analysisResults = new PointsToAnalysis(pathView,testClassName).analise(entryMethod);
-        testLog.info(testClassName+".class ");
-        testLog.info("Expected results :");
-        expectedResults.forEach((name,intset)->testLog.info(name+"="+intset));
-        testLog.info("");
-        testLog.info("Actual results :");
+        Map<String, PointsToSet> analysisResults = new PointsToAnalysis(pathView,testClassName,LogDetailLevel.HIGH).analise(entryMethod);
+        testLog.info(testClassName+".class ",LogDetailLevel.LOW);
+        testLog.info("Expected results :",LogDetailLevel.LOW);
+        expectedResults.forEach((name,intset)->testLog.info(name+"="+intset ,LogDetailLevel.LOW));
+        testLog.info("",LogDetailLevel.LOW);
+        testLog.info("Actual results :",LogDetailLevel.LOW);
         removeUseMethod(analysisResults);
         for (var entry : analysisResults.entrySet())
-            testLog.info(entry.getKey() + "=" + entry.getValue());
-        testLog.info("");
+            testLog.info(entry.getKey() + "=" + entry.getValue(),LogDetailLevel.LOW);
+        testLog.info("",LogDetailLevel.LOW);
 
         if (expectedResults.equals(analysisResults)) pass(testClassName);
         else fail(testClassName);
