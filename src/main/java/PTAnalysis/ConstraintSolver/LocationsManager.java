@@ -23,6 +23,7 @@ public class LocationsManager {
     final int totalLocations;
     int call_counter=0;
     private IntVar cardinalityOfAll=null;
+    static private int cardinalityOfAllSetVarsID=1;
     LocationsManager(Model m){
         this.model=m;
         locationsMap= new HashMap<>();
@@ -123,6 +124,16 @@ public class LocationsManager {
         }
         cardinalityOfAll=sum.intVar();
         return cardinalityOfAll;
+    }
+    public IntVar totalElementsOfSetVars(){
+        SetVar[] setVars = model.retrieveSetVars();
+        if(setVars.length ==0){System.out.println("!No setVars in model "+model+"!"); return model.intVar(0,0);}
+        //IntVar[] cardOfSetVars = (IntVar[]) Arrays.stream(setVars).map(SetVar::getCard).toArray();
+        //return model.sum("cardinality of all SetVars "+cardinalityOfAllSetVarsID++,cardOfSetVars);
+        IntVar[] cardOfSetVars = new IntVar[setVars.length];
+        for (int i =0;i< setVars.length;i++)
+            cardOfSetVars[i]=setVars[i].getCard();
+       return model.sum("cardinality of all SetVars "+cardinalityOfAllSetVarsID++,cardOfSetVars);
     }
     private void unnasociateTmpIntVars(){
         //for(IntVar v : tempIntVars)

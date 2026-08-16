@@ -52,7 +52,8 @@ public class Solver {
             storeSetsOfConstraint(c);
         });
 
-        IntVar totalElements= totalElementsOfSetVarsOfModel();
+        //IntVar totalElements= totalElementsOfSetVarsOfModel();
+        IntVar totalElements= locationsManager.totalElementsOfSetVars();
         model.setObjective(Model.MINIMIZE, totalElements);
    }
     private void storeSetsOfConstraint(Constraint c){

@@ -32,7 +32,7 @@ public class GenericSolver<T> {
     //might remove the locked classes idk
     private final LockedIdentityHashMap<Set<T>, SetVar> sets2Vars;
     //private final LockedHashMap<SetVar, Set<T>> vars2Sets;
-
+    private int cardinalityOfAllSetVarsID=1;
     private GenericSolver(String problemName, LogDetailLevel loggerDetailLevel){
         this.model = new Model(problemName);
         this.solverLog= new LoggerFactory().createLogger("logs/Solver/",problemName+" SolverResults",loggerDetailLevel);
@@ -165,7 +165,7 @@ public class GenericSolver<T> {
             solverLog.info(entry.getValue().getName()+"="+set.toString(),LogDetailLevel.LOW);
         }
     }
-    IntVar totalElementsOfSetVarsOfModel( ){
+    IntVar totalElementsOfSetVarsOfModel2( ){
         SetVar[] setvars =model.retrieveSetVars();
         if(setvars.length ==0){solverLog.info("!No setVars in model "+model+"!",LogDetailLevel.LOW); return model.intVar(0,0);}
         ArExpression sum= setvars[0].getCard();
@@ -174,6 +174,16 @@ public class GenericSolver<T> {
             sum=sum.add(setvars[i].getCard());
         return sum.intVar();
     }
+
+    IntVar totalElementsOfSetVarsOfModel(){
+        SetVar[] setVars = model.retrieveSetVars();
+        if(setVars.length ==0){solverLog.info("!No setVars in model "+model+"!",LogDetailLevel.LOW); return model.intVar(0,0);}
+        IntVar[] cardOfSetVars = new IntVar[setVars.length];
+        for (int i =0;i< setVars.length;i++)
+            cardOfSetVars[i]=setVars[i].getCard();
+        return model.sum("cardinality of all SetVars "+cardinalityOfAllSetVarsID++,cardOfSetVars);
+    }
+
 }
 
 class LockedIdentityHashMap<K,L> extends IdentityHashMap<K,L> {
